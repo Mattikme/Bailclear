@@ -198,11 +198,6 @@
     document.getElementById("doc-variation").textContent = calculationReady ? `${sign}${euroFmt.format(diffMensuelle)} (${sign}${pctFmt.format(pctVariation)} %)` : "—";
     document.getElementById("doc-nouveau-hc").textContent = calculationReady ? euroFmt.format(nouveauHC) : "—";
     document.getElementById("doc-charges").textContent = rawCharges !== "" && Number.isFinite(charges) ? euroFmt.format(charges) : "—";
-    const chargesType = document.getElementById("type-charges").value;
-    const chargeLabels = {provision:"Provision mensuelle pour charges locatives",forfait:"Forfait mensuel de charges (non révisé par BailClear)",aucune:"Charges récupérables",inconnu:"Type de charges à vérifier"};
-    document.getElementById("doc-charges-label").textContent = chargeLabels[chargesType] || chargeLabels.inconnu;
-    document.getElementById("doc-charges-note").textContent = chargesType === "forfait" ? "Le forfait peut faire l’objet d’une révision distincte selon le bail. Le présent total le reprend sans le réviser." : "";
-    document.getElementById("q-charges-label").textContent = chargeLabels[chargesType] || chargeLabels.inconnu;
     document.getElementById("doc-nouveau-cc").textContent = calculationReady ? euroFmt.format(nouveauCC) : "—";
     const chargesType = document.getElementById("type-charges").value;
     const chargeLabels = {
@@ -215,6 +210,7 @@
     document.getElementById("doc-charges-note").textContent = chargesType === "forfait"
       ? "Le forfait peut faire l’objet d’une révision distincte selon le bail. Le présent total le reprend sans le réviser."
       : "";
+    document.getElementById("q-charges-label").textContent = chargeLabels[chargesType] || chargeLabels.inconnu;
     document.getElementById("doc-prise-effet").textContent = compliance.effectiveDate
       ? "Date de prise d’effet indicative : " + formatDateFR(compliance.effectiveDate) + ". Vérifiez la date contractuelle avant envoi."
       : "Date de prise d’effet à vérifier.";
