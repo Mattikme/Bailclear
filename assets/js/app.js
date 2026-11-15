@@ -311,7 +311,7 @@
       ``,
       `Madame, Monsieur,`,
       ``,
-      `Conformément à notre contrat de location conclu ou reconduit le ${dateBail} et à l'article 17-1 de la loi n° 89-462 du 6 juillet 1989, je vous informe de la révision annuelle de votre loyer :`,
+      `Conformément au contrat initial signé le ${dateBail} et à l'article 17-1 de la loi n° 89-462 du 6 juillet 1989, je vous informe de la révision annuelle de votre loyer :`,
       `- Ancien loyer hors charges : ${ancienHC}`,
       `- Calcul IRL : ${formule}`,
       `- Nouveau loyer hors charges : ${nouveauHC}`,
