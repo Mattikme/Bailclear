@@ -10,7 +10,7 @@
 
 ## Limites réelles
 - Dossiers conservés dans le navigateur : pas de compte, synchronisation serveur, sauvegarde distante ou notification quand le site est fermé.
-- Le jeu d'indices inclus dans le dépôt est un secours partiel. Le premier rafraîchissement API doit confirmer l'historique complet pour les trois territoires.
+- Le dernier rafraîchissement INSEE réussi le 15 novembre 2026 a enregistré 96 observations par territoire, du T4 2002 au T3 2026. Le workflow quotidien poursuit l'actualisation ; un jeu de données âgé de plus de 14 jours bloque le calcul.
 - Le diagnostic est une aide à la vigilance, pas une validation juridique. Le site ne lit pas le bail, n'authentifie pas le DPE et ne vérifie pas les plafonds locaux.
 - Le prorata est une estimation arithmétique ; préavis, remise des clés et contrat peuvent modifier les sommes dues.
 - Paiements, ventes, codes d'activation, comptes, e-mails et stockage privé ne sont pas implémentés.
