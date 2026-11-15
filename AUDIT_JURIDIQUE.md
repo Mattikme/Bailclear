@@ -64,3 +64,7 @@ Les valeurs jusqu'au T3 2026 sont détaillées dans SCOPE_PRODUIT.md. Source : I
 
 ### Limites persistantes
 Les indices sont préremplis mais ne se mettent pas automatiquement à jour dans l'interface. La commercialisation reste bloquée. Pas de backend, compte, paiement, synchronisation, sauvegarde serveur ni notification utilisateur. Pas de test navigateur ou de production Cloudflare confirmé. Revue juridique professionnelle nécessaire.
+
+
+### Contrôle de la date de publication de l'indice
+Le module bloque désormais un calcul si l'indice sélectionné n'était pas encore publié à la date de révision indiquée. Les dates de publication utilisées pour les paires intégrées sont celles des publications INSEE correspondantes (T1 15 avril, T2 10 juillet, T3 15 octobre 2026 ; T4 2025 publié le 15 janvier 2026). Vérification par tests ajoutée. L'utilisateur doit encore confirmer que la paire choisie est celle visée par son bail.
