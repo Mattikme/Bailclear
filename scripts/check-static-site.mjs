@@ -15,3 +15,7 @@ assert.match(html,/type-contrat/); assert.match(html,/clause-revision/);
 assert.match(app,/BailClearLegalRules/);
 assert.doesNotMatch(app,/STRIPE_PAYMENT_LINK|BAILCLEAR-PRO-2026|unlocked=/);
 console.log("Contrôle statique BailClear : OK");
+
+const copyFn=app.slice(app.indexOf("function copyLetterToClipboard"),app.indexOf("const OWNER_KEY"));
+assert.match(copyFn,/if \(!lastLegalCheckAllowsPrint\)/,"Copie du courrier non bloquée lorsque le diagnostic échoue");
+assert.match(copyFn,/doc-prise-effet/,"La date d'effet doit apparaître dans le texte copié");
