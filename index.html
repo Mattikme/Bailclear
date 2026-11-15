@@ -11,7 +11,7 @@
   <meta property="og:type" content="website">
   <meta property="og:locale" content="fr_FR">
   <meta property="og:site_name" content="BailClear">
-  <meta property="og:title" content="Calculateur Révision Loyer IRL &amp; Courrier Officiel Loi ALUR — BailClear">
+  <meta property="og:title" content="Calculateur Révision Loyer IRL et Documents Locatifs — BailClear">
   <meta property="og:description" content="Calcul de révision IRL, contrôles de vigilance locative et préparation de documents A4.">
   <meta property="og:url" content="https://bailclear.fr/">
 
@@ -127,12 +127,13 @@
               <div class="field">
                 <label for="trimestre-ref">Trimestre de référence du bail</label>
                 <select id="trimestre-ref">
-                  <option value="" selected>À sélectionner selon le bail</option>
+                  <option value="auto" selected>Non précisé au bail — dernier IRL publié à la signature</option>
                   <option value="T1">1er Trimestre (T1 — publié mi-avril)</option>
                   <option value="T2">2e Trimestre (T2 — publié mi-juillet)</option>
                   <option value="T3">3e Trimestre (T3 — publié mi-octobre)</option>
                   <option value="T4">4e Trimestre (T4 — publié mi-janvier)</option>
                 </select>
+                <span class="field-hint">Si le bail précise un trimestre, sélectionnez-le. Sinon, BailClear recherche le dernier indice publié à la signature.</span>
               </div>
               <div class="field">
                 <label for="classe-dpe">Classe énergétique (DPE)</label>
@@ -149,6 +150,17 @@
                 <span class="field-hint">Les indices préremplis sont adaptés au territoire sélectionné. Vérifiez le trimestre et les dates applicables.</span>
               </div>
               <div class="field">
+                <label for="regime-logement">Régime du logement</label>
+                <select id="regime-logement">
+                  <option value="inconnu" selected>À vérifier</option>
+                  <option value="prive-classique">Parc privé classique non conventionné</option>
+                  <option value="anah">Convention Anah</option>
+                  <option value="social">Logement social / HLM</option>
+                  <option value="loi-1948">Logement soumis à la loi de 1948</option>
+                  <option value="autre">Autre régime / situation particulière</option>
+                </select>
+              </div>
+              <div class="field">
                 <label for="type-contrat">Type de contrat</label>
                 <select id="type-contrat">
                   <option value="inconnu" selected>Non renseigné</option>
@@ -159,8 +171,17 @@
                 </select>
                 <span class="field-hint">Le contrôle IRL est limité aux baux classiques soumis à la loi du 6 juillet 1989.</span>
               </div>
+              <div class="field">
+                <label for="date-dpe">Date de réalisation du DPE</label>
+                <input type="date" id="date-dpe" value="">
+                <span class="field-hint">Un DPE réalisé avant le 1er juillet 2021 n’est plus valable en 2026. La classe doit être relevée sur un DPE/une attestation valide ; BailClear ne vérifie pas le numéro ADEME.</span>
+              </div>
             </div>
             <div class="form-row-2">
+              <div class="field">
+                <label for="type-charges">Type de charges</label>
+                <select id="type-charges"><option value="inconnu" selected>À vérifier</option><option value="provision">Provision sur charges</option><option value="forfait">Forfait de charges</option><option value="aucune">Pas de charges</option></select>
+              </div>
               <div class="field">
                 <label for="clause-revision">Le bail contient-il une clause de révision annuelle ?</label>
                 <select id="clause-revision">
@@ -173,13 +194,13 @@
             <div class="form-row-2">
               <div class="field">
                 <label for="irl-ancien">Ancien IRL (Année N-1)</label>
-                <input type="number" id="irl-ancien" step="0.01" min="100" value="145.77" required readonly>
-                <span class="field-hint">Ex. T3 2025 : 145,77</span>
+                <input type="number" id="irl-ancien" step="0.01" min="100" value="" required readonly>
+                <span class="field-hint" id="irl-source-note">Indices en attente de chargement de la source INSEE.</span>
               </div>
               <div class="field">
                 <label for="irl-nouveau">Nouvel IRL (Année N)</label>
-                <input type="number" id="irl-nouveau" step="0.01" min="100" value="148.06" required readonly>
-                <span class="field-hint">Paires annuelles disponibles au 15 octobre 2026. <a href="https://www.insee.fr/fr/statistiques/9081853" target="_blank" rel="noopener noreferrer">Consulter les indices officiels</a>.</span>
+                <input type="number" id="irl-nouveau" step="0.01" min="100" value="" required readonly>
+                <span class="field-hint">Valeurs récupérées depuis l’API officielle INSEE. <a href="https://www.insee.fr/fr/statistiques/9081853" target="_blank" rel="noopener noreferrer">Consulter les publications IRL</a>.</span>
               </div>
             </div>
 
@@ -221,8 +242,18 @@
 
             <div class="form-row-2">
               <div class="field">
-                <label for="date-signature-bail">Date de conclusion / dernière reconduction du bail</label>
+                <label for="date-signature-bail">Date de signature initiale du bail</label>
                 <input type="date" id="date-signature-bail" value="">
+              </div>
+              <div class="field">
+                <label for="bail-reconduit">Le bail a-t-il été renouvelé ou tacitement reconduit ?</label>
+                <select id="bail-reconduit"><option value="inconnu" selected>À vérifier</option><option value="oui">Oui</option><option value="non">Non</option></select>
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div class="field">
+                <label for="date-derniere-reconduction">Date du dernier renouvellement / de la dernière reconduction</label>
+                <input type="date" id="date-derniere-reconduction" value="">
               </div>
               <div class="field">
                 <label for="ville-redaction">Fait à (Ville)</label>
@@ -334,8 +365,8 @@
                         <td class="num"><strong id="doc-nouveau-hc">857,47 €</strong></td>
                       </tr>
                       <tr>
-                        <td>Provision mensuelle pour charges locatives</td>
-                        <td class="num" id="doc-charges">65,00 €</td>
+                        <td id="doc-charges-label">Charges — type à vérifier</td>
+                        <td class="num" id="doc-charges">—</td>
                       </tr>
                       <tr class="row-total">
                         <td><strong>Nouveau montant mensuel total à régler (charges comprises)</strong></td>
@@ -343,6 +374,7 @@
                       </tr>
                     </tbody>
                   </table>
+                  <p id="doc-charges-note" class="legal-footnote"></p>
 
                   <p id="doc-prise-effet">Ce nouveau montant s'appliquera à compter de votre prochaine échéance de loyer à partir du <strong>--/--/----</strong>.</p>
 
@@ -396,8 +428,8 @@
                         <td class="num" id="q-loyer-hc">857,47 €</td>
                       </tr>
                       <tr>
-                        <td>Provision pour charges locatives</td>
-                        <td class="num" id="q-charges">65,00 €</td>
+                        <td id="q-charges-label">Charges — type à vérifier</td>
+                        <td class="num" id="q-charges">—</td>
                       </tr>
                       <tr class="row-total">
                         <td><strong>Total à régler (Charges comprises)</strong></td>
@@ -502,6 +534,7 @@
   
 
   <script src="assets/js/legal-rules.js"></script>
+  <script src="assets/js/irl-index.js"></script>
   <script src="assets/js/app.js"></script>
 </body>
 </html>

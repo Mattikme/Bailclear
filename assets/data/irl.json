@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "source": "INSEE BDM — API SDMX, identifiants IDBANK officiels",
+  "sourceUrl": "https://www.insee.fr/fr/information/2862759",
+  "refreshedAt": "2026-11-15T02:00:00.000Z",
+  "refreshMethod": "Jeu de secours intégré, en attente du premier rafraîchissement API BDM",
+  "availabilityDatePolicy": "DATE_JO conservée comme date prudente de disponibilité. La mise à disposition sur insee.fr peut précéder la parution au Journal officiel ; les cas proches de cette date doivent être vérifiés manuellement.",
+  "observationCount": {
+    "metropole": 8,
+    "corse": 8,
+    "outremer": 8
+  },
+  "territories": {
+    "metropole": [
+      {
+        "period": "2024-Q4",
+        "value": 144.64,
+        "dateJo": "2025-01-16",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2025-Q1",
+        "value": 145.47,
+        "dateJo": "2025-04-16",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2025-Q2",
+        "value": 146.68,
+        "dateJo": "2025-07-13",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2025-Q3",
+        "value": 145.77,
+        "dateJo": "2025-10-17",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2025-Q4",
+        "value": 145.78,
+        "dateJo": "2026-01-16",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2026-Q1",
+        "value": 146.6,
+        "dateJo": "2026-04-16",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2026-Q2",
+        "value": 148.37,
+        "dateJo": "2026-07-12",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2026-Q3",
+        "value": 148.06,
+        "dateJo": "2026-10-16",
+        "status": "A",
+        "quality": "DEF"
+      }
+    ],
+    "corse": [
+      {
+        "period": "2024-Q4",
+        "value": 140.48,
+        "dateJo": "2025-01-16",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2025-Q1",
+        "value": 141.28,
+        "dateJo": "2025-04-16",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2025-Q2",
+        "value": 144.56,
+        "dateJo": "2025-07-13",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2025-Q3",
+        "value": 141.58,
+        "dateJo": "2025-10-17",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2025-Q4",
+        "value": 141.59,
+        "dateJo": "2026-01-16",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2026-Q1",
+        "value": 142.38,
+        "dateJo": "2026-04-16",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2026-Q2",
+        "value": 146.22,
+        "dateJo": "2026-07-12",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2026-Q3",
+        "value": 143.8,
+        "dateJo": "2026-10-16",
+        "status": "A",
+        "quality": "DEF"
+      }
+    ],
+    "outremer": [
+      {
+        "period": "2024-Q4",
+        "value": 141.86,
+        "dateJo": "2025-01-16",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2025-Q1",
+        "value": 142.67,
+        "dateJo": "2025-04-16",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2025-Q2",
+        "value": 145.27,
+        "dateJo": "2025-07-13",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2025-Q3",
+        "value": 142.97,
+        "dateJo": "2025-10-17",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2025-Q4",
+        "value": 142.98,
+        "dateJo": "2026-01-16",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2026-Q1",
+        "value": 143.78,
+        "dateJo": "2026-04-16",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2026-Q2",
+        "value": 146.94,
+        "dateJo": "2026-07-12",
+        "status": "A",
+        "quality": "DEF"
+      },
+      {
+        "period": "2026-Q3",
+        "value": 145.21,
+        "dateJo": "2026-10-16",
+        "status": "A",
+        "quality": "DEF"
+      }
+    ]
+  }
+}

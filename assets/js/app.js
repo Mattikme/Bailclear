@@ -9,6 +9,7 @@
   let irlDataset = null;
   let selectedIRLPair = null;
   let selectedIRLPairError = "Base IRL INSEE non chargée.";
+  let refreshIRLSelection = null;
 
 
   const euroFmt = new Intl.NumberFormat("fr-FR", {
@@ -188,7 +189,7 @@
     document.getElementById("doc-trimestre").textContent = trimestreLabel;
     document.getElementById("doc-trimestre-2").textContent = trimestre || "—";
     document.getElementById("doc-trimestre-3").textContent = trimestre || "—";
-    document.getElementById("doc-ancien-hc").textContent = euroFmt.format(calculationReady ? loyerHC : 0);
+    document.getElementById("doc-ancien-hc").textContent = calculationReady ? euroFmt.format(loyerHC) : "—";
     document.getElementById("doc-irl-ancien").textContent = calculationReady ? irlAncien.toFixed(2) : "—";
     document.getElementById("doc-irl-nouveau").textContent = calculationReady ? irlNouveau.toFixed(2) : "—";
     document.getElementById("doc-formule").textContent = calculationReady
@@ -209,6 +210,7 @@
     document.getElementById("doc-charges-note").textContent = chargesType === "forfait"
       ? "Le forfait peut faire l’objet d’une révision distincte selon le bail. Le présent total le reprend sans le réviser."
       : "";
+    document.getElementById("q-charges-label").textContent = chargeLabels[chargesType] || chargeLabels.inconnu;
     document.getElementById("doc-prise-effet").textContent = compliance.effectiveDate
       ? "Date de prise d’effet indicative : " + formatDateFR(compliance.effectiveDate) + ". Vérifiez la date contractuelle avant envoi."
       : "Date de prise d’effet à vérifier.";
@@ -335,7 +337,7 @@
   function writeOwnerData(v) { localStorage.setItem(OWNER_KEY,JSON.stringify(v)); }
   function currentProperty() {
     const g=id=>(document.getElementById(id)?.value||"").trim();
-    return {id:(crypto.randomUUID?crypto.randomUUID():String(Date.now())),savedAt:new Date().toISOString(),owner:g("bailleur-nom"),tenant:g("locataire-nom"),address:g("bien-adresse"),rent:g("loyer-hc"),charges:g("charges"),quarter:g("trimestre-ref"),dpe:g("classe-dpe"),oldIndex:g("irl-ancien"),newIndex:g("irl-nouveau"),anniversary:g("date-bail-anniv"),sentDate:g("date-envoi"),landlordAddress:g("bailleur-adresse"),leaseDate:g("date-signature-bail"),zone:g("zone-logement"),contractType:g("type-contrat"),revisionClause:g("clause-revision"),city:g("ville-redaction")};
+    return {id:(crypto.randomUUID?crypto.randomUUID():String(Date.now())),savedAt:new Date().toISOString(),owner:g("bailleur-nom"),tenant:g("locataire-nom"),address:g("bien-adresse"),rent:g("loyer-hc"),charges:g("charges"),chargesType:g("type-charges"),quarter:g("trimestre-ref"),dpe:g("classe-dpe"),dpeDate:g("date-dpe"),oldIndex:g("irl-ancien"),newIndex:g("irl-nouveau"),anniversary:g("date-bail-anniv"),sentDate:g("date-envoi"),landlordAddress:g("bailleur-adresse"),leaseDate:g("date-signature-bail"),renewalStatus:g("bail-reconduit"),lastRenewalDate:g("date-derniere-reconduction"),zone:g("zone-logement"),contractType:g("type-contrat"),specialRegime:g("regime-logement"),revisionClause:g("clause-revision"),city:g("ville-redaction")};
   }
   function renderOwnerData() {
     const data=readOwnerData(), list=document.getElementById("saved-properties"), hist=document.getElementById("revision-history"), alerts=document.getElementById("owner-alerts");
@@ -344,7 +346,7 @@
     data.properties.forEach(p=>{
       const row=document.createElement("div");row.className="saved-row";const label=document.createElement("span");label.textContent=(p.address||"Bien sans adresse")+" — "+(p.tenant||"Locataire non renseigné");
       const load=document.createElement("button");load.type="button";load.className="btn btn-secondary";load.textContent="Charger";
-      load.addEventListener("click",()=>{const m={owner:"bailleur-nom",tenant:"locataire-nom",address:"bien-adresse",rent:"loyer-hc",charges:"charges",quarter:"trimestre-ref",dpe:"classe-dpe",oldIndex:"irl-ancien",newIndex:"irl-nouveau",anniversary:"date-bail-anniv",sentDate:"date-envoi",landlordAddress:"bailleur-adresse",leaseDate:"date-signature-bail",zone:"zone-logement",contractType:"type-contrat",revisionClause:"clause-revision",city:"ville-redaction"};Object.entries(m).forEach(([k,id])=>{const el=document.getElementById(id);if(el&&p[k]!==undefined)el.value=p[k];});updateIRLCalculation();});
+      load.addEventListener("click",()=>{const m={owner:"bailleur-nom",tenant:"locataire-nom",address:"bien-adresse",rent:"loyer-hc",charges:"charges",chargesType:"type-charges",quarter:"trimestre-ref",dpe:"classe-dpe",dpeDate:"date-dpe",oldIndex:"irl-ancien",newIndex:"irl-nouveau",anniversary:"date-bail-anniv",sentDate:"date-envoi",landlordAddress:"bailleur-adresse",leaseDate:"date-signature-bail",renewalStatus:"bail-reconduit",lastRenewalDate:"date-derniere-reconduction",zone:"zone-logement",contractType:"type-contrat",specialRegime:"regime-logement",revisionClause:"clause-revision",city:"ville-redaction"};Object.entries(m).forEach(([k,id])=>{const el=document.getElementById(id);if(el&&p[k]!==undefined)el.value=p[k];});if (refreshIRLSelection) refreshIRLSelection(); else updateIRLCalculation();});
       const del=document.createElement("button");del.type="button";del.className="btn btn-secondary";del.textContent="Supprimer";del.addEventListener("click",()=>{const d=readOwnerData();writeOwnerData({...d,properties:d.properties.filter(x=>x.id!==p.id)});renderOwnerData();});row.append(label,load,del);list.append(row);
     });
     if(!data.history.length)hist.textContent="Aucune révision enregistrée.";
@@ -357,7 +359,7 @@
   }
   function initOwnerTools() {
     renderOwnerData();
-    document.getElementById("save-property")?.addEventListener("click",()=>{const p=currentProperty();if(!p.address&&!p.tenant){alert("Renseignez au moins l’adresse du logement ou le nom du locataire.");return;}const d=readOwnerData(),i=d.properties.findIndex(x=>x.address===p.address&&x.tenant===p.tenant);if(i>=0){p.id=d.properties[i].id;d.properties[i]=p;}else d.properties.push(p);const amount=Number((Number(p.rent||0)*Number(p.newIndex||1)/Number(p.oldIndex||1)).toFixed(2));d.history.push({id:p.id,address:p.address,newRent:amount.toFixed(2),savedAt:p.savedAt});writeOwnerData(d);renderOwnerData();alert("Dossier enregistré sur cet appareil.");});
+    document.getElementById("save-property")?.addEventListener("click",()=>{const p=currentProperty();if(!p.address&&!p.tenant){alert("Renseignez au moins l’adresse du logement ou le nom du locataire.");return;}const d=readOwnerData(),i=d.properties.findIndex(x=>x.address===p.address&&x.tenant===p.tenant);if(i>=0){p.id=d.properties[i].id;d.properties[i]=p;}else d.properties.push(p);if(lastLegalCheckAllowsPrint){const amount=Number((Number(p.rent)*Number(p.newIndex)/Number(p.oldIndex)).toFixed(2));d.history.push({id:p.id,address:p.address,newRent:amount.toFixed(2),savedAt:p.savedAt});}writeOwnerData(d);renderOwnerData();alert("Dossier enregistré sur cet appareil.");});
     document.getElementById("export-data")?.addEventListener("click",()=>{const blob=new Blob([JSON.stringify(readOwnerData(),null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="bailclear-dossiers.json";a.click();URL.revokeObjectURL(url);});
     document.getElementById("import-data")?.addEventListener("change",async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{const v=JSON.parse(await f.text());if(!Array.isArray(v.properties)||!Array.isArray(v.history))throw Error();writeOwnerData(v);renderOwnerData();alert("Import terminé.");}catch(_){alert("Fichier invalide : export JSON BailClear attendu.");}e.target.value="";});
   }
@@ -367,8 +369,8 @@
     initDefaultDates();
     checkUrlUnlock();
     applyLicenseUI();
-    applyIRLDefaults();
     updateProrataCalculation();
+    loadIRLData().then(() => { if (refreshIRLSelection) refreshIRLSelection(); });
 
     document.querySelectorAll(".tab-btn").forEach((btn) => {
       btn.addEventListener("click", function () {
@@ -386,21 +388,29 @@
     });
 
     function applyIRLDefaults() {
-      const zone = document.getElementById("zone-logement")?.value || "metropole";
-      const quarter = document.getElementById("trimestre-ref")?.value || "";
-      const preset = IRL_PRESETS[zone]?.[quarter];
-      if (!preset) {
-        document.getElementById("irl-ancien").value = "";
-        document.getElementById("irl-nouveau").value = "";
-        updateIRLCalculation();
-        return;
+      const result = irlDataset ? window.BailClearIRLIndex.resolvePair(irlDataset, {
+        territory: document.getElementById("zone-logement")?.value || "metropole",
+        quarterMode: document.getElementById("trimestre-ref")?.value || "auto",
+        signatureDate: document.getElementById("date-signature-bail")?.value || "",
+        revisionDate: document.getElementById("date-bail-anniv")?.value || ""
+      }) : { valid: false, message: selectedIRLPairError };
+      selectedIRLPair = result.valid ? result : null;
+      selectedIRLPairError = result.valid ? "" : (result.message || "Paire IRL non disponible.");
+      document.getElementById("irl-ancien").value = selectedIRLPair ? selectedIRLPair.oldIndex.value.toFixed(2) : "";
+      document.getElementById("irl-nouveau").value = selectedIRLPair ? selectedIRLPair.newIndex.value.toFixed(2) : "";
+      const hint = document.getElementById("irl-source-note");
+      if (hint) {
+        hint.textContent = selectedIRLPair
+          ? "Source INSEE BDM — " + selectedIRLPair.oldIndex.period + " / " + selectedIRLPair.newIndex.period +
+            ". La parution au Journal officiel sert de date prudente ; vérifiez les dates proches d'une publication."
+          : selectedIRLPairError;
       }
-      document.getElementById("irl-ancien").value = preset.ancien.toFixed(2);
-      document.getElementById("irl-nouveau").value = preset.nouveau.toFixed(2);
       updateIRLCalculation();
     }
-    document.getElementById("trimestre-ref").addEventListener("change", applyIRLDefaults);
-    document.getElementById("zone-logement")?.addEventListener("change", applyIRLDefaults);
+    refreshIRLSelection = applyIRLDefaults;
+    ["trimestre-ref","zone-logement","date-signature-bail","date-bail-anniv"].forEach(id => {
+      document.getElementById(id)?.addEventListener("change", applyIRLDefaults);
+    });
 
     document.getElementById("irl-form").addEventListener("input", updateIRLCalculation);
     document.getElementById("irl-form").addEventListener("change", updateIRLCalculation);
@@ -416,12 +426,17 @@
     document.getElementById("btn-reset").addEventListener("click", function () {
       document.getElementById("loyer-hc").value = "";
       document.getElementById("charges").value = "";
-      document.getElementById("trimestre-ref").value = "T3";
+      document.getElementById("trimestre-ref").value = "auto";
       document.getElementById("classe-dpe").value = "INCONNU";
       document.getElementById("type-contrat").value = "inconnu";
       document.getElementById("clause-revision").value = "inconnu";
       document.getElementById("date-bail-anniv").value = "";
       document.getElementById("date-signature-bail").value = "";
+      document.getElementById("date-dpe").value = "";
+      document.getElementById("bail-reconduit").value = "inconnu";
+      document.getElementById("date-derniere-reconduction").value = "";
+      document.getElementById("regime-logement").value = "inconnu";
+      document.getElementById("type-charges").value = "inconnu";
       ["bailleur-nom","bailleur-adresse","locataire-nom","bien-adresse","ville-redaction"].forEach(id => document.getElementById(id).value = "");
       applyIRLDefaults();
     });

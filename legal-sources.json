@@ -1,7 +1,92 @@
 [
-  {"id":"article-17-1","label":"Loi du 6 juillet 1989 — article 17-1","url":"https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043977085"},
-  {"id":"article-21","label":"Loi du 6 juillet 1989 — article 21","url":"https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000028806698"},
-  {"id":"service-public-irl","label":"Service-Public — indice de référence des loyers","url":"https://www.service-public.gouv.fr/particuliers/vosdroits/F13723"},
-  {"id":"insee-irl","label":"INSEE — IRL et indices territoriaux","url":"https://www.insee.fr/fr/statistiques/9081853"},
-  {"id":"bail-mobilite","label":"Service-Public — bail mobilité","url":"https://www.service-public.gouv.fr/particuliers/vosdroits/F34759"}
+  {
+    "id": "article-17-1",
+    "label": "Loi du 6 juillet 1989 — article 17-1 (révision du loyer)",
+    "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043977085"
+  },
+  {
+    "id": "article-21",
+    "label": "Loi du 6 juillet 1989 — article 21 (quittance)",
+    "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000028806698"
+  },
+  {
+    "id": "article-7-1",
+    "label": "Loi du 6 juillet 1989 — article 7-1 (prescription)",
+    "url": "https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000028777184"
+  },
+  {
+    "id": "service-public-irl",
+    "label": "Service-Public — Augmentation et révision du loyer F1311",
+    "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F1311"
+  },
+  {
+    "id": "service-public-bail-mobilite",
+    "label": "Service-Public — Bail mobilité",
+    "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F34759"
+  },
+  {
+    "id": "service-public-dpe",
+    "label": "Service-Public — Validité du DPE F16096",
+    "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F16096"
+  },
+  {
+    "id": "cch-dpe-validity",
+    "label": "Code de la construction et de l'habitation — D126-19",
+    "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043818603"
+  },
+  {
+    "id": "insee-irl",
+    "label": "INSEE — IRL et indices territoriaux",
+    "url": "https://www.insee.fr/fr/statistiques/9081853"
+  },
+  {
+    "id": "insee-api-sdmx",
+    "label": "INSEE — API BDM SDMX",
+    "url": "https://www.insee.fr/fr/information/2862759"
+  },
+  {
+    "id": "insee-melodi-migration",
+    "label": "INSEE — Transition BDM vers Melodi",
+    "url": "https://www.insee.fr/fr/information/1302169"
+  },
+  {
+    "id": "rent-control",
+    "label": "Loi ELAN — encadrement expérimental des loyers, article 140",
+    "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043977071"
+  },
+  {
+    "id": "lease-information-notice",
+    "label": "Arrêté du 9 octobre 2026 — notice d'information des contrats de location",
+    "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000054992497"
+  },
+  {
+    "id": "legal-consultation-art54",
+    "label": "Loi du 31 décembre 1971 — article 54, consultation juridique et rédaction d'actes",
+    "url": "https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000006903350"
+  },
+  {
+    "id": "consumer-l221-5",
+    "label": "Code de la consommation — L221-5",
+    "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000044563141"
+  },
+  {
+    "id": "consumer-l221-13",
+    "label": "Code de la consommation — L221-13",
+    "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000044563210"
+  },
+  {
+    "id": "consumer-l221-28",
+    "label": "Code de la consommation — L221-28",
+    "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000044563170"
+  },
+  {
+    "id": "consumer-mediator",
+    "label": "Service-Public — Médiation de la consommation",
+    "url": "https://entreprendre.service-public.gouv.fr/vosdroits/F33338"
+  },
+  {
+    "id": "cnil-tracers",
+    "label": "CNIL — Cookies et autres traceurs",
+    "url": "https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies/FAQ"
+  }
 ]
