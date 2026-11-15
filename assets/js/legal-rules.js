@@ -42,6 +42,8 @@
       block("Date de réalisation du DPE manquante ou invalide : sa durée de validité ne peut pas être contrôlée.");
     } else if (input.dpeDate < "2021-07-01") {
       block("DPE réalisé avant le 1er juillet 2021 : il n'est plus valable en 2026. Un DPE valide doit être fourni.");
+    } else if (isValidISODate(input.requestDate) && input.dpeDate > input.requestDate) {
+      block("La date de réalisation du DPE est postérieure à la date de la demande : vérifiez la saisie.");
     } else if (isValidISODate(input.requestDate)) {
       const year = Number(input.dpeDate.slice(0, 4)) + 10;
       const month = Number(input.dpeDate.slice(5, 7));

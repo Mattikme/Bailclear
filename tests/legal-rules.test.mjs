@@ -25,3 +25,4 @@ test("demande avant date prévue : effet à la date contractuelle",()=>assert.eq
 test("29 février : contrôle automatique suspendu",()=>assert.equal(rules.evaluate({...base,revisionDate:"2024-02-29"}).valid,false));
 test("date impossible rejetée",()=>assert.equal(rules.isValidISODate("2026-02-30"),false));
 test("version du ruleset exposée",()=>assert.match(rules.RULESET_VERSION,/^2026-/));
+test("DPE daté après la demande rejeté",()=>assert.equal(rules.evaluate({...base,dpeDate:"2026-12-01",requestDate:"2026-11-15"}).valid,false));
