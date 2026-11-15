@@ -3538,7 +3538,7 @@
       ]
     }
   },
-  "refreshedAt": "2026-11-15T02:54:21.465Z",
+  "refreshedAt": "2026-11-15T02:56:15.388Z",
   "refreshMethod": "Automatique — API BDM INSEE SDMX",
   "availabilityDatePolicy": "DATE_JO conservée comme date prudente de disponibilité. La mise à disposition sur insee.fr peut précéder la parution au Journal officiel ; les cas proches de cette date doivent être vérifiés manuellement.",
   "observationCount": {
