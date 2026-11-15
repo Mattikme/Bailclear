@@ -74,6 +74,8 @@
     let blocked = false;
     let effectiveDate = formatDateFR(dateAnnivStr || dateEnvoiStr);
 
+    if (dpe === "INCONNU") messages.push("Classe DPE non renseignée : vérifiez le diagnostic avant toute demande de révision.");
+
     if (dpe === "F" || dpe === "G") {
       const cutoff = zone === "outremer" ? "2024-07-01" : "2022-08-24";
       if (!leaseDate) {
@@ -350,12 +352,14 @@
 
     document.getElementById("trimestre-ref").addEventListener("change", function () {
       const preset = IRL_PRESETS[this.value];
-      if (preset) {
+      const zone = document.getElementById("zone-logement")?.value || "metropole";
+      if (preset && zone === "metropole") {
         document.getElementById("irl-ancien").value = preset.ancien.toFixed(2);
         document.getElementById("irl-nouveau").value = preset.nouveau.toFixed(2);
       }
       updateIRLCalculation();
     });
+    document.getElementById("zone-logement")?.addEventListener("change", updateIRLCalculation);
 
     document.getElementById("irl-form").addEventListener("input", updateIRLCalculation);
     document.getElementById("irl-form").addEventListener("change", updateIRLCalculation);
