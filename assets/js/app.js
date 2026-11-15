@@ -93,8 +93,8 @@
       territory: document.getElementById("zone-logement")?.value || "metropole",
       revisionDate: dateAnnivStr || "",
       requestDate: dateEnvoiStr || "",
-      indexPublishedAt: IRL_PRESETS[document.getElementById("zone-logement")?.value || "metropole"]?.[document.getElementById("trimestre-ref")?.value || "T3"]?.publishedAt || "",
-      indexValidThrough: IRL_PRESETS[document.getElementById("zone-logement")?.value || "metropole"]?.[document.getElementById("trimestre-ref")?.value || "T3"]?.validThrough || ""
+      indexPublishedAt: IRL_PRESETS[document.getElementById("zone-logement")?.value || "metropole"]?.[document.getElementById("trimestre-ref")?.value || ""]?.publishedAt || "",
+      indexValidThrough: IRL_PRESETS[document.getElementById("zone-logement")?.value || "metropole"]?.[document.getElementById("trimestre-ref")?.value || ""]?.validThrough || ""
     });
     const required = [
       ["bailleur-nom", "Nom du bailleur"],
@@ -153,7 +153,7 @@
     const ville = escapeText(document.getElementById("ville-redaction").value, "À compléter");
     const territoryKey = document.getElementById("zone-logement")?.value || "metropole";
     const quarterPreset = IRL_PRESETS[territoryKey]?.[trimestreKey];
-    const trimestreLabel = quarterPreset ? quarterPreset.label : trimestreKey;
+    const trimestreLabel = quarterPreset ? quarterPreset.label : "Trimestre à vérifier";
 
     document.getElementById("doc-bailleur-nom").textContent = bailleurNom;
     document.getElementById("doc-bailleur-adresse").textContent = bailleurAdresse;
@@ -331,7 +331,7 @@
     initDefaultDates();
     checkUrlUnlock();
     applyLicenseUI();
-    updateIRLCalculation();
+    applyIRLDefaults();
     updateProrataCalculation();
 
     document.querySelectorAll(".tab-btn").forEach((btn) => {
@@ -351,9 +351,14 @@
 
     function applyIRLDefaults() {
       const zone = document.getElementById("zone-logement")?.value || "metropole";
-      const quarter = document.getElementById("trimestre-ref")?.value || "T3";
+      const quarter = document.getElementById("trimestre-ref")?.value || "";
       const preset = IRL_PRESETS[zone]?.[quarter];
-      if (!preset) return;
+      if (!preset) {
+        document.getElementById("irl-ancien").value = "";
+        document.getElementById("irl-nouveau").value = "";
+        updateIRLCalculation();
+        return;
+      }
       document.getElementById("irl-ancien").value = preset.ancien.toFixed(2);
       document.getElementById("irl-nouveau").value = preset.nouveau.toFixed(2);
       updateIRLCalculation();
@@ -373,8 +378,8 @@
     });
 
     document.getElementById("btn-reset").addEventListener("click", function () {
-      document.getElementById("loyer-hc").value = "850.00";
-      document.getElementById("charges").value = "65.00";
+      document.getElementById("loyer-hc").value = "";
+      document.getElementById("charges").value = "";
       document.getElementById("trimestre-ref").value = "T3";
       document.getElementById("classe-dpe").value = "INCONNU";
       document.getElementById("type-contrat").value = "inconnu";

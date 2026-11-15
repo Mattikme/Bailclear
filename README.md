@@ -39,3 +39,6 @@ Projet statique Cloudflare Pages : framework preset `None`, commande de build vi
 - Indices préremplis au 15 octobre 2026 pour métropole, Corse et collectivités article 73.
 - Bail mobilité, contrats inconnus/hors périmètre, clause non confirmée, dates/DPE manquants et situations DPE F/G concernées : document bloqué.
 - Le produit ne contrôle pas l'encadrement local des loyers, les conventions Anah ni tous les régimes particuliers. Vérification humaine du bail et du DPE obligatoire.
+
+
+Le formulaire exige désormais un choix explicite du trimestre IRL et ne préremplit plus le loyer ni les charges avec des valeurs d'exemple.

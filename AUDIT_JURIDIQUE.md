@@ -84,3 +84,7 @@ Le bouton de copie du courrier ne respectait pas le blocage déjà appliqué à 
 ### Sources officielles complémentaires
 - Service-Public, « Augmentation et révision du loyer en cours de bail d'habitation », vérifié le 8 août 2025 : https://www.service-public.gouv.fr/particuliers/vosdroits/F1311. Cette page précise le choix du trimestre, les régimes particuliers et le délai de notification.
 - INSEE, IRL T3 2026, publié le 15 octobre 2026 : https://www.insee.fr/fr/statistiques/9081853.
+
+
+### Correction supplémentaire du formulaire
+Le trimestre IRL n'est plus présélectionné : l'utilisateur doit choisir celui prévu au bail. Les montants de loyer et de charges d'exemple ne sont plus préremplis. Sans trimestre sélectionné, les indices et leur date de publication ne sont pas transmis au contrôle ; le document reste bloqué. Cette mesure réduit le risque d'un courrier généré sur la base d'un trimestre ou de montants fictifs.
