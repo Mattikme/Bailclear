@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import rules from "../assets/js/legal-rules.js";
-const base = { contractType:"residence-vide", revisionClause:"oui", dpe:"A-E", leaseDate:"2023-09-01", territory:"metropole", revisionDate:"2026-11-01", requestDate:"2026-11-01", indexPublishedAt:"2026-10-15" };
+const base = { contractType:"residence-vide", revisionClause:"oui", dpe:"A-E", leaseDate:"2023-09-01", territory:"metropole", revisionDate:"2026-11-01", requestDate:"2026-11-01", indexPublishedAt:"2026-10-15", indexValidThrough:"2027-10-14" };
 test("bail classique avec clause connue",()=>assert.equal(rules.evaluate(base).valid,true));
 test("bail mobilité bloqué",()=>assert.equal(rules.evaluate({...base,contractType:"mobilite"}).valid,false));
 test("autre type de contrat bloqué",()=>assert.equal(rules.evaluate({...base,contractType:"autre"}).valid,false));
@@ -18,3 +18,5 @@ test("date impossible rejetée",()=>assert.equal(rules.isValidISODate("2026-02-3
 
 test("bloque un indice publié après la date de révision",()=>assert.equal(rules.evaluate({...base,revisionDate:"2026-09-01"}).valid,false));
 test("accepte un indice publié le jour de la révision",()=>assert.equal(rules.evaluate({...base,revisionDate:"2026-10-15",requestDate:"2026-10-15"}).valid,true));
+
+test("bloque une paire IRL après sa période de validité prévue",()=>assert.equal(rules.evaluate({...base,revisionDate:"2027-10-15",requestDate:"2027-10-15"}).valid,false));
