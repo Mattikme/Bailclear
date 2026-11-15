@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import rules from "../assets/js/legal-rules.js";
-const base = { contractType:"residence-vide", revisionClause:"oui", dpe:"A-E", leaseDate:"2023-09-01", territory:"metropole", revisionDate:"2026-09-01", requestDate:"2026-09-01" };
+const base = { contractType:"residence-vide", revisionClause:"oui", dpe:"A-E", leaseDate:"2023-09-01", territory:"metropole", revisionDate:"2026-11-01", requestDate:"2026-11-01", indexPublishedAt:"2026-10-15" };
 test("bail classique avec clause connue",()=>assert.equal(rules.evaluate(base).valid,true));
 test("bail mobilité bloqué",()=>assert.equal(rules.evaluate({...base,contractType:"mobilite"}).valid,false));
 test("autre type de contrat bloqué",()=>assert.equal(rules.evaluate({...base,contractType:"autre"}).valid,false));
@@ -15,3 +15,6 @@ test("demande tardive dans le délai : prise d’effet à la demande",()=>{const
 test("demande anticipée : pas d’effet avant date contractuelle",()=>assert.equal(rules.evaluate({...base,requestDate:"2026-08-15"}).effectiveDate,"2026-09-01"));
 test("29 février : calcul automatique suspendu",()=>assert.equal(rules.evaluate({...base,revisionDate:"2024-02-29"}).valid,false));
 test("date impossible rejetée",()=>assert.equal(rules.isValidISODate("2026-02-30"),false));
+
+test("bloque un indice publié après la date de révision",()=>assert.equal(rules.evaluate({...base,revisionDate:"2026-09-01"}).valid,false));
+test("accepte un indice publié le jour de la révision",()=>assert.equal(rules.evaluate({...base,revisionDate:"2026-10-15",requestDate:"2026-10-15"}).valid,true));
