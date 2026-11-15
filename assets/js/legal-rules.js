@@ -48,12 +48,15 @@
         messages.push("DPE F/G : la date indiquée précède le seuil d’application ; vérifiez la dernière reconduction et la validité du DPE.");
       }
     }
-    if (!isValidISODate(input.indexPublishedAt)) {
+    if (!isValidISODate(input.indexPublishedAt) || !isValidISODate(input.indexValidThrough)) {
       blocked = true;
       messages.push("Date de publication de l’indice non vérifiée.");
     } else if (isValidISODate(input.revisionDate) && input.revisionDate < input.indexPublishedAt) {
       blocked = true;
       messages.push("L’indice sélectionné n’était pas encore publié à la date de révision : choisissez une référence disponible à cette date.");
+    } else if (isValidISODate(input.revisionDate) && input.revisionDate > input.indexValidThrough) {
+      blocked = true;
+      messages.push("La paire IRL préremplie est arrivée à sa date de fin de validité prévisionnelle : attendez la mise à jour officielle des indices.");
     }
     if (!isValidISODate(input.revisionDate) || !isValidISODate(input.requestDate)) {
       blocked = true;
