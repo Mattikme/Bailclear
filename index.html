@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calculateur Révision Loyer IRL 2026 &amp; Lettre Officielle Loi ALUR | BailClear</title>
-  <meta name="description" content="Calculez gratuitement l'augmentation de loyer selon l'indice IRL de l'INSEE, vérifiez la conformité Loi ALUR et DPE (F/G), calculez le prorata temporis et éditez votre courrier officiel et quittance PDF.">
+  <meta name="description" content="Calculez gratuitement l'augmentation de loyer selon l'indice IRL de l'INSEE, vérifiez la conformité Loi ALUR et DPE (F/G), calculez le prorata temporis et éditez un courrier de révision et un avis d’échéance.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://bailclear.fr/">
 
@@ -12,7 +12,7 @@
   <meta property="og:locale" content="fr_FR">
   <meta property="og:site_name" content="BailClear">
   <meta property="og:title" content="Calculateur Révision Loyer IRL &amp; Courrier Officiel Loi ALUR — BailClear">
-  <meta property="og:description" content="Calcul instantané de révision IRL INSEE, contrôle légal DPE &amp; prescription 1 an, calcul prorata et génération de lettre officielle + quittance A4.">
+  <meta property="og:description" content="Calcul de révision IRL, contrôles de vigilance locative et préparation de documents A4.">
   <meta property="og:url" content="https://bailclear.fr/">
 
   <script type="application/ld+json">
@@ -26,7 +26,7 @@
         "applicationCategory": "FinanceApplication",
         "operatingSystem": "Web",
         "inLanguage": "fr-FR",
-        "description": "Outil de calcul de révision annuelle des loyers selon l'Indice de Référence des Loyers (IRL INSEE), contrôle de conformité Loi ALUR et DPE, calcul de prorata temporis et génération de courrier officiel.",
+        "description": "Outil d’aide au calcul de révision annuelle des loyers selon l’IRL INSEE, avec contrôles de vigilance et préparation de documents.",
         "offers": {
           "@type": "Offer",
           "price": "9.00",
@@ -89,10 +89,10 @@
 
   <section class="hero no-print">
     <div class="container">
-      <div class="hero-kicker">Conformité Loi n° 89-462 &amp; Loi ALUR • Traitement 100 % local</div>
-      <h1>Révision de Loyer IRL &amp; Courrier Officiel en 60 secondes</h1>
+      <div class="hero-kicker">Conformité Loi n° 89-462 &amp; Loi ALUR • Dossiers conservés dans ce navigateur</div>
+      <h1>Calcul de révision de loyer IRL et documents locatifs</h1>
       <p class="hero-lead">
-        Calculez le nouveau loyer exact selon l'Indice de Référence des Loyers (INSEE), vérifiez automatiquement la validité légale (prescription 1 an, gel des passoires thermiques DPE F/G) et générez votre notification prête à poster.
+        Estimez la révision selon l'Indice de Référence des Loyers (INSEE), repérez les principaux points de vigilance et préparez un courrier à vérifier avant envoi.
       </p>
     </div>
   </section>
@@ -143,21 +143,26 @@
                   <option value="A-E" selected>Classe A, B, C, D ou E (Autorisé)</option>
                   <option value="F">Classe F (Passoire thermique)</option>
                   <option value="G">Classe G (Passoire thermique)</option>
-                  <option value="OUTREMER">Logement Outre-Mer (Guadeloupe, Martinique, etc.)</option>
+                  
                 </select>
+              </div>
+<div class="field">
+                <label for="zone-logement">Territoire du logement</label>
+                <select id="zone-logement"><option value="metropole" selected>France métropolitaine</option><option value="outremer">Guadeloupe, Martinique, Guyane, La Réunion ou Mayotte</option></select>
+                <span class="field-hint">Les indices préremplis sont ceux de la métropole.</span>
               </div>
             </div>
 
             <div class="form-row-2">
               <div class="field">
                 <label for="irl-ancien">Ancien IRL (Année N-1)</label>
-                <input type="number" id="irl-ancien" step="0.01" min="100" value="144.51" required>
-                <span class="field-hint">Ex. T3 2024 : 144,51</span>
+                <input type="number" id="irl-ancien" step="0.01" min="100" value="145.77" required>
+                <span class="field-hint">Ex. T3 2025 : 145,77</span>
               </div>
               <div class="field">
                 <label for="irl-nouveau">Nouvel IRL (Année N)</label>
-                <input type="number" id="irl-nouveau" step="0.01" min="100" value="145.78" required>
-                <span class="field-hint">Ex. T3 2025 : 145,78 (<a href="https://www.insee.fr/fr/statistiques/serie/001515333" target="_blank" rel="noopener noreferrer">Série INSEE</a>)</span>
+                <input type="number" id="irl-nouveau" step="0.01" min="100" value="148.06" required>
+                <span class="field-hint">Ex. T3 2026 : 148,06 (<a href="https://www.insee.fr/fr/statistiques/serie/001515333" target="_blank" rel="noopener noreferrer">Série INSEE</a>)</span>
               </div>
             </div>
 
@@ -199,7 +204,7 @@
 
             <div class="form-row-2">
               <div class="field">
-                <label for="date-signature-bail">Date de signature du bail</label>
+                <label for="date-signature-bail">Date de conclusion / dernière reconduction du bail</label>
                 <input type="date" id="date-signature-bail" value="2023-11-01">
               </div>
               <div class="field">
@@ -249,13 +254,11 @@
               <div class="action-buttons">
                 <button type="button" id="btn-copy-text" class="btn btn-secondary">Copier le texte brut (Gratuit)</button>
                 <button type="button" id="btn-download-pdf" class="btn btn-primary">
-                  Télécharger PDF Officiel sans filigrane — 9 €
+                  Imprimer / Enregistrer en PDF
                 </button>
               </div>
             </div>
-            <div id="unlock-help" class="unlock-bar">
-              <span>Déjà réglé ? <button type="button" id="btn-manual-unlock" class="btn-link">Saisir votre code d'accès reçu après paiement</button></span>
-            </div>
+            
           </div>
 
           <div class="document-wrapper">
@@ -345,7 +348,7 @@
                 <div class="quittance-box">
                   <div class="quittance-header">
                     <h2>AVIS D’ÉCHÉANCE DE LOYER</h2>
-                    <span class="quittance-sub">Article 21 de la loi n° 89-462 du 6 juillet 1989</span>
+                    <span class="quittance-sub">Document prévisionnel — ne vaut pas quittance</span>
                   </div>
 
                   <div class="doc-header-addresses">
@@ -406,7 +409,7 @@
     <div id="tab-prorata" class="tab-panel no-print">
       <div class="panel prorata-container">
         <h2>Calculateur de Prorata Temporis (Entrée ou Sortie en cours de mois)</h2>
-        <p class="muted-text">Calcul au nombre exact de jours calendaires du mois concerné (28, 29, 30 ou 31 jours), conforme aux usages locatifs et jurisprudentiels.</p>
+        <p class="muted-text">Estimation au nombre de jours calendaires du mois. Le préavis, la date effective de fin du bail et la remise des clés peuvent modifier les sommes réellement dues.</p>
 
         <div class="form-row-3">
           <div class="field">
@@ -432,7 +435,7 @@
             <input type="date" id="prorata-date" value="2026-11-15">
           </div>
           <div class="prorata-result-card">
-            <span class="kpi-label">Montant exact dû pour ce mois</span>
+            <span class="kpi-label">Estimation du prorata pour ce mois</span>
             <span class="kpi-value" id="prorata-total-du">488,00 €</span>
             <span class="kpi-delta" id="prorata-detail">16 jours occupés sur 30 jours (Loyer : 453,33 € + Charges : 34,67 €)</span>
           </div>
@@ -452,7 +455,7 @@
       <div class="faq-grid">
         <article class="faq-card">
           <h3>1. Formule officielle INSEE</h3>
-          <p>Le calcul s'effectue exclusivement sur le <strong>loyer hors charges</strong> : <code>Loyer HC × (Nouvel IRL ÷ Ancien IRL)</code>. La provision sur charges n'est jamais indexée sur l'IRL (elle fait l'objet d'une régularisation annuelle sur justificatifs réels).</p>
+          <p>Le calcul de révision porte sur le <strong>loyer hors charges</strong> selon la clause du bail et l’IRL applicable. Les charges ne sont pas multipliées par le ratio IRL ; leur régularisation suit ses propres règles.</p>
         </article>
         <article class="faq-card">
           <h3>2. Délai de prescription d'un an</h3>
@@ -464,7 +467,7 @@
         </article>
         <article class="faq-card">
           <h3>4. Gel des logements classés DPE F et G</h3>
-          <p>Depuis le 24 août 2022 en France métropolitaine (et le 1er juillet 2024 en Outre-mer), les logements classés <strong>F ou G</strong> ne peuvent faire l'objet d'aucune révision de loyer lors de la reconduction ou du renouvellement du bail.</p>
+          <p>Le gel des loyers F/G dépend de la date de conclusion, renouvellement ou reconduction du contrat et du territoire. Le contrôle affiché est une alerte et ne remplace pas la vérification du bail et du DPE.</p>
         </article>
       </div>
     </section>
@@ -472,7 +475,7 @@
 
   <footer class="site-footer no-print">
     <div class="container footer-inner">
-      <p>&copy; 2026 BailClear — Outil indépendant de calcul locatif conforme à la loi n° 89-462. Aucune donnée personnelle n'est transmise à nos serveurs.</p>
+      <p>&copy; 2026 BailClear — Outil indépendant d’aide au calcul locatif. Les dossiers enregistrés restent dans le stockage local de votre navigateur.</p>
       <nav class="footer-links" aria-label="Informations légales">
         <a href="mentions-legales.html">Mentions légales</a>
         <a href="confidentialite.html">Politique de confidentialité (RGPD)</a>
@@ -481,21 +484,7 @@
     </div>
   </footer>
 
-  <dialog id="unlock-modal" class="modal no-print">
-    <div class="modal-box">
-      <h3>Activer votre Pack Dossier Locatif PDF</h3>
-      <p class="muted-text">Saisissez le code de confirmation affiché sur votre reçu de paiement Stripe (ou utilisez le lien de retour automatique).</p>
-      <div class="field">
-        <label for="unlock-code-input">Code d'activation</label>
-        <input type="text" id="unlock-code-input" placeholder="Ex. BAILCLEAR-2026" autocomplete="off">
-      </div>
-      <p id="unlock-error" class="error-msg" hidden>Code invalide. Vérifiez votre reçu ou procédez au règlement.</p>
-      <div class="modal-actions">
-        <button type="button" id="btn-close-modal" class="btn btn-secondary">Annuler</button>
-        <button type="button" id="btn-confirm-code" class="btn btn-primary">Débloquer les PDF</button>
-      </div>
-    </div>
-  </dialog>
+  
 
   <script src="assets/js/app.js"></script>
 </body>
