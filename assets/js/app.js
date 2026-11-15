@@ -121,7 +121,11 @@
     });
     if (missing.length) result.messages.push("Complétez le document : " + missing.map(([, label]) => label).join(", ") + ".");
     if (invalidNumbers.length) result.messages.push("Vérifiez les valeurs numériques : " + invalidNumbers.map(([, , label]) => label).join(", ") + ".");
-    const valid = result.valid && missing.length === 0 && invalidNumbers.length === 0;
+    const chargesType = document.getElementById("type-charges")?.value || "inconnu";
+    const chargesValue = Number(document.getElementById("charges")?.value);
+    const chargesMismatch = chargesType === "aucune" && chargesValue !== 0;
+    if (chargesMismatch) result.messages.push("Le type de charges indique « aucune », mais un montant non nul est saisi. Corrigez le type ou le montant.");
+    const valid = result.valid && missing.length === 0 && invalidNumbers.length === 0 && !chargesMismatch;
     diagEl.className = valid ? "alert alert-warning" : "alert alert-danger";
     diagEl.textContent = (valid ? "Contrôle partiel — vérification humaine obligatoire : " : "Document bloqué — conditions ou informations manquantes : ") + result.messages.join(" ");
     return { valid, effectiveDate: result.effectiveDate };
