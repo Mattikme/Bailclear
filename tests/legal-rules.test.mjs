@@ -1,0 +1,20 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import rules from "../assets/js/legal-rules.js";
+const base = { contractType:"residence-vide", revisionClause:"oui", dpe:"A-E", leaseDate:"2023-09-01", territory:"metropole", revisionDate:"2026-11-01", requestDate:"2026-11-01", indexPublishedAt:"2026-10-15" };
+test("bail classique avec clause connue",()=>assert.equal(rules.evaluate(base).valid,true));
+test("bail mobilité bloqué",()=>assert.equal(rules.evaluate({...base,contractType:"mobilite"}).valid,false));
+test("autre type de contrat bloqué",()=>assert.equal(rules.evaluate({...base,contractType:"autre"}).valid,false));
+test("absence de clause bloquée",()=>assert.equal(rules.evaluate({...base,revisionClause:"non"}).valid,false));
+test("clause inconnue bloquée",()=>assert.equal(rules.evaluate({...base,revisionClause:"inconnu"}).valid,false));
+test("DPE F métropole après seuil bloqué",()=>assert.equal(rules.evaluate({...base,dpe:"F",leaseDate:"2022-08-24"}).valid,false));
+test("seuil outre-mer du 1er juillet 2024",()=>{assert.equal(rules.evaluate({...base,territory:"outremer",dpe:"G",leaseDate:"2024-06-30"}).valid,true);assert.equal(rules.evaluate({...base,territory:"outremer",dpe:"G",leaseDate:"2024-07-01"}).valid,false);});
+test("DPE F/G avant seuil : avertissement",()=>{const r=rules.evaluate({...base,dpe:"F",leaseDate:"2022-08-23"});assert.equal(r.valid,true);assert.match(r.messages.join(" "),/vérifiez/);});
+test("demande le jour anniversaire du délai annuel bloquée",()=>assert.equal(rules.evaluate({...base,requestDate:"2027-11-01"}).valid,false));
+test("demande tardive dans le délai : prise d’effet à la demande",()=>{const r=rules.evaluate({...base,requestDate:"2026-11-15"});assert.equal(r.valid,true);assert.equal(r.effectiveDate,"2026-11-15");});
+test("demande anticipée : pas d’effet avant date contractuelle",()=>assert.equal(rules.evaluate({...base,requestDate:"2026-10-15"}).effectiveDate,"2026-11-01"));
+test("29 février : calcul automatique suspendu",()=>assert.equal(rules.evaluate({...base,revisionDate:"2024-02-29"}).valid,false));
+test("date impossible rejetée",()=>assert.equal(rules.isValidISODate("2026-02-30"),false));
+
+test("bloque un indice publié après la date de révision",()=>assert.equal(rules.evaluate({...base,revisionDate:"2026-09-01"}).valid,false));
+test("accepte un indice publié le jour de la révision",()=>assert.equal(rules.evaluate({...base,revisionDate:"2026-10-15",requestDate:"2026-10-15"}).valid,true));
