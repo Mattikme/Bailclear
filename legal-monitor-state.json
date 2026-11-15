@@ -30,5 +30,9 @@
   "cnil-tracers": {
     "sha256": "9859d91427a0b780edb5bc915cd1a7b6572785c391dd00ad2c5f113e48f69c1c",
     "url": "https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies/FAQ"
+  },
+  "service-public-rent-control": {
+    "sha256": "b5b219d07a750901ef7eb350c4654ab88a91dd8b4b19debf263a41319a643505",
+    "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F1314"
   }
 }
