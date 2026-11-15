@@ -9,6 +9,7 @@
   let irlDataset = null;
   let selectedIRLPair = null;
   let selectedIRLPairError = "Base IRL INSEE non chargée.";
+  let refreshIRLSelection = null;
 
 
   const euroFmt = new Intl.NumberFormat("fr-FR", {
