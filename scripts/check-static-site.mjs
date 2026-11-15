@@ -20,7 +20,9 @@ const copyFn=app.slice(app.indexOf("function copyLetterToClipboard"),app.indexOf
 assert.match(copyFn,/if \(!lastLegalCheckAllowsPrint\)/,"Copie du courrier non bloquée lorsque le diagnostic échoue");
 assert.match(copyFn,/doc-prise-effet/,"La date d'effet doit apparaître dans le texte copié");
 
-const quarterSelect=html.match(/<select id="trimestre-ref">([\\s\\S]*?)<\\/select>/)?.[1]||"";
+const quarterStart=html.indexOf('<select id="trimestre-ref">');
+const quarterEnd=html.indexOf("</select>",quarterStart);
+const quarterSelect=quarterStart>=0&&quarterEnd>quarterStart?html.slice(quarterStart,quarterEnd):"";
 assert.match(quarterSelect,/<option value="" selected>/,"Le trimestre IRL doit être choisi explicitement");
 assert.doesNotMatch(quarterSelect,/<option value="T[1-4]" selected>/,"Aucun trimestre IRL ne doit être présélectionné");
 assert.match(html,/id="loyer-hc"[^>]*value=""/,"Le loyer ne doit pas être prérempli par une valeur fictive");
