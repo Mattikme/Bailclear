@@ -183,3 +183,5 @@ body {
   .a4-sheet { padding: 0 !important; box-shadow: none !important; font-size: 11pt; }
   .page-break { border: none; margin: 0; page-break-before: always; break-before: page; }
 }
+
+.owner-panel{margin:28px 0}.owner-panel h2{margin-top:0}.owner-actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}.file-label{cursor:pointer}.owner-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.owner-grid h3{font-size:1rem}.saved-list{display:flex;flex-direction:column;gap:8px}.saved-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:10px;border:1px solid var(--border-color);border-radius:var(--radius-sm);font-size:.86rem}@media(max-width:680px){.owner-grid{grid-template-columns:1fr}}
