@@ -1,11 +1,16 @@
-name: Veille juridique officielle
+name: Veille juridique et actualisation IRL INSEE
 on:
   schedule:
     - cron: "17 6 * * *"
   workflow_dispatch:
+  push:
+    branches: [main]
 permissions:
   contents: write
   issues: write
+concurrency:
+  group: bailclear-legal-watch
+  cancel-in-progress: false
 jobs:
   monitor:
     runs-on: ubuntu-latest
@@ -14,43 +19,60 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Comparer les sources officielles
+      - name: Actualiser les indices IRL depuis l'API INSEE
+        id: irl-refresh
+        continue-on-error: true
+        run: node scripts/update-irl-data.mjs
+      - name: Alerter en cas d'échec de récupération IRL
+        if: steps.irl-refresh.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '[IRL INSEE] Mise à jour automatique à examiner';
+            const body = [
+              'La récupération des indices IRL depuis l’API SDMX INSEE a échoué.',
+              '',
+              'Le dernier jeu validé est conservé. Aucun nouvel indice ne doit être supposé valide. Vérifier l’API, les identifiants de séries, les statuts et les dates de publication, puis relancer le workflow.',
+              '',
+              'API : https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/001515333+010760507+010760509'
+            ].join('\n');
+            const listed = await github.rest.issues.listForRepo({owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100});
+            const existing = listed.data.find(issue => issue.title === title);
+            if (existing) await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, body});
+            else await github.rest.issues.create({owner: context.repo.owner, repo: context.repo.repo, title, body});
+      - name: Comparer les sources juridiques officielles
         run: node scripts/monitor-legal-sources.mjs
-      - name: Alerter en cas de changement ou d'indisponibilité
+      - name: Alerter en cas de modification ou indisponibilité juridique
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
             const changes = JSON.parse(fs.readFileSync('legal-monitor-changes.json', 'utf8'));
-            const relevant = changes.filter(x => x.kind === 'changed' || x.kind === 'unavailable');
-            if (relevant.length) {
-              const title = '[Veille juridique] Sources officielles à examiner';
-              const lines = [
-                'La veille a détecté une modification de contenu ou une source indisponible.',
-                '',
-                'Une modification de page ne prouve pas à elle seule un changement de droit. Une revue humaine doit comparer le texte, vérifier son entrée en vigueur, évaluer son impact, ajouter des tests et valider avant publication.',
-                ''
-              ];
-              for (const x of relevant) {
-                lines.push('- **' + x.label + '** — ' + x.kind);
-                lines.push('  - Source : ' + x.url);
-                lines.push('  - Détail : ' + (x.kind === 'changed' ? ('empreinte ' + x.previous + ' -> ' + x.current) : x.error));
-              }
-              const body = lines.join('\n');
-              const result = await github.rest.issues.listForRepo({owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100});
-              const existing = result.data.find(i => i.title === title);
-              if (existing) {
-                await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, body});
-              } else {
-                await github.rest.issues.create({owner: context.repo.owner, repo: context.repo.repo, title, body});
-              }
+            const relevant = changes.filter(item => item.kind === 'changed' || item.kind === 'unavailable');
+            if (!relevant.length) return;
+            const title = '[Veille juridique] Sources officielles à examiner';
+            const lines = [
+              'La veille a détecté une modification de contenu ou une source indisponible.',
+              '',
+              'Une variation de page ne prouve pas à elle seule un changement de droit. Une revue humaine doit comparer le texte, ses dates d’entrée en vigueur, son champ d’application et ses effets. Aucune règle du moteur n’est modifiée automatiquement.',
+              ''
+            ];
+            for (const item of relevant) {
+              lines.push('- **' + item.label + '** — ' + item.kind);
+              lines.push('  - Source : ' + item.url);
+              lines.push('  - Détail : ' + (item.kind === 'changed' ? ('empreinte ' + item.previous + ' -> ' + item.current) : item.error));
             }
-      - name: Enregistrer les empreintes vérifiées
+            const body = lines.join('\n');
+            const listed = await github.rest.issues.listForRepo({owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100});
+            const existing = listed.data.find(issue => issue.title === title);
+            if (existing) await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, body});
+            else await github.rest.issues.create({owner: context.repo.owner, repo: context.repo.repo, title, body});
+      - name: Enregistrer les IRL et empreintes validés
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add legal-monitor-state.json
+          git add assets/data/irl.json legal-monitor-state.json
           if ! git diff --cached --quiet; then
-            git commit -m "chore: update legal source fingerprints"
+            git commit -m "chore: refresh official IRL data and legal fingerprints"
             git push
           fi
