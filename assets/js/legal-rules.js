@@ -48,6 +48,13 @@
         messages.push("DPE F/G : la date indiquée précède le seuil d’application ; vérifiez la dernière reconduction et la validité du DPE.");
       }
     }
+    if (!isValidISODate(input.indexPublishedAt)) {
+      blocked = true;
+      messages.push("Date de publication de l’indice non vérifiée.");
+    } else if (isValidISODate(input.revisionDate) && input.revisionDate < input.indexPublishedAt) {
+      blocked = true;
+      messages.push("L’indice sélectionné n’était pas encore publié à la date de révision : choisissez une référence disponible à cette date.");
+    }
     if (!isValidISODate(input.revisionDate) || !isValidISODate(input.requestDate)) {
       blocked = true;
       messages.push("Renseignez une date de révision prévue au bail et une date de demande valides.");
