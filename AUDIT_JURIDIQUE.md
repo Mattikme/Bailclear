@@ -88,3 +88,7 @@ Le bouton de copie du courrier ne respectait pas le blocage déjà appliqué à 
 
 ### Correction supplémentaire du formulaire
 Le trimestre IRL n'est plus présélectionné : l'utilisateur doit choisir celui prévu au bail. Les montants de loyer et de charges d'exemple ne sont plus préremplis. Sans trimestre sélectionné, les indices et leur date de publication ne sont pas transmis au contrôle ; le document reste bloqué. Cette mesure réduit le risque d'un courrier généré sur la base d'un trimestre ou de montants fictifs.
+
+
+### Précisions sur le loyer et les charges
+Le formulaire précise désormais que le complément de loyer doit être inclus dans le montant hors charges servant au calcul. Il indique aussi que le champ charges concerne une provision et que le forfait de charges n'est pas recalculé. Ces points suivent les précisions de Service-Public sur la révision IRL et les charges forfaitaires.
