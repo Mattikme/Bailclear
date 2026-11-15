@@ -9,22 +9,22 @@
   // T1-T3 : 2025/2026 ; T4 : 2024/2025, le T4 2026 n'étant pas encore publié.
   const IRL_PRESETS = {
     metropole: {
-      T1: { ancien: 145.47, nouveau: 146.60, label: "1er trimestre (T1)" },
-      T2: { ancien: 146.68, nouveau: 148.37, label: "2e trimestre (T2)" },
-      T3: { ancien: 145.77, nouveau: 148.06, label: "3e trimestre (T3)" },
-      T4: { ancien: 144.64, nouveau: 145.78, label: "4e trimestre (T4)" }
+      T1: { ancien: 145.47, nouveau: 146.60, publishedAt: "2026-04-15", label: "1er trimestre (T1)" },
+      T2: { ancien: 146.68, nouveau: 148.37, publishedAt: "2026-07-10", label: "2e trimestre (T2)" },
+      T3: { ancien: 145.77, nouveau: 148.06, publishedAt: "2026-10-15", label: "3e trimestre (T3)" },
+      T4: { ancien: 144.64, nouveau: 145.78, publishedAt: "2026-01-15", label: "4e trimestre (T4)" }
     },
     corse: {
-      T1: { ancien: 141.28, nouveau: 142.38, label: "1er trimestre (T1)" },
-      T2: { ancien: 144.56, nouveau: 146.22, label: "2e trimestre (T2)" },
-      T3: { ancien: 141.58, nouveau: 143.80, label: "3e trimestre (T3)" },
-      T4: { ancien: 140.48, nouveau: 141.59, label: "4e trimestre (T4)" }
+      T1: { ancien: 141.28, nouveau: 142.38, publishedAt: "2026-04-15", label: "1er trimestre (T1)" },
+      T2: { ancien: 144.56, nouveau: 146.22, publishedAt: "2026-07-10", label: "2e trimestre (T2)" },
+      T3: { ancien: 141.58, nouveau: 143.80, publishedAt: "2026-10-15", label: "3e trimestre (T3)" },
+      T4: { ancien: 140.48, nouveau: 141.59, publishedAt: "2026-01-15", label: "4e trimestre (T4)" }
     },
     outremer: {
-      T1: { ancien: 142.67, nouveau: 143.78, label: "1er trimestre (T1)" },
-      T2: { ancien: 145.27, nouveau: 146.94, label: "2e trimestre (T2)" },
-      T3: { ancien: 142.97, nouveau: 145.21, label: "3e trimestre (T3)" },
-      T4: { ancien: 141.86, nouveau: 142.98, label: "4e trimestre (T4)" }
+      T1: { ancien: 142.67, nouveau: 143.78, publishedAt: "2026-04-15", label: "1er trimestre (T1)" },
+      T2: { ancien: 145.27, nouveau: 146.94, publishedAt: "2026-07-10", label: "2e trimestre (T2)" },
+      T3: { ancien: 142.97, nouveau: 145.21, publishedAt: "2026-10-15", label: "3e trimestre (T3)" },
+      T4: { ancien: 141.86, nouveau: 142.98, publishedAt: "2026-01-15", label: "4e trimestre (T4)" }
     }
   };
 
@@ -92,7 +92,8 @@
       leaseDate: document.getElementById("date-signature-bail")?.value || "",
       territory: document.getElementById("zone-logement")?.value || "metropole",
       revisionDate: dateAnnivStr || "",
-      requestDate: dateEnvoiStr || ""
+      requestDate: dateEnvoiStr || "",
+      indexPublishedAt: IRL_PRESETS[document.getElementById("zone-logement")?.value || "metropole"]?.[document.getElementById("trimestre-ref")?.value || "T3"]?.publishedAt || ""
     });
     const required = [
       ["bailleur-nom", "Nom du bailleur"],
@@ -102,8 +103,11 @@
       ["ville-redaction", "Ville de rédaction"]
     ];
     const missing = required.filter(([id]) => !(document.getElementById(id)?.value || "").trim());
+    const numeric = [["loyer-hc", value => value > 0, "Loyer hors charges"], ["charges", value => value >= 0, "Charges"], ["irl-ancien", value => value > 0, "Ancien IRL"], ["irl-nouveau", value => value > 0, "Nouvel IRL"]];
+    const invalidNumbers = numeric.filter(([id, predicate]) => { const el = document.getElementById(id); const raw = el?.value.trim() || ""; const value = Number(raw); return raw === "" || !Number.isFinite(value) || !predicate(value); });
     if (missing.length) result.messages.push("Complétez le document : " + missing.map(([, label]) => label).join(", ") + ".");
-    const valid = result.valid && missing.length === 0;
+    if (invalidNumbers.length) result.messages.push("Vérifiez les valeurs numériques : " + invalidNumbers.map(([, , label]) => label).join(", ") + ".");
+    const valid = result.valid && missing.length === 0 && invalidNumbers.length === 0;
     diagEl.className = valid ? "alert alert-warning" : "alert alert-danger";
     diagEl.textContent = (valid ? "Contrôle partiel — vérification humaine obligatoire : " : "Document bloqué — conditions ou informations manquantes : ") + result.messages.join(" ");
     return { valid, effectiveDate: result.effectiveDate };
@@ -170,7 +174,7 @@
     document.getElementById("doc-nouveau-hc").textContent = euroFmt.format(nouveauHC);
     document.getElementById("doc-charges").textContent = euroFmt.format(charges);
     document.getElementById("doc-nouveau-cc").textContent = euroFmt.format(nouveauCC);
-    document.getElementById("doc-prise-effet").innerHTML = `Ce nouveau montant s'appliquera à compter de votre prochaine échéance de loyer à partir du <strong>${compliance.effectiveDate}</strong>.`;
+    document.getElementById("doc-prise-effet").textContent = compliance.effectiveDate ? "Date de prise d’effet indicative : " + formatDateFR(compliance.effectiveDate) + ". Vérifiez la date contractuelle avant envoi." : "Date de prise d’effet à vérifier.";
     document.getElementById("doc-bailleur-sig").textContent = bailleurNom;
 
     document.getElementById("q-bailleur-nom").textContent = bailleurNom;
