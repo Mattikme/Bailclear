@@ -10,9 +10,9 @@ test("clause inconnue bloquée",()=>assert.equal(rules.evaluate({...base,revisio
 test("DPE F métropole après seuil bloqué",()=>assert.equal(rules.evaluate({...base,dpe:"F",leaseDate:"2022-08-24"}).valid,false));
 test("seuil outre-mer du 1er juillet 2024",()=>{assert.equal(rules.evaluate({...base,territory:"outremer",dpe:"G",leaseDate:"2024-06-30"}).valid,true);assert.equal(rules.evaluate({...base,territory:"outremer",dpe:"G",leaseDate:"2024-07-01"}).valid,false);});
 test("DPE F/G avant seuil : avertissement",()=>{const r=rules.evaluate({...base,dpe:"F",leaseDate:"2022-08-23"});assert.equal(r.valid,true);assert.match(r.messages.join(" "),/vérifiez/);});
-test("demande le jour anniversaire du délai annuel bloquée",()=>assert.equal(rules.evaluate({...base,requestDate:"2027-09-01"}).valid,false));
-test("demande tardive dans le délai : prise d’effet à la demande",()=>{const r=rules.evaluate({...base,requestDate:"2026-10-15"});assert.equal(r.valid,true);assert.equal(r.effectiveDate,"2026-10-15");});
-test("demande anticipée : pas d’effet avant date contractuelle",()=>assert.equal(rules.evaluate({...base,requestDate:"2026-08-15"}).effectiveDate,"2026-09-01"));
+test("demande le jour anniversaire du délai annuel bloquée",()=>assert.equal(rules.evaluate({...base,requestDate:"2027-11-01"}).valid,false));
+test("demande tardive dans le délai : prise d’effet à la demande",()=>{const r=rules.evaluate({...base,requestDate:"2026-11-15"});assert.equal(r.valid,true);assert.equal(r.effectiveDate,"2026-11-15");});
+test("demande anticipée : pas d’effet avant date contractuelle",()=>assert.equal(rules.evaluate({...base,requestDate:"2026-10-15"}).effectiveDate,"2026-11-01"));
 test("29 février : calcul automatique suspendu",()=>assert.equal(rules.evaluate({...base,revisionDate:"2024-02-29"}).valid,false));
 test("date impossible rejetée",()=>assert.equal(rules.isValidISODate("2026-02-30"),false));
 
