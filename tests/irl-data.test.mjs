@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import irl from "../assets/js/irl-index.js";
@@ -14,3 +15,24 @@ test("données de plus de 14 jours bloquent",()=>{const d=dataset();d.refreshedA
 test("série territoriale inconnue bloquée",()=>assert.equal(irl.resolvePair(dataset(),{territory:"autre",quarterMode:"T3",signatureDate:"2023-01-01",revisionDate:"2026-10-20"}).valid,false));
 test("parseur SDMX lit observations auto-fermantes et normales",()=>{const ids=["001515333","010760507","010760509"];const series=ids.map(id=>'<Series IDBANK="'+id+'" TITLE_FR="IRL"><Obs TIME_PERIOD="2022-Q3" OBS_VALUE="140.00" OBS_STATUS="A" OBS_QUAL="DEF" DATE_JO="2022-10-15"/><Obs TIME_PERIOD="2026-Q3" OBS_VALUE="148.06" OBS_STATUS="A" OBS_QUAL="DEF" DATE_JO="2026-10-16"></Obs></Series>').join("");const p=parseSdmxXml("<DataSet>"+series+"</DataSet>");assert.equal(p.territories.metropole.length,2);assert.equal(p.territories.corse.length,2);assert.equal(p.territories.outremer.length,2);});
 test("parseur refuse une observation provisoire",()=>{const ids=["001515333","010760507","010760509"];const series=ids.map(id=>'<Series IDBANK="'+id+'"><Obs TIME_PERIOD="2022-Q3" OBS_VALUE="140" OBS_STATUS="P" OBS_QUAL="P" DATE_JO="2022-10-15"/><Obs TIME_PERIOD="2026-Q3" OBS_VALUE="148" OBS_STATUS="A" OBS_QUAL="DEF" DATE_JO="2026-10-16"/></Series>').join("");assert.throws(()=>parseSdmxXml("<DataSet>"+series+"</DataSet>"),/non définitive/);});
+
+test("le jeu IRL récupéré depuis l'API INSEE contient les trois séries territoriales",()=>{
+  const actual=JSON.parse(readFileSync(new URL("../assets/data/irl.json",import.meta.url),"utf8"));
+  for(const territory of ["metropole","corse","outremer"]) {
+    const result=irl.resolvePair(actual,{
+      territory,quarterMode:"T3",signatureDate:"2024-01-20",revisionDate:"2026-11-01"
+    });
+    assert.equal(result.valid,true,territory+" : "+result.message);
+    assert.equal(result.newIndex.period,"2026-Q3");
+    assert.equal(result.oldIndex.period,"2025-Q3");
+  }
+});
+test("le dernier IRL publié à la signature est sélectionné en mode automatique sur le jeu officiel",()=>{
+  const actual=JSON.parse(readFileSync(new URL("../assets/data/irl.json",import.meta.url),"utf8"));
+  const result=irl.resolvePair(actual,{
+    territory:"metropole",quarterMode:"auto",signatureDate:"2026-11-01",revisionDate:"2026-11-01"
+  });
+  assert.equal(result.valid,true);
+  assert.equal(result.quarter,"T3");
+  assert.equal(result.newIndex.period,"2026-Q3");
+});
