@@ -17,7 +17,7 @@ for(const source of sources){
     const previous=state[source.id]?.sha256;
     if(previous && previous!==digest) changes.push({...source,kind:"changed",previous,current:digest});
     else if(!previous) changes.push({...source,kind:"baseline",current:digest});
-    next[source.id]={sha256:digest,checkedAt:new Date().toISOString(),url:source.url};
+    next[source.id]={sha256:digest,url:source.url};
   }catch(error){changes.push({...source,kind:"unavailable",error:String(error)});}
 }
 fs.writeFileSync(statePath,JSON.stringify(next,null,2)+"\n");
