@@ -47,3 +47,7 @@ Les champs d'indices sont en lecture seule pour éviter qu'une valeur modifiée 
 
 ## Vérification du trimestre de référence
 L'utilisateur doit sélectionner le trimestre indiqué dans le bail. Si le bail ne précise pas la date de référence IRL, la règle officielle est de retenir le dernier IRL publié à la date de signature. L'application ne lit pas le bail et ne peut pas confirmer ce choix : vérification manuelle obligatoire. Source : Service-Public, https://www.service-public.gouv.fr/particuliers/vosdroits/F1311.
+
+
+## Prévention des valeurs implicites
+Le trimestre de référence, le loyer et les charges ne sont pas présélectionnés. Le calcul doit être renseigné à partir du bail et des montants réellement applicables. Le choix du trimestre reste une vérification humaine : le site ne lit pas le contrat.
