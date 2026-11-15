@@ -2,9 +2,7 @@
   "use strict";
 
   const CONFIG = {
-    STRIPE_PAYMENT_LINK: "https://buy.stripe.com/VOTRE_LIEN_STRIPE_9EUR",
-    VALID_UNLOCK_CODES: ["BAILCLEAR-PRO-2026", "BAILCLEAR-2026"],
-    STORAGE_KEY: "bailclear_pro_unlocked_v1"
+    STORAGE_KEY: "bailclear_owner_data_v1"
   };
 
   const IRL_PRESETS = {
@@ -38,23 +36,11 @@
     return clean.length > 0 ? clean : fallback;
   }
 
-  function isProUnlocked() {
-    return localStorage.getItem(CONFIG.STORAGE_KEY) === "true";
-  }
+  function isProUnlocked() { return false; }
 
-  function unlockPro() {
-    localStorage.setItem(CONFIG.STORAGE_KEY, "true");
-    applyLicenseUI();
-  }
+  function unlockPro() { return false; }
 
-  function checkUrlUnlock() {
-    const params = new URLSearchParams(window.location.search);
-    const code = (params.get("unlocked") || "").trim().toUpperCase();
-    if (CONFIG.VALID_UNLOCK_CODES.includes(code)) {
-      unlockPro();
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }
+  function checkUrlUnlock() { /* Pro activation must be verified server-side. */ }
 
   function applyLicenseUI() {
     const unlocked = isProUnlocked();
@@ -76,7 +62,7 @@
       badge.className = "badge badge-neutral";
       sheet.classList.add("watermarked");
       watermarkStatus.textContent = "Aperçu avec filigrane";
-      btnDownload.textContent = "Télécharger PDF Officiel sans filigrane — 9 €";
+      btnDownload.textContent = "PDF Pro indisponible — paiement à configurer";
     }
   }
 
@@ -311,7 +297,43 @@
     }
   }
 
+
+  const OWNER_KEY = "bailclear_owner_data_v1";
+  function readOwnerData() {
+    try { const v=JSON.parse(localStorage.getItem(OWNER_KEY)||'{"properties":[],"history":[]}'); return {properties:Array.isArray(v.properties)?v.properties:[],history:Array.isArray(v.history)?v.history:[]}; }
+    catch (_) { return {properties:[],history:[]}; }
+  }
+  function writeOwnerData(v) { localStorage.setItem(OWNER_KEY,JSON.stringify(v)); }
+  function currentProperty() {
+    const g=id=>(document.getElementById(id)?.value||"").trim();
+    return {id:(crypto.randomUUID?crypto.randomUUID():String(Date.now())),savedAt:new Date().toISOString(),owner:g("bailleur-nom"),tenant:g("locataire-nom"),address:g("bien-adresse"),rent:g("loyer-hc"),charges:g("charges"),quarter:g("trimestre-ref"),dpe:g("classe-dpe"),oldIndex:g("irl-ancien"),newIndex:g("irl-nouveau"),anniversary:g("date-bail-anniv"),sentDate:g("date-envoi"),landlordAddress:g("bailleur-adresse"),leaseDate:g("date-signature-bail"),city:g("ville-redaction")};
+  }
+  function renderOwnerData() {
+    const data=readOwnerData(), list=document.getElementById("saved-properties"), hist=document.getElementById("revision-history"), alerts=document.getElementById("owner-alerts");
+    if(!list||!hist||!alerts)return; list.replaceChildren();hist.replaceChildren();
+    if(!data.properties.length)list.textContent="Aucun dossier enregistré.";
+    data.properties.forEach(p=>{
+      const row=document.createElement("div");row.className="saved-row";const label=document.createElement("span");label.textContent=(p.address||"Bien sans adresse")+" — "+(p.tenant||"Locataire non renseigné");
+      const load=document.createElement("button");load.type="button";load.className="btn btn-secondary";load.textContent="Charger";
+      load.addEventListener("click",()=>{const m={owner:"bailleur-nom",tenant:"locataire-nom",address:"bien-adresse",rent:"loyer-hc",charges:"charges",quarter:"trimestre-ref",dpe:"classe-dpe",oldIndex:"irl-ancien",newIndex:"irl-nouveau",anniversary:"date-bail-anniv",sentDate:"date-envoi",landlordAddress:"bailleur-adresse",leaseDate:"date-signature-bail",city:"ville-redaction"};Object.entries(m).forEach(([k,id])=>{const el=document.getElementById(id);if(el&&p[k]!==undefined)el.value=p[k];});updateIRLCalculation();});
+      const del=document.createElement("button");del.type="button";del.className="btn btn-secondary";del.textContent="Supprimer";del.addEventListener("click",()=>{const d=readOwnerData();writeOwnerData({...d,properties:d.properties.filter(x=>x.id!==p.id)});renderOwnerData();});row.append(label,load,del);list.append(row);
+    });
+    if(!data.history.length)hist.textContent="Aucune révision enregistrée.";
+    data.history.slice().reverse().forEach(p=>{const row=document.createElement("div");row.className="saved-row";row.textContent=(p.address||"Bien")+" — "+p.newRent+" € HC — "+new Date(p.savedAt).toLocaleDateString("fr-FR");hist.append(row);});
+    const today=new Date();today.setHours(0,0,0,0);
+    const due=data.properties.map(p=>({p,d:p.anniversary?new Date(p.anniversary+"T00:00:00"):null})).filter(x=>x.d).map(x=>{x.d.setFullYear(today.getFullYear());return x;}).filter(x=>x.d>=today&&x.d<=new Date(today.getTime()+30*86400000));
+    alerts.className=due.length?"alert alert-warning":"alert alert-success";
+    alerts.textContent=due.length?"Révision à anticiper dans les 30 jours : "+due.map(x=>(x.p.address||"Bien")+" ("+x.d.toLocaleDateString("fr-FR")+")").join(" ; ")+".":"Aucun anniversaire de bail dans les 30 prochains jours. Rappel visible uniquement à l’ouverture du site.";
+  }
+  function initOwnerTools() {
+    renderOwnerData();
+    document.getElementById("save-property")?.addEventListener("click",()=>{const p=currentProperty();if(!p.address&&!p.tenant){alert("Renseignez au moins l’adresse du logement ou le nom du locataire.");return;}const d=readOwnerData(),i=d.properties.findIndex(x=>x.address===p.address&&x.tenant===p.tenant);if(i>=0){p.id=d.properties[i].id;d.properties[i]=p;}else d.properties.push(p);const amount=Number((Number(p.rent||0)*Number(p.newIndex||1)/Number(p.oldIndex||1)).toFixed(2));d.history.push({id:p.id,address:p.address,newRent:amount.toFixed(2),savedAt:p.savedAt});writeOwnerData(d);renderOwnerData();alert("Dossier enregistré sur cet appareil.");});
+    document.getElementById("export-data")?.addEventListener("click",()=>{const blob=new Blob([JSON.stringify(readOwnerData(),null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="bailclear-dossiers.json";a.click();URL.revokeObjectURL(url);});
+    document.getElementById("import-data")?.addEventListener("change",async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{const v=JSON.parse(await f.text());if(!Array.isArray(v.properties)||!Array.isArray(v.history))throw Error();writeOwnerData(v);renderOwnerData();alert("Import terminé.");}catch(_){alert("Fichier invalide : export JSON BailClear attendu.");}e.target.value="";});
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
+    initOwnerTools();
     initDefaultDates();
     checkUrlUnlock();
     applyLicenseUI();
@@ -366,14 +388,12 @@
     document.getElementById("btn-copy-text").addEventListener("click", copyLetterToClipboard);
 
     document.getElementById("btn-download-pdf").addEventListener("click", function () {
-      if (isProUnlocked()) {
-        window.print();
-      } else {
-        window.location.href = CONFIG.STRIPE_PAYMENT_LINK;
-      }
+      if (isProUnlocked()) { window.print(); } else { window.alert("Le paiement et l’activation Pro sécurisée ne sont pas configurés. L’aperçu avec filigrane va être imprimé."); window.print(); }
     });
 
     const modal = document.getElementById("unlock-modal");
+    const manualUnlock = document.getElementById("btn-manual-unlock");
+    if (manualUnlock) document.getElementById("unlock-help").style.display = "none";
     document.getElementById("btn-manual-unlock").addEventListener("click", function () {
       document.getElementById("unlock-error").hidden = true;
       modal.showModal();
@@ -385,13 +405,8 @@
 
     document.getElementById("btn-confirm-code").addEventListener("click", function () {
       const code = (document.getElementById("unlock-code-input").value || "").trim().toUpperCase();
-      if (CONFIG.VALID_UNLOCK_CODES.includes(code)) {
-        unlockPro();
-        modal.close();
-        window.print();
-      } else {
-        document.getElementById("unlock-error").hidden = false;
-      }
+      document.getElementById("unlock-error").textContent = "L’activation par code est désactivée : elle doit être vérifiée par le serveur de paiement.";
+      document.getElementById("unlock-error").hidden = false;
     });
   });
 })();

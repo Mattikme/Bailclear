@@ -244,7 +244,7 @@
             <div class="action-header">
               <div>
                 <h3>Dossier Locatif Prêt à Envoyer (Format A4)</h3>
-                <p class="muted-text">Inclut la <strong>Lettre officielle de notification IRL</strong> + la <strong>Quittance de loyer mise à jour</strong>.</p>
+                <p class="muted-text">Inclut la <strong>lettre de notification IRL</strong> + un <strong>avis d’échéance prévisionnel</strong> (ne vaut pas quittance).</p>
               </div>
               <div class="action-buttons">
                 <button type="button" id="btn-copy-text" class="btn btn-secondary">Copier le texte brut (Gratuit)</button>
@@ -344,7 +344,7 @@
               <div class="doc-page">
                 <div class="quittance-box">
                   <div class="quittance-header">
-                    <h2>QUITTANCE DE LOYER</h2>
+                    <h2>AVIS D’ÉCHÉANCE DE LOYER</h2>
                     <span class="quittance-sub">Article 21 de la loi n° 89-462 du 6 juillet 1989</span>
                   </div>
 
@@ -362,13 +362,13 @@
                   </div>
 
                   <p class="quittance-declaration">
-                    Je soussigné(e) <strong id="q-bailleur-nom-2">Jean Dupont</strong>, propriétaire du logement désigné ci-dessus, déclare avoir reçu de <strong id="q-locataire-nom-2">Camille Martin</strong> la somme totale de <strong id="q-total-somme">922,47 €</strong> au titre du paiement du loyer révisé et des provisions sur charges pour l'échéance mensuelle, et lui en donne quittance, sous réserve de tous mes droits.
+                    Le présent document indique les sommes appelées pour l’échéance. Il constitue un <strong>avis d’échéance</strong> et non une quittance : il ne certifie pas le paiement ni la réception des fonds.
                   </p>
 
                   <table class="doc-table">
                     <thead>
                       <tr>
-                        <th>Détail du règlement mensuel</th>
+                        <th>Détail des sommes à régler</th>
                         <th class="num">Montant</th>
                       </tr>
                     </thead>
@@ -382,7 +382,7 @@
                         <td class="num" id="q-charges">65,00 €</td>
                       </tr>
                       <tr class="row-total">
-                        <td><strong>Total réglé (Charges comprises)</strong></td>
+                        <td><strong>Total à régler (Charges comprises)</strong></td>
                         <td class="num"><strong id="q-total-table">922,47 €</strong></td>
                       </tr>
                     </tbody>
@@ -390,7 +390,7 @@
 
                   <div class="quittance-footer">
                     <p>Fait à <span id="q-ville">Paris</span>, le <span id="q-date">--/--/----</span></p>
-                    <p class="legal-footnote">Cette quittance annule tous les reçus qui auraient pu être établis précédemment en cas de paiement partiel du montant du présent terme. Elle est à conserver pendant 3 ans (art. 7-1 de la loi du 6 juillet 1989).</p>
+                    <p class="legal-footnote">Avis d’échéance prévisionnel : ce document ne prouve pas le paiement. Une quittance ne peut être délivrée qu’après encaissement intégral des sommes dues.</p>
                     <div class="doc-signature">
                       <p>Signature du bailleur : <strong id="q-bailleur-sig">Jean Dupont</strong></p>
                     </div>
@@ -440,6 +440,13 @@
       </div>
     </div>
 
+    <section class="panel owner-panel no-print" id="espace-bailleur" aria-labelledby="owner-title">
+      <h2 id="owner-title">Espace bailleur — Mes biens et mon historique</h2>
+      <p class="muted-text">Dossiers enregistrés uniquement dans ce navigateur : pas de synchronisation ni de sauvegarde serveur.</p>
+      <div class="owner-actions"><button type="button" class="btn btn-primary" id="save-property">Enregistrer ce dossier</button><button type="button" class="btn btn-secondary" id="export-data">Exporter mes dossiers (JSON)</button><label class="btn btn-secondary file-label" for="import-data">Importer un export JSON</label><input type="file" id="import-data" accept="application/json" hidden></div>
+      <div id="owner-alerts" class="alert alert-warning" role="status">Chargement des rappels…</div>
+      <div class="owner-grid"><div><h3>Biens enregistrés</h3><div id="saved-properties" class="saved-list">Aucun dossier enregistré.</div></div><div><h3>Historique des révisions</h3><div id="revision-history" class="saved-list">Aucune révision enregistrée.</div></div></div>
+    </section>
     <section class="faq-section no-print" id="faq-juridique" aria-labelledby="titre-faq">
       <h2 id="titre-faq">Règles légales de la révision de loyer en France (Loi ALUR &amp; Climat)</h2>
       <div class="faq-grid">
