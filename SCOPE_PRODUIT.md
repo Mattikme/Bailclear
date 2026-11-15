@@ -2,56 +2,44 @@
 Mise à jour : 15 novembre 2026.
 
 ## Fonction couverte
-Calcul arithmétique indicatif de révision annuelle IRL et préparation d'un modèle de notification pour les baux d'habitation classiques de résidence principale, vides ou meublés, soumis à la loi n° 89-462 du 6 juillet 1989.
+Calcul indicatif de révision annuelle IRL et préparation d'un modèle de notification pour les baux de résidence principale vides ou meublés du parc privé classique non conventionné, sous réserve que la situation relève effectivement de la loi n° 89-462 du 6 juillet 1989.
 
 ## Cas bloqués
-- Bail mobilité.
-- Type de contrat non identifié ou hors périmètre.
-- Absence de clause annuelle de révision ou clause non vérifiée.
-- DPE inconnu.
-- Date de conclusion/dernière reconduction manquante.
-- Date de révision ou date de demande manquante/invalide.
-- DPE F/G et date de contrat/reconduction au-delà du seuil applicable.
-- Champs indispensables du courrier non remplis.
+- Bail mobilité, régime Anah, logement social, loi de 1948, régime inconnu ou situation particulière.
+- Absence de clause annuelle ou clause non vérifiée.
+- DPE inconnu, date du DPE manquante/invalide ou DPE expiré.
+- DPE F/G et bail conclu, renouvelé ou reconduit à compter du seuil territorial applicable.
+- Signature initiale, statut de reconduction requis ou date de dernière reconduction manquants.
+- Date de révision ou de demande manquante/invalide.
+- Paire IRL indisponible, données INSEE trop anciennes ou date proche d'une publication.
+- Champs indispensables du courrier incomplets.
 - Date de révision au 29 février : contrôle du délai suspendu pour revue humaine.
 
+## Règles contrôlées
+- Clause annuelle, date contractuelle, délai d'un an, perte du droit à révision de l'année écoulée et prise d'effet à la demande si celle-ci est tardive.
+- Trimestre stipulé au bail ; à défaut, dernier IRL publié à la date de signature.
+- Dernière observation définitive disponible de ce trimestre à la date de révision, comparée au même trimestre de l'année précédente.
+- Gel DPE F/G par territoire, date de signature initiale et dernière reconduction déclarée.
+- Validité temporelle du DPE par date de réalisation.
+- Type de charges et avertissement en cas de forfait.
+
 ## Ce que BailClear ne décide pas
-Le produit ne détermine pas à lui seul la validité de toutes les clauses du bail, la conformité à un encadrement local des loyers, les règles des conventions Anah, logements sociaux, loi de 1948, baux commerciaux ou saisonniers, l'exactitude du DPE, la réalité d'une reconduction, les charges réellement exigibles ou le droit d'envoyer un courrier dans une situation litigieuse.
+Le produit ne lit pas le bail et ne confirme pas que la clause est valide. Il ne vérifie pas l'encadrement local des loyers, les conventions Anah, logements sociaux, loi de 1948, compléments de loyer contestables, authenticité du DPE, classe réelle du logement ni le bien-fondé d'une demande litigieuse. Les charges au forfait ne sont pas révisées par le moteur. L'avis d'échéance ne vaut pas quittance.
 
-## Indices préremplis
-Paires annuelles disponibles au 15 octobre 2026. T1-T3 comparent 2025/2026 ; T4 compare 2024/2025 car le T4 2026 n'est pas publié à cette date. Les valeurs Corse et article 73 sont distinctes de la métropole.
+## IRL et automatisation
+Sources INSEE BDM/SDMX : 001515333 (métropole), 010760507 (Corse), 010760509 (territoires de l'article 73). Le workflow récupère quotidiennement l'historique, valide les séries et observations, puis met à jour le jeu de données. Le fichier inclus au départ est un secours partiel ; la première récupération réussie doit confirmer l'historique complet. DATE_JO est une borne prudente ; les cas proches d'une publication sont suspendus pour vérifier la date exacte sur insee.fr. Un jeu de données de plus de quatorze jours bloque le calcul.
 
-| Territoire | T1 2025/2026 | T2 2025/2026 | T3 2025/2026 | T4 2024/2025 |
-|---|---:|---:|---:|---:|
-| Métropole | 145,47 / 146,60 | 146,68 / 148,37 | 145,77 / 148,06 | 144,64 / 145,78 |
-| Corse | 141,28 / 142,38 | 144,56 / 146,22 | 141,58 / 143,80 | 140,48 / 141,59 |
-| Collectivités article 73 | 142,67 / 143,78 | 145,27 / 146,94 | 142,97 / 145,21 | 141,86 / 142,98 |
+## Gouvernance juridique
+Les règles déterministes sont versionnées et testées. La veille compare les sources officielles et ouvre une alerte en cas de modification ou d'indisponibilité. Elle ne modifie jamais automatiquement le moteur juridique. Toute évolution doit être analysée, traduite en tests, approuvée puis publiée par une personne compétente.
 
-Source : INSEE, IRL T3 2026, 15 octobre 2026 : https://www.insee.fr/fr/statistiques/9081853 ; avis au Journal officiel du 16 octobre 2026 : https://www.legifrance.gouv.fr/jorf/id/JORFARTI000054989041.
-
-## Veille
-Une veille quotidienne compare les contenus des sources officielles. Toute modification ou indisponibilité crée une alerte GitHub. La détection est automatisée ; l'interprétation juridique, la modification des règles, les tests de non-régression et l'approbation de publication restent humains. Aucun changement de droit n'est déployé automatiquement sur la seule base d'une variation de page.
+## Commercialisation
+Commercialisation non validée. Une revue d'avocat est nécessaire sur le risque de consultation juridique réglementée lié au diagnostic individualisé et au courrier personnalisé. Les mentions légales, CGV, identité du vendeur, RGPD, médiation, rétractation et paiement restent à finaliser.
 
 ## Sources
-- Loi du 6 juillet 1989, article 17-1 : https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043977085
-- Loi du 6 juillet 1989, article 21 : https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000028806698
-- Service-Public, IRL : https://www.service-public.gouv.fr/particuliers/vosdroits/F13723
-- Service-Public, bail mobilité : https://www.service-public.gouv.fr/particuliers/vosdroits/F34759
+- Loi n° 89-462, article 17-1 : https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043977085
+- Service-Public, révision du loyer : https://www.service-public.gouv.fr/particuliers/vosdroits/F1311
+- Service-Public, validité DPE : https://www.service-public.gouv.fr/particuliers/vosdroits/F16096
+- INSEE, API SDMX : https://www.insee.fr/fr/information/2862759
+- Loi n° 71-1130, article 54 : https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000006903350
 
 Ce document décrit le périmètre logiciel et ne constitue pas un avis juridique.
-
-
-## Fenêtre de validité des indices préremplis
-Les champs d'indices sont en lecture seule pour éviter qu'une valeur modifiée manuellement conserve une date de publication incorrecte. Chaque paire a une date de publication et une date de fin de validité prévisionnelle : T4 2024/2025 jusqu'au 14 janvier 2027 ; T1 2025/2026 jusqu'au 14 avril 2027 ; T2 jusqu'au 9 juillet 2027 ; T3 jusqu'au 14 octobre 2027. Au-delà, le calcul est bloqué jusqu'à mise à jour officielle. Ces dates sont des garde-fous de maintenance, pas une garantie de disponibilité des publications.
-
-
-## Vérification du trimestre de référence
-L'utilisateur doit sélectionner le trimestre indiqué dans le bail. Si le bail ne précise pas la date de référence IRL, la règle officielle est de retenir le dernier IRL publié à la date de signature. L'application ne lit pas le bail et ne peut pas confirmer ce choix : vérification manuelle obligatoire. Source : Service-Public, https://www.service-public.gouv.fr/particuliers/vosdroits/F1311.
-
-
-## Prévention des valeurs implicites
-Le trimestre de référence, le loyer et les charges ne sont pas présélectionnés. Le calcul doit être renseigné à partir du bail et des montants réellement applicables. Le choix du trimestre reste une vérification humaine : le site ne lit pas le contrat.
-
-
-## Loyer et charges
-Le loyer hors charges saisi doit inclure le complément de loyer lorsqu'il existe. Le champ de charges concerne une provision : le forfait de charges n'est pas recalculé par BailClear et doit être vérifié séparément selon le bail. Source : Service-Public, https://www.service-public.gouv.fr/particuliers/vosdroits/F1311.
