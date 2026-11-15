@@ -2,5 +2,8 @@
   "name": "bailclear",
   "private": true,
   "version": "0.2.0",
-  "scripts": { "test": "node --test tests/*.test.mjs", "check": "node scripts/check-static-site.mjs" }
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node scripts/check-static-site.mjs && node --check scripts/irl-data-parser.mjs && node --check scripts/update-irl-data.mjs"
+  }
 }
