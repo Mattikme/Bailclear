@@ -186,12 +186,9 @@
     document.getElementById("doc-bailleur-sig").textContent = bailleurNom;
 
     document.getElementById("q-bailleur-nom").textContent = bailleurNom;
-    document.getElementById("q-bailleur-nom-2").textContent = bailleurNom;
     document.getElementById("q-bailleur-adresse").textContent = bailleurAdresse;
     document.getElementById("q-locataire-nom").textContent = locataireNom;
-    document.getElementById("q-locataire-nom-2").textContent = locataireNom;
     document.getElementById("q-bien-adresse").textContent = bienAdresse;
-    document.getElementById("q-total-somme").textContent = euroFmt.format(nouveauCC);
     document.getElementById("q-loyer-hc").textContent = euroFmt.format(nouveauHC);
     document.getElementById("q-charges").textContent = euroFmt.format(charges);
     document.getElementById("q-total-table").textContent = euroFmt.format(nouveauCC);
