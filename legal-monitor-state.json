@@ -1,1 +1,34 @@
-{}
+{
+  "service-public-irl": {
+    "sha256": "db3587cb8c61c59ffbcc02598f28781c07154a0bda5b91975a529af4db2c5996",
+    "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F1311"
+  },
+  "service-public-bail-mobilite": {
+    "sha256": "ec7f4334e87ea55d62a58f991470258894eaed25f7f33f29aedc25cc1021b586",
+    "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F34759"
+  },
+  "service-public-dpe": {
+    "sha256": "e832436c9753056a871818ffe5e9e18999f721ca5bb163e1bfa37a28504abb23",
+    "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F16096"
+  },
+  "insee-irl": {
+    "sha256": "10a13c9a292e96e48d142d8a2679f88613b45b63118335c07b33602c2cb40ede",
+    "url": "https://www.insee.fr/fr/statistiques/9081853"
+  },
+  "insee-api-sdmx": {
+    "sha256": "6b169a5f905e87617c6a076658f6f44e39647f0d1d6e6cdfb7261f903ea86d33",
+    "url": "https://www.insee.fr/fr/information/2862759"
+  },
+  "insee-melodi-migration": {
+    "sha256": "eca1ec43fa235a6a60396ce725fbcd6833b7c3aafc43fd3a5904914a9753690d",
+    "url": "https://www.insee.fr/fr/information/1302169"
+  },
+  "consumer-mediator": {
+    "sha256": "b1d9c2b3820a1d287c3c494dcea004c882655bec5f64593169ce12ec17f91692",
+    "url": "https://entreprendre.service-public.gouv.fr/vosdroits/F33338"
+  },
+  "cnil-tracers": {
+    "sha256": "9859d91427a0b780edb5bc915cd1a7b6572785c391dd00ad2c5f113e48f69c1c",
+    "url": "https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies/FAQ"
+  }
+}
