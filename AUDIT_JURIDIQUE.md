@@ -41,3 +41,26 @@
 - Entreprendre.Service-Public, mentions légales : https://entreprendre.service-public.gouv.fr/vosdroits/F37351
 
 Cet audit est une analyse technique et documentaire, pas un avis juridique ni une certification de conformité.
+
+
+## Revue contradictoire complémentaire — 15 novembre 2026
+
+### Défauts supplémentaires identifiés
+- Les indices Corse et des collectivités régies par l'article 73 n'étaient pas intégrés. Les paires annuelles officielles jusqu'au T3 2026 sont désormais préremplies par territoire.
+- Le formulaire ne demandait pas le type de contrat ni la présence d'une clause annuelle. Le bail mobilité et les contrats inconnus/hors périmètre sont désormais bloqués ; l'absence de clause connue bloque aussi le document.
+- Le contrôle exige la date de conclusion/dernière reconduction et les informations essentielles du courrier.
+- Le rappel anniversaire est corrigé pour les échéances autour du changement d'année.
+- Le 29 février déclenche une vérification humaine au lieu d'un calcul de délai arbitraire.
+- Le contrôle reste partiel : il ne vérifie pas l'encadrement local des loyers, les conventions Anah, les baux spéciaux ou toutes les clauses.
+
+### Indices territoriaux officiels
+Les valeurs jusqu'au T3 2026 sont détaillées dans SCOPE_PRODUIT.md. Source : INSEE, 15 octobre 2026, https://www.insee.fr/fr/statistiques/9081853 ; Journal officiel, 16 octobre 2026, https://www.legifrance.gouv.fr/jorf/id/JORFARTI000054989041.
+
+### Automatisation mise en place
+- Tests unitaires des règles métier.
+- Contrôle statique HTML/JavaScript/JSON-LD.
+- Veille quotidienne de pages officielles Légifrance, INSEE et Service-Public.
+- Une modification de source crée une alerte GitHub pour analyse humaine. La veille ne modifie jamais automatiquement le droit applicable ni le code de production.
+
+### Limites persistantes
+Les indices sont préremplis mais ne se mettent pas automatiquement à jour dans l'interface. La commercialisation reste bloquée. Pas de backend, compte, paiement, synchronisation, sauvegarde serveur ni notification utilisateur. Pas de test navigateur ou de production Cloudflare confirmé. Revue juridique professionnelle nécessaire.

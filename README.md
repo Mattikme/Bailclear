@@ -30,3 +30,12 @@
 
 ## Déploiement
 Projet statique Cloudflare Pages : framework preset `None`, commande de build vide, répertoire de sortie `/`.
+
+
+## Qualité et veille
+- npm test : tests unitaires des règles métier sans dépendance externe.
+- npm run check : syntaxe JavaScript, identifiants DOM, JSON-LD et contrôles de régression.
+- GitHub Actions compare quotidiennement les pages officielles Légifrance, INSEE et Service-Public. Une modification crée une alerte à examiner ; aucune règle de droit n'est modifiée ou déployée automatiquement.
+- Indices préremplis au 15 octobre 2026 pour métropole, Corse et collectivités article 73.
+- Bail mobilité, contrats inconnus/hors périmètre, clause non confirmée, dates/DPE manquants et situations DPE F/G concernées : document bloqué.
+- Le produit ne contrôle pas l'encadrement local des loyers, les conventions Anah ni tous les régimes particuliers. Vérification humaine du bail et du DPE obligatoire.
