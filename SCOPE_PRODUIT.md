@@ -39,3 +39,7 @@ Une veille quotidienne compare les contenus des sources officielles. Toute modif
 - Service-Public, bail mobilité : https://www.service-public.gouv.fr/particuliers/vosdroits/F34759
 
 Ce document décrit le périmètre logiciel et ne constitue pas un avis juridique.
+
+
+## Fenêtre de validité des indices préremplis
+Les champs d'indices sont en lecture seule pour éviter qu'une valeur modifiée manuellement conserve une date de publication incorrecte. Chaque paire a une date de publication et une date de fin de validité prévisionnelle : T4 2024/2025 jusqu'au 14 janvier 2027 ; T1 2025/2026 jusqu'au 14 avril 2027 ; T2 jusqu'au 9 juillet 2027 ; T3 jusqu'au 14 octobre 2027. Au-delà, le calcul est bloqué jusqu'à mise à jour officielle. Ces dates sont des garde-fous de maintenance, pas une garantie de disponibilité des publications.

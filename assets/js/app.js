@@ -9,22 +9,22 @@
   // T1-T3 : 2025/2026 ; T4 : 2024/2025, le T4 2026 n'étant pas encore publié.
   const IRL_PRESETS = {
     metropole: {
-      T1: { ancien: 145.47, nouveau: 146.60, publishedAt: "2026-04-15", label: "1er trimestre (T1)" },
-      T2: { ancien: 146.68, nouveau: 148.37, publishedAt: "2026-07-10", label: "2e trimestre (T2)" },
-      T3: { ancien: 145.77, nouveau: 148.06, publishedAt: "2026-10-15", label: "3e trimestre (T3)" },
-      T4: { ancien: 144.64, nouveau: 145.78, publishedAt: "2026-01-15", label: "4e trimestre (T4)" }
+      T1: { ancien: 145.47, nouveau: 146.60, publishedAt: "2026-04-15", validThrough: "2027-04-14", label: "1er trimestre (T1)" },
+      T2: { ancien: 146.68, nouveau: 148.37, publishedAt: "2026-07-10", validThrough: "2027-07-09", label: "2e trimestre (T2)" },
+      T3: { ancien: 145.77, nouveau: 148.06, publishedAt: "2026-10-15", validThrough: "2027-10-14", label: "3e trimestre (T3)" },
+      T4: { ancien: 144.64, nouveau: 145.78, publishedAt: "2026-01-15", validThrough: "2027-01-14", label: "4e trimestre (T4)" }
     },
     corse: {
-      T1: { ancien: 141.28, nouveau: 142.38, publishedAt: "2026-04-15", label: "1er trimestre (T1)" },
-      T2: { ancien: 144.56, nouveau: 146.22, publishedAt: "2026-07-10", label: "2e trimestre (T2)" },
-      T3: { ancien: 141.58, nouveau: 143.80, publishedAt: "2026-10-15", label: "3e trimestre (T3)" },
-      T4: { ancien: 140.48, nouveau: 141.59, publishedAt: "2026-01-15", label: "4e trimestre (T4)" }
+      T1: { ancien: 141.28, nouveau: 142.38, publishedAt: "2026-04-15", validThrough: "2027-04-14", label: "1er trimestre (T1)" },
+      T2: { ancien: 144.56, nouveau: 146.22, publishedAt: "2026-07-10", validThrough: "2027-07-09", label: "2e trimestre (T2)" },
+      T3: { ancien: 141.58, nouveau: 143.80, publishedAt: "2026-10-15", validThrough: "2027-10-14", label: "3e trimestre (T3)" },
+      T4: { ancien: 140.48, nouveau: 141.59, publishedAt: "2026-01-15", validThrough: "2027-01-14", label: "4e trimestre (T4)" }
     },
     outremer: {
-      T1: { ancien: 142.67, nouveau: 143.78, publishedAt: "2026-04-15", label: "1er trimestre (T1)" },
-      T2: { ancien: 145.27, nouveau: 146.94, publishedAt: "2026-07-10", label: "2e trimestre (T2)" },
-      T3: { ancien: 142.97, nouveau: 145.21, publishedAt: "2026-10-15", label: "3e trimestre (T3)" },
-      T4: { ancien: 141.86, nouveau: 142.98, publishedAt: "2026-01-15", label: "4e trimestre (T4)" }
+      T1: { ancien: 142.67, nouveau: 143.78, publishedAt: "2026-04-15", validThrough: "2027-04-14", label: "1er trimestre (T1)" },
+      T2: { ancien: 145.27, nouveau: 146.94, publishedAt: "2026-07-10", validThrough: "2027-07-09", label: "2e trimestre (T2)" },
+      T3: { ancien: 142.97, nouveau: 145.21, publishedAt: "2026-10-15", validThrough: "2027-10-14", label: "3e trimestre (T3)" },
+      T4: { ancien: 141.86, nouveau: 142.98, publishedAt: "2026-01-15", validThrough: "2027-01-14", label: "4e trimestre (T4)" }
     }
   };
 
@@ -93,7 +93,8 @@
       territory: document.getElementById("zone-logement")?.value || "metropole",
       revisionDate: dateAnnivStr || "",
       requestDate: dateEnvoiStr || "",
-      indexPublishedAt: IRL_PRESETS[document.getElementById("zone-logement")?.value || "metropole"]?.[document.getElementById("trimestre-ref")?.value || "T3"]?.publishedAt || ""
+      indexPublishedAt: IRL_PRESETS[document.getElementById("zone-logement")?.value || "metropole"]?.[document.getElementById("trimestre-ref")?.value || "T3"]?.publishedAt || "",
+      indexValidThrough: IRL_PRESETS[document.getElementById("zone-logement")?.value || "metropole"]?.[document.getElementById("trimestre-ref")?.value || "T3"]?.validThrough || ""
     });
     const required = [
       ["bailleur-nom", "Nom du bailleur"],
