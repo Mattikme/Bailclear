@@ -1,26 +1,32 @@
-# BailClear (`bailclear.fr`) — Livraison Production v1.0
+# BailClear — application statique Cloudflare Pages
 
-Application web statique de calcul de révision annuelle de loyer (IRL INSEE), contrôle de conformité juridique (Loi ALUR prescription 1 an & gel DPE F/G), calcul de prorata temporis et génération de courrier officiel + quittance au format A4.
+## Fonctionnalités présentes
+- Calculateur de révision IRL et documents locatifs.
+- Courrier de notification et avis d'échéance distinct d'une quittance.
+- Calculateur indicatif de prorata calendaire.
+- Espace bailleur local : plusieurs biens, historique, import/export JSON et rappels visibles à l'ouverture.
+- Impression / enregistrement PDF via le navigateur.
 
-## Configuration avant mise en ligne (2 minutes)
-1. **Stripe Payment Link (9,00 € TTC)** :
-   - Créez un lien de paiement sur Stripe.
-   - Configurez la redirection après paiement vers : `https://bailclear.fr/?unlocked=BAILCLEAR-PRO-2026`
-   - Ouvrez `assets/js/app.js` (ligne 11) et remplacez `STRIPE_PAYMENT_LINK` par votre lien Stripe.
-2. **Mentions légales** :
-   - Renseignez votre nom/statut et e-mail de contact dans `mentions-legales.html`, `confidentialite.html` et `cgv.html`.
+## Limites réelles
+- Dossiers conservés dans le navigateur : pas de compte, synchronisation serveur, sauvegarde distante ou notification lorsque le site est fermé.
+- Les indices intégrés doivent être actualisés après chaque publication INSEE. Les valeurs présentes sont celles de la métropole ; elles ne conviennent pas à la Corse ni aux collectivités ultramarines.
+- Le contrôle juridique est une aide à la vigilance, pas une validation automatisée. Le bail, sa clause, la date de demande, le territoire et la situation DPE doivent être vérifiés.
+- Le prorata est une estimation arithmétique ; préavis, remise des clés et contrat peuvent modifier les sommes dues.
+- Paiements, ventes, codes d'activation, comptes, e-mails et stockage privé ne sont pas implémentés.
 
-## Déploiement Cloudflare Pages (0 €/mois)
-- **Méthode 1 (Direct Upload)** : Glissez-déposez directement ce fichier `.zip` dans Cloudflare Pages > *Create a project* > *Upload assets*.
-- **Méthode 2 (GitHub)** : Poussez le contenu du dossier sur un dépôt GitHub, puis connectez-le à Cloudflare Pages (Framework preset : `None`, Build command : vide, Output directory : `/`).
+## Bloquants avant toute vente
+1. Renseigner identité réelle, forme/statut, adresse, immatriculation, régime TVA et contact du vendeur.
+2. Confirmer les mentions légales et l'entité d'hébergement.
+3. Finaliser la politique RGPD après inventaire des traitements, journaux, traceurs, durées, sous-traitants et transferts.
+4. Mettre en place un parcours de commande avec informations précontractuelles, prix TTC, caractéristiques, délai de fourniture, confirmation durable, médiation et rétractation.
+5. Si fourniture immédiate de contenu numérique : recueillir et conserver le consentement exprès et la reconnaissance de perte du droit de rétractation lorsque les conditions légales sont réunies.
+6. Mettre en place la vérification de paiement côté serveur. Aucun déblocage par URL ou code côté navigateur.
+7. Faire relire les documents et règles métier par un professionnel du droit.
 
+## Références officielles
+- INSEE, série IRL métropole 001515333 : https://www.insee.fr/fr/statistiques/serie/001515333
+- Loi du 6 juillet 1989, articles 17-1 et 21 : https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000509310
+- Code de la consommation, articles L.221-5, L.221-13 et L.221-28 : https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006069565/LEGISCTA000032221319/
 
-## État des fonctionnalités et limites techniques
-
-- Espace bailleur : plusieurs dossiers, historique des révisions, import/export JSON et rappel visible à l'ouverture du site dans les 30 jours précédant la date anniversaire. Les données restent dans le stockage local du navigateur ; pas de synchronisation ni d'alerte lorsque le site est fermé.
-- Le document de seconde page est un avis d'échéance, pas une quittance. Il ne certifie pas le paiement. Une quittance ne doit être émise qu'après encaissement intégral.
-- L'ancien déverrouillage Pro par code JavaScript et paramètre URL est désactivé : un code public est contournable. L'activation payante exige une vérification Stripe côté serveur.
-- La synchronisation automatique des IRL exige une source INSEE/API intégrée avec une politique d'accès adaptée. Vérifier les indices avant toute notification.
-- Comptes, synchronisation multi-appareils, alertes e-mail et paiements vérifiés nécessitent un backend, une base de données et des secrets de déploiement. Ces services ne sont pas présents dans ce dépôt et ne sont pas annoncés comme actifs.
-
-Le site reste une application statique Cloudflare Pages. Ne stockez pas de pièces d'identité ou de données sensibles dans les dossiers locaux.
+## Déploiement
+Projet statique Cloudflare Pages : framework preset `None`, commande de build vide, répertoire de sortie `/`.

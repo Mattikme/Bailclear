@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calculateur Révision Loyer IRL 2026 &amp; Lettre Officielle Loi ALUR | BailClear</title>
-  <meta name="description" content="Calculez gratuitement l'augmentation de loyer selon l'indice IRL de l'INSEE, vérifiez la conformité Loi ALUR et DPE (F/G), calculez le prorata temporis et éditez votre courrier officiel et quittance PDF.">
+  <meta name="description" content="Calculez gratuitement l'augmentation de loyer selon l'indice IRL de l'INSEE, vérifiez la conformité Loi ALUR et DPE (F/G), calculez le prorata temporis et éditez un courrier de révision et un avis d’échéance.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://bailclear.fr/">
 
@@ -12,7 +12,7 @@
   <meta property="og:locale" content="fr_FR">
   <meta property="og:site_name" content="BailClear">
   <meta property="og:title" content="Calculateur Révision Loyer IRL &amp; Courrier Officiel Loi ALUR — BailClear">
-  <meta property="og:description" content="Calcul instantané de révision IRL INSEE, contrôle légal DPE &amp; prescription 1 an, calcul prorata et génération de lettre officielle + quittance A4.">
+  <meta property="og:description" content="Calcul de révision IRL, contrôles de vigilance locative et préparation de documents A4.">
   <meta property="og:url" content="https://bailclear.fr/">
 
   <script type="application/ld+json">
@@ -26,13 +26,7 @@
         "applicationCategory": "FinanceApplication",
         "operatingSystem": "Web",
         "inLanguage": "fr-FR",
-        "description": "Outil de calcul de révision annuelle des loyers selon l'Indice de Référence des Loyers (IRL INSEE), contrôle de conformité Loi ALUR et DPE, calcul de prorata temporis et génération de courrier officiel.",
-        "offers": {
-          "@type": "Offer",
-          "price": "9.00",
-          "priceCurrency": "EUR",
-          "description": "Pack Dossier Locatif PDF sans filigrane (Lettre officielle de révision IRL + Quittance de loyer mise à jour)"
-        }
+        "description": "Outil d’aide au calcul de révision annuelle des loyers selon l’IRL INSEE, avec contrôles de vigilance et préparation de documents."
       },
       {
         "@type": "FAQPage",
@@ -82,17 +76,17 @@
         <a href="#faq-juridique">Règles Loi ALUR</a>
       </nav>
       <div class="header-status">
-        <span id="license-badge" class="badge badge-neutral">Version Gratuite</span>
+        <span id="license-badge" class="badge badge-neutral">Outil gratuit</span>
       </div>
     </div>
   </header>
 
   <section class="hero no-print">
     <div class="container">
-      <div class="hero-kicker">Conformité Loi n° 89-462 &amp; Loi ALUR • Traitement 100 % local</div>
-      <h1>Révision de Loyer IRL &amp; Courrier Officiel en 60 secondes</h1>
+      <div class="hero-kicker">Conformité Loi n° 89-462 &amp; Loi ALUR • Dossiers conservés dans ce navigateur</div>
+      <h1>Calcul de révision de loyer IRL et documents locatifs</h1>
       <p class="hero-lead">
-        Calculez le nouveau loyer exact selon l'Indice de Référence des Loyers (INSEE), vérifiez automatiquement la validité légale (prescription 1 an, gel des passoires thermiques DPE F/G) et générez votre notification prête à poster.
+        Estimez la révision selon l'Indice de Référence des Loyers (INSEE), repérez les principaux points de vigilance et préparez un courrier à vérifier avant envoi.
       </p>
     </div>
   </section>
@@ -140,24 +134,29 @@
               <div class="field">
                 <label for="classe-dpe">Classe énergétique (DPE)</label>
                 <select id="classe-dpe">
-                  <option value="A-E" selected>Classe A, B, C, D ou E (Autorisé)</option>
+                  <option value="INCONNU" selected>Non renseigné</option><option value="A-E">Classe A, B, C, D ou E</option>
                   <option value="F">Classe F (Passoire thermique)</option>
                   <option value="G">Classe G (Passoire thermique)</option>
-                  <option value="OUTREMER">Logement Outre-Mer (Guadeloupe, Martinique, etc.)</option>
+                  
                 </select>
+              </div>
+<div class="field">
+                <label for="zone-logement">Territoire du logement</label>
+                <select id="zone-logement"><option value="metropole" selected>France métropolitaine</option><option value="corse">Corse</option><option value="outremer">Guadeloupe, Martinique, Guyane, La Réunion ou Mayotte</option></select>
+                <span class="field-hint">Les indices préremplis sont ceux de la métropole.</span>
               </div>
             </div>
 
             <div class="form-row-2">
               <div class="field">
                 <label for="irl-ancien">Ancien IRL (Année N-1)</label>
-                <input type="number" id="irl-ancien" step="0.01" min="100" value="144.51" required>
-                <span class="field-hint">Ex. T3 2024 : 144,51</span>
+                <input type="number" id="irl-ancien" step="0.01" min="100" value="145.77" required>
+                <span class="field-hint">Ex. T3 2025 : 145,77</span>
               </div>
               <div class="field">
                 <label for="irl-nouveau">Nouvel IRL (Année N)</label>
-                <input type="number" id="irl-nouveau" step="0.01" min="100" value="145.78" required>
-                <span class="field-hint">Ex. T3 2025 : 145,78 (<a href="https://www.insee.fr/fr/statistiques/serie/001515333" target="_blank" rel="noopener noreferrer">Série INSEE</a>)</span>
+                <input type="number" id="irl-nouveau" step="0.01" min="100" value="148.06" required>
+                <span class="field-hint">Ex. T3 2026 : 148,06 (<a href="https://www.insee.fr/fr/statistiques/serie/001515333" target="_blank" rel="noopener noreferrer">Série INSEE</a>)</span>
               </div>
             </div>
 
@@ -174,37 +173,37 @@
 
             <hr class="divider">
 
-            <h3 class="sub-heading">Personnalisation du courrier officiel &amp; de la quittance</h3>
+            <h3 class="sub-heading">Personnalisation du courrier et de l’avis d’échéance</h3>
 
             <div class="form-row-2">
               <div class="field">
                 <label for="bailleur-nom">Nom &amp; Prénom du Bailleur (ou SCI)</label>
-                <input type="text" id="bailleur-nom" placeholder="Ex. Jean Dupont" value="Jean Dupont">
+                <input type="text" id="bailleur-nom" placeholder="Ex. Jean Dupont" value="">
               </div>
               <div class="field">
                 <label for="locataire-nom">Nom &amp; Prénom du Locataire</label>
-                <input type="text" id="locataire-nom" placeholder="Ex. Camille Martin" value="Camille Martin">
+                <input type="text" id="locataire-nom" placeholder="Ex. Camille Martin" value="">
               </div>
             </div>
 
             <div class="field">
               <label for="bailleur-adresse">Adresse complète du Bailleur</label>
-              <input type="text" id="bailleur-adresse" placeholder="Ex. 14 rue de la République, 75011 Paris" value="14 rue de la République, 75011 Paris">
+              <input type="text" id="bailleur-adresse" placeholder="Ex. 14 rue de la République, 75011 Paris" value="">
             </div>
 
             <div class="field">
               <label for="bien-adresse">Adresse du logement loué</label>
-              <input type="text" id="bien-adresse" placeholder="Ex. 8 avenue Victor Hugo, Apt 4B, 69003 Lyon" value="8 avenue Victor Hugo, Apt 4B, 69003 Lyon">
+              <input type="text" id="bien-adresse" placeholder="Ex. 8 avenue Victor Hugo, Apt 4B, 69003 Lyon" value="">
             </div>
 
             <div class="form-row-2">
               <div class="field">
-                <label for="date-signature-bail">Date de signature du bail</label>
-                <input type="date" id="date-signature-bail" value="2023-11-01">
+                <label for="date-signature-bail">Date de conclusion / dernière reconduction du bail</label>
+                <input type="date" id="date-signature-bail" value="">
               </div>
               <div class="field">
                 <label for="ville-redaction">Fait à (Ville)</label>
-                <input type="text" id="ville-redaction" value="Paris">
+                <input type="text" id="ville-redaction" value="">
               </div>
             </div>
           </form>
@@ -230,9 +229,7 @@
               </div>
             </div>
 
-            <div id="legal-diagnostic" class="alert alert-success" role="status">
-              <strong>Conformité validée :</strong> La demande respecte le délai légal de prescription d'un an (art. 17-1 loi du 6 juillet 1989) et le logement n'est pas soumis au gel énergétique DPE F/G.
-            </div>
+            <div id="legal-diagnostic" class="alert alert-warning" role="status">Renseignez les dates, le DPE et le territoire pour afficher les points de vigilance. Ce contrôle ne constitue pas une validation juridique.</div>
 
             <div class="formula-box">
               <span class="formula-title">Détail du calcul légal :</span>
@@ -243,19 +240,17 @@
           <div class="panel action-panel no-print">
             <div class="action-header">
               <div>
-                <h3>Dossier Locatif Prêt à Envoyer (Format A4)</h3>
+                <h3>Aperçu des documents à vérifier avant envoi (A4)</h3>
                 <p class="muted-text">Inclut la <strong>lettre de notification IRL</strong> + un <strong>avis d’échéance prévisionnel</strong> (ne vaut pas quittance).</p>
               </div>
               <div class="action-buttons">
                 <button type="button" id="btn-copy-text" class="btn btn-secondary">Copier le texte brut (Gratuit)</button>
                 <button type="button" id="btn-download-pdf" class="btn btn-primary">
-                  Télécharger PDF Officiel sans filigrane — 9 €
+                  Imprimer / Enregistrer en PDF
                 </button>
               </div>
             </div>
-            <div id="unlock-help" class="unlock-bar">
-              <span>Déjà réglé ? <button type="button" id="btn-manual-unlock" class="btn-link">Saisir votre code d'accès reçu après paiement</button></span>
-            </div>
+            
           </div>
 
           <div class="document-wrapper">
@@ -270,26 +265,26 @@
               <div class="doc-page">
                 <div class="doc-header-addresses">
                   <div class="sender-block">
-                    <strong id="doc-bailleur-nom">Jean Dupont</strong><br>
-                    <span id="doc-bailleur-adresse">14 rue de la République, 75011 Paris</span>
+                    <strong id="doc-bailleur-nom">Nom du bailleur</strong><br>
+                    <span id="doc-bailleur-adresse">Adresse du bailleur</span>
                   </div>
                   <div class="recipient-block">
                     À l'attention de :<br>
-                    <strong id="doc-locataire-nom">Camille Martin</strong><br>
-                    <span id="doc-bien-adresse">8 avenue Victor Hugo, Apt 4B, 69003 Lyon</span>
+                    <strong id="doc-locataire-nom">Nom du locataire</strong><br>
+                    <span id="doc-bien-adresse">Adresse du logement</span>
                   </div>
                 </div>
 
                 <div class="doc-meta">
-                  <p>Fait à <span id="doc-ville">Paris</span>, le <span id="doc-date-envoi">--/--/----</span></p>
+                  <p>Fait à <span id="doc-ville">Ville</span>, le <span id="doc-date-envoi">--/--/----</span></p>
                   <p><strong>Objet : Révision annuelle du loyer conformément à l'Indice de Référence des Loyers (IRL)</strong></p>
-                  <p class="doc-ref">Réf. bail signé le <span id="doc-date-bail">01/11/2023</span> — Logement situé : <span id="doc-bien-adresse-2">8 avenue Victor Hugo, Apt 4B, 69003 Lyon</span></p>
+                  <p class="doc-ref">Réf. bail signé le <span id="doc-date-bail">--/--/----</span> — Logement situé : <span id="doc-bien-adresse-2">Adresse du logement</span></p>
                 </div>
 
                 <div class="doc-body">
                   <p>Madame, Monsieur,</p>
 
-                  <p>Conformément aux dispositions de notre contrat de location signé le <strong id="doc-date-bail-2">01/11/2023</strong> et en application de l'article 17-1 de la loi n° 89-462 du 6 juillet 1989 tendant à améliorer les rapports locatifs, le loyer est révisable chaque année à la date convenue selon la variation de l'Indice de Référence des Loyers (IRL) publié par l'INSEE.</p>
+                  <p>Conformément aux dispositions de notre contrat de location signé le <strong id="doc-date-bail-2">--/--/----</strong> et en application de l'article 17-1 de la loi n° 89-462 du 6 juillet 1989 tendant à améliorer les rapports locatifs, le loyer est révisable chaque année à la date convenue selon la variation de l'Indice de Référence des Loyers (IRL) publié par l'INSEE.</p>
 
                   <p>Le trimestre de référence stipulé au bail étant le <strong id="doc-trimestre">3e Trimestre (T3)</strong>, le calcul de révision s'établit comme suit :</p>
 
@@ -334,7 +329,7 @@
 
                   <div class="doc-signature">
                     <p>Signature du bailleur :</p>
-                    <p><strong id="doc-bailleur-sig">Jean Dupont</strong></p>
+                    <p><strong id="doc-bailleur-sig">Nom du bailleur</strong></p>
                   </div>
                 </div>
               </div>
@@ -345,19 +340,19 @@
                 <div class="quittance-box">
                   <div class="quittance-header">
                     <h2>AVIS D’ÉCHÉANCE DE LOYER</h2>
-                    <span class="quittance-sub">Article 21 de la loi n° 89-462 du 6 juillet 1989</span>
+                    <span class="quittance-sub">Document prévisionnel — ne vaut pas quittance</span>
                   </div>
 
                   <div class="doc-header-addresses">
                     <div class="sender-block">
                       <strong>Bailleur :</strong><br>
-                      <span id="q-bailleur-nom">Jean Dupont</span><br>
-                      <span id="q-bailleur-adresse">14 rue de la République, 75011 Paris</span>
+                      <span id="q-bailleur-nom">Nom du bailleur</span><br>
+                      <span id="q-bailleur-adresse">Adresse du bailleur</span>
                     </div>
                     <div class="recipient-block">
                       <strong>Locataire :</strong><br>
-                      <span id="q-locataire-nom">Camille Martin</span><br>
-                      <span id="q-bien-adresse">8 avenue Victor Hugo, Apt 4B, 69003 Lyon</span>
+                      <span id="q-locataire-nom">Nom du locataire</span><br>
+                      <span id="q-bien-adresse">Adresse du logement</span>
                     </div>
                   </div>
 
@@ -389,10 +384,10 @@
                   </table>
 
                   <div class="quittance-footer">
-                    <p>Fait à <span id="q-ville">Paris</span>, le <span id="q-date">--/--/----</span></p>
+                    <p>Fait à <span id="q-ville">Ville</span>, le <span id="q-date">--/--/----</span></p>
                     <p class="legal-footnote">Avis d’échéance prévisionnel : ce document ne prouve pas le paiement. Une quittance ne peut être délivrée qu’après encaissement intégral des sommes dues.</p>
                     <div class="doc-signature">
-                      <p>Signature du bailleur : <strong id="q-bailleur-sig">Jean Dupont</strong></p>
+                      <p>Signature du bailleur : <strong id="q-bailleur-sig">Nom du bailleur</strong></p>
                     </div>
                   </div>
                 </div>
@@ -406,7 +401,7 @@
     <div id="tab-prorata" class="tab-panel no-print">
       <div class="panel prorata-container">
         <h2>Calculateur de Prorata Temporis (Entrée ou Sortie en cours de mois)</h2>
-        <p class="muted-text">Calcul au nombre exact de jours calendaires du mois concerné (28, 29, 30 ou 31 jours), conforme aux usages locatifs et jurisprudentiels.</p>
+        <p class="muted-text">Estimation au nombre de jours calendaires du mois. Le préavis, la date effective de fin du bail et la remise des clés peuvent modifier les sommes réellement dues.</p>
 
         <div class="form-row-3">
           <div class="field">
@@ -432,7 +427,7 @@
             <input type="date" id="prorata-date" value="2026-11-15">
           </div>
           <div class="prorata-result-card">
-            <span class="kpi-label">Montant exact dû pour ce mois</span>
+            <span class="kpi-label">Estimation du prorata pour ce mois</span>
             <span class="kpi-value" id="prorata-total-du">488,00 €</span>
             <span class="kpi-delta" id="prorata-detail">16 jours occupés sur 30 jours (Loyer : 453,33 € + Charges : 34,67 €)</span>
           </div>
@@ -452,7 +447,7 @@
       <div class="faq-grid">
         <article class="faq-card">
           <h3>1. Formule officielle INSEE</h3>
-          <p>Le calcul s'effectue exclusivement sur le <strong>loyer hors charges</strong> : <code>Loyer HC × (Nouvel IRL ÷ Ancien IRL)</code>. La provision sur charges n'est jamais indexée sur l'IRL (elle fait l'objet d'une régularisation annuelle sur justificatifs réels).</p>
+          <p>Le calcul de révision porte sur le <strong>loyer hors charges</strong> selon la clause du bail et l’IRL applicable. Les charges ne sont pas multipliées par le ratio IRL ; leur régularisation suit ses propres règles.</p>
         </article>
         <article class="faq-card">
           <h3>2. Délai de prescription d'un an</h3>
@@ -464,7 +459,7 @@
         </article>
         <article class="faq-card">
           <h3>4. Gel des logements classés DPE F et G</h3>
-          <p>Depuis le 24 août 2022 en France métropolitaine (et le 1er juillet 2024 en Outre-mer), les logements classés <strong>F ou G</strong> ne peuvent faire l'objet d'aucune révision de loyer lors de la reconduction ou du renouvellement du bail.</p>
+          <p>Le gel des loyers F/G dépend de la date de conclusion, renouvellement ou reconduction du contrat et du territoire. Le contrôle affiché est une alerte et ne remplace pas la vérification du bail et du DPE.</p>
         </article>
       </div>
     </section>
@@ -472,7 +467,7 @@
 
   <footer class="site-footer no-print">
     <div class="container footer-inner">
-      <p>&copy; 2026 BailClear — Outil indépendant de calcul locatif conforme à la loi n° 89-462. Aucune donnée personnelle n'est transmise à nos serveurs.</p>
+      <p>&copy; 2026 BailClear — Outil indépendant d’aide au calcul locatif. Les dossiers enregistrés restent dans le stockage local de votre navigateur.</p>
       <nav class="footer-links" aria-label="Informations légales">
         <a href="mentions-legales.html">Mentions légales</a>
         <a href="confidentialite.html">Politique de confidentialité (RGPD)</a>
@@ -481,21 +476,7 @@
     </div>
   </footer>
 
-  <dialog id="unlock-modal" class="modal no-print">
-    <div class="modal-box">
-      <h3>Activer votre Pack Dossier Locatif PDF</h3>
-      <p class="muted-text">Saisissez le code de confirmation affiché sur votre reçu de paiement Stripe (ou utilisez le lien de retour automatique).</p>
-      <div class="field">
-        <label for="unlock-code-input">Code d'activation</label>
-        <input type="text" id="unlock-code-input" placeholder="Ex. BAILCLEAR-2026" autocomplete="off">
-      </div>
-      <p id="unlock-error" class="error-msg" hidden>Code invalide. Vérifiez votre reçu ou procédez au règlement.</p>
-      <div class="modal-actions">
-        <button type="button" id="btn-close-modal" class="btn btn-secondary">Annuler</button>
-        <button type="button" id="btn-confirm-code" class="btn btn-primary">Débloquer les PDF</button>
-      </div>
-    </div>
-  </dialog>
+  
 
   <script src="assets/js/app.js"></script>
 </body>
