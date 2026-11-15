@@ -5,27 +5,12 @@
     STORAGE_KEY: "bailclear_owner_data_v1"
   };
 
-  // Paires annuelles publiées par l'INSEE au 15 octobre 2026.
-  // T1-T3 : 2025/2026 ; T4 : 2024/2025, le T4 2026 n'étant pas encore publié.
+  // Valeurs métropolitaines INSEE, série 001515333, jusqu'au T3 2026.
   const IRL_PRESETS = {
-    metropole: {
-      T1: { ancien: 145.47, nouveau: 146.60, label: "1er trimestre (T1)" },
-      T2: { ancien: 146.68, nouveau: 148.37, label: "2e trimestre (T2)" },
-      T3: { ancien: 145.77, nouveau: 148.06, label: "3e trimestre (T3)" },
-      T4: { ancien: 144.64, nouveau: 145.78, label: "4e trimestre (T4)" }
-    },
-    corse: {
-      T1: { ancien: 141.28, nouveau: 142.38, label: "1er trimestre (T1)" },
-      T2: { ancien: 144.56, nouveau: 146.22, label: "2e trimestre (T2)" },
-      T3: { ancien: 141.58, nouveau: 143.80, label: "3e trimestre (T3)" },
-      T4: { ancien: 140.48, nouveau: 141.59, label: "4e trimestre (T4)" }
-    },
-    outremer: {
-      T1: { ancien: 142.67, nouveau: 143.78, label: "1er trimestre (T1)" },
-      T2: { ancien: 145.27, nouveau: 146.94, label: "2e trimestre (T2)" },
-      T3: { ancien: 142.97, nouveau: 145.21, label: "3e trimestre (T3)" },
-      T4: { ancien: 141.86, nouveau: 142.98, label: "4e trimestre (T4)" }
-    }
+    T1: { ancien: 145.47, nouveau: 146.60, label: "1er Trimestre (T1)" },
+    T2: { ancien: 146.68, nouveau: 148.37, label: "2e Trimestre (T2)" },
+    T3: { ancien: 145.77, nouveau: 148.06, label: "3e Trimestre (T3)" },
+    T4: { ancien: 144.64, nouveau: 145.78, label: "4e Trimestre (T4)" }
   };
 
   let lastLegalCheckAllowsPrint = false;
@@ -85,21 +70,58 @@
 
   function evaluateLegalCompliance(dpe, dateAnnivStr, dateEnvoiStr) {
     const diagEl = document.getElementById("legal-diagnostic");
-    const result = window.BailClearLegalRules.evaluate({
-      contractType: document.getElementById("type-contrat")?.value || "inconnu",
-      revisionClause: document.getElementById("clause-revision")?.value || "inconnu",
-      dpe, leaseDate: document.getElementById("date-signature-bail")?.value || "",
-      territory: document.getElementById("zone-logement")?.value || "metropole",
-      revisionDate: dateAnnivStr || "", requestDate: dateEnvoiStr || ""
-    });
-    const required = [["bailleur-nom","Nom du bailleur"],["bailleur-adresse","Adresse du bailleur"],["locataire-nom","Nom du locataire"],["bien-adresse","Adresse du logement"],["ville-redaction","Ville de rédaction"]];
-    const missing = required.filter(([id]) => !(document.getElementById(id)?.value || "").trim());
-    if (missing.length) result.messages.push("Complétez le document : " + missing.map(([,label]) => label).join(", ") + ".");
-    const valid = result.valid && missing.length === 0;
-    diagEl.className = valid ? "alert alert-warning" : "alert alert-danger";
-    diagEl.textContent = (valid ? "Contrôle partiel — vérification humaine obligatoire : " : "Document bloqué — conditions ou informations manquantes : ") + result.messages.join(" ");
-    return { valid, effectiveDate: result.effectiveDate };
+    const leaseDate = document.getElementById("date-signature-bail")?.value || "";
+    const zone = document.getElementById("zone-logement")?.value || "metropole";
+    const messages = [];
+    let blocked = false;
+    let effectiveDate = formatDateFR(dateAnnivStr || dateEnvoiStr);
+
+    if (dpe === "INCONNU") { blocked = true; messages.push("Classe DPE non renseignée : renseignez le diagnostic avant de préparer une demande de hausse."); }
+
+    if (dpe === "F" || dpe === "G") {
+      const cutoff = zone === "outremer" ? "2024-07-01" : "2022-08-24";
+      if (!leaseDate) {
+        messages.push("DPE F/G : date de conclusion ou de dernière reconduction manquante. Impossible de déterminer l'application du gel.");
+      } else if (leaseDate >= cutoff) {
+        blocked = true;
+        messages.push("DPE F/G : au vu de la date et du territoire renseignés, le gel légal des révisions est susceptible de s'appliquer. Ne générez pas de demande de hausse avant vérification.");
+      } else {
+        messages.push("DPE F/G : la date indiquée précède le seuil légal, mais vérifiez qu'aucun renouvellement ou reconduction ultérieur n'a eu lieu.");
+      }
+    }
+
+    if (dateAnnivStr && dateEnvoiStr) {
+      const anniversary = new Date(dateAnnivStr + "T00:00:00");
+      const request = new Date(dateEnvoiStr + "T00:00:00");
+      const deadline = new Date(anniversary);
+      deadline.setFullYear(deadline.getFullYear() + 1);
+      if (Number.isNaN(anniversary.getTime()) || Number.isNaN(request.getTime())) {
+        blocked = true;
+        messages.push("Dates invalides : vérifiez la date de révision et la date de demande.");
+      } else if (request >= deadline) {
+        blocked = true;
+        messages.push("Délai d'un an dépassé : la révision correspondant à cette échéance est perdue (article 17-1).");
+      } else if (request > anniversary) {
+        effectiveDate = formatDateFR(dateEnvoiStr);
+        messages.push("Demande postérieure à la date de révision : la hausse ne peut prendre effet qu'à compter de la demande, sans rétroactivité.");
+      } else {
+        effectiveDate = formatDateFR(dateAnnivStr);
+        messages.push("Demande effectuée avant ou à la date de révision : vérifiez que la clause du bail prévoit bien cette date.");
+      }
+    } else {
+      blocked = true;
+      messages.push("Renseignez la date de révision prévue au bail et la date de demande pour contrôler le délai légal.");
+    }
+
+    if (zone !== "metropole") {
+      messages.push("Les indices préremplis sont ceux de la métropole : sélectionnez manuellement les indices officiels du territoire concerné.");
+    }
+
+    diagEl.className = blocked ? "alert alert-danger" : "alert alert-warning";
+    diagEl.textContent = (blocked ? "Vigilance juridique — hausse non validée : " : "Contrôle partiel — vérification humaine nécessaire : ") + messages.join(" ");
+    return { valid: !blocked, effectiveDate };
   }
+
   function updateIRLCalculation() {
     const loyerHC = Math.max(0, parseFloat(document.getElementById("loyer-hc").value) || 0);
     const charges = Math.max(0, parseFloat(document.getElementById("charges").value) || 0);
@@ -137,10 +159,8 @@
     const bienAdresse = escapeText(document.getElementById("bien-adresse").value, "Adresse du logement loué");
     const dateBailFR = formatDateFR(document.getElementById("date-signature-bail").value);
     const dateEnvoiFR = formatDateFR(dateEnvoi);
-    const ville = escapeText(document.getElementById("ville-redaction").value, "À compléter");
-    const territoryKey = document.getElementById("zone-logement")?.value || "metropole";
-    const quarterPreset = IRL_PRESETS[territoryKey]?.[trimestreKey];
-    const trimestreLabel = quarterPreset ? quarterPreset.label : trimestreKey;
+    const ville = escapeText(document.getElementById("ville-redaction").value, "Paris");
+    const trimestreLabel = IRL_PRESETS[trimestreKey] ? IRL_PRESETS[trimestreKey].label : trimestreKey;
 
     document.getElementById("doc-bailleur-nom").textContent = bailleurNom;
     document.getElementById("doc-bailleur-adresse").textContent = bailleurAdresse;
@@ -296,9 +316,8 @@
     if(!data.history.length)hist.textContent="Aucune révision enregistrée.";
     data.history.slice().reverse().forEach(p=>{const row=document.createElement("div");row.className="saved-row";row.textContent=(p.address||"Bien")+" — "+p.newRent+" € HC — "+new Date(p.savedAt).toLocaleDateString("fr-FR");hist.append(row);});
     const today=new Date();today.setHours(0,0,0,0);
-    const horizon=new Date(today);horizon.setDate(horizon.getDate()+30);
-    const due=data.properties.map(p=>{if(!p.anniversary||!window.BailClearLegalRules.isValidISODate(p.anniversary))return null;const parts=p.anniversary.split("-").map(Number);let d=new Date(today.getFullYear(),parts[1]-1,parts[2]);d.setHours(0,0,0,0);if(d<today)d=new Date(today.getFullYear()+1,parts[1]-1,parts[2]);return {p,d};}).filter(x=>x&&x.d>=today&&x.d<=horizon);
-    alerts.className="alert alert-warning";
+    const due=data.properties.map(p=>({p,d:p.anniversary?new Date(p.anniversary+"T00:00:00"):null})).filter(x=>x.d).map(x=>{x.d.setFullYear(today.getFullYear());return x;}).filter(x=>x.d>=today&&x.d<=new Date(today.getTime()+30*86400000));
+    alerts.className=due.length?"alert alert-warning":"alert alert-success";
     alerts.textContent=due.length?"Révision à anticiper dans les 30 jours : "+due.map(x=>(x.p.address||"Bien")+" ("+x.d.toLocaleDateString("fr-FR")+")").join(" ; ")+".":"Aucun anniversaire de bail dans les 30 prochains jours. Rappel visible uniquement à l’ouverture du site.";
   }
   function initOwnerTools() {
@@ -331,17 +350,16 @@
       });
     });
 
-    function applyIRLDefaults() {
+    document.getElementById("trimestre-ref").addEventListener("change", function () {
+      const preset = IRL_PRESETS[this.value];
       const zone = document.getElementById("zone-logement")?.value || "metropole";
-      const quarter = document.getElementById("trimestre-ref")?.value || "T3";
-      const preset = IRL_PRESETS[zone]?.[quarter];
-      if (!preset) return;
-      document.getElementById("irl-ancien").value = preset.ancien.toFixed(2);
-      document.getElementById("irl-nouveau").value = preset.nouveau.toFixed(2);
+      if (preset && zone === "metropole") {
+        document.getElementById("irl-ancien").value = preset.ancien.toFixed(2);
+        document.getElementById("irl-nouveau").value = preset.nouveau.toFixed(2);
+      }
       updateIRLCalculation();
-    }
-    document.getElementById("trimestre-ref").addEventListener("change", applyIRLDefaults);
-    document.getElementById("zone-logement")?.addEventListener("change", applyIRLDefaults);
+    });
+    document.getElementById("zone-logement")?.addEventListener("change", updateIRLCalculation);
 
     document.getElementById("irl-form").addEventListener("input", updateIRLCalculation);
     document.getElementById("irl-form").addEventListener("change", updateIRLCalculation);
@@ -358,13 +376,10 @@
       document.getElementById("loyer-hc").value = "850.00";
       document.getElementById("charges").value = "65.00";
       document.getElementById("trimestre-ref").value = "T3";
-      document.getElementById("classe-dpe").value = "INCONNU";
-      document.getElementById("type-contrat").value = "inconnu";
-      document.getElementById("clause-revision").value = "inconnu";
-      document.getElementById("date-bail-anniv").value = "";
-      document.getElementById("date-signature-bail").value = "";
-      ["bailleur-nom","bailleur-adresse","locataire-nom","bien-adresse","ville-redaction"].forEach(id => document.getElementById(id).value = "");
-      applyIRLDefaults();
+      document.getElementById("classe-dpe").value = "A-E";
+      document.getElementById("irl-ancien").value = "145.77";
+      document.getElementById("irl-nouveau").value = "148.06";
+      updateIRLCalculation();
     });
 
     document.getElementById("btn-copy-text").addEventListener("click", copyLetterToClipboard);

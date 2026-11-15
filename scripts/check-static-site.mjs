@@ -1,0 +1,17 @@
+import fs from "node:fs";
+import assert from "node:assert/strict";
+const html=fs.readFileSync("index.html","utf8");
+const app=fs.readFileSync("assets/js/app.js","utf8");
+const rules=fs.readFileSync("assets/js/legal-rules.js","utf8");
+new Function(app); new Function(rules);
+const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);
+assert.equal(ids.length,new Set(ids).size,"Identifiants HTML dupliqués");
+const missing=[...app.matchAll(/getElementById\(["']([^"']+)["']\)/g)].map(x=>x[1]).filter(id=>!ids.includes(id));
+assert.deepEqual([...new Set(missing)],[],"Référence DOM manquante");
+const blocks=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+for(const block of blocks) JSON.parse(block[1]);
+assert.match(html,/assets\/js\/legal-rules\.js/);
+assert.match(html,/type-contrat/); assert.match(html,/clause-revision/);
+assert.match(app,/BailClearLegalRules/);
+assert.doesNotMatch(app,/STRIPE_PAYMENT_LINK|BAILCLEAR-PRO-2026|unlocked=/);
+console.log("Contrôle statique BailClear : OK");
