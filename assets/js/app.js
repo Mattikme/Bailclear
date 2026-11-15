@@ -231,6 +231,10 @@
   }
 
   function copyLetterToClipboard() {
+    if (!lastLegalCheckAllowsPrint) {
+      window.alert("Le courrier est bloqué. Vérifiez les conditions juridiques et les champs obligatoires avant de le copier. Le contrôle reste partiel et ne constitue pas un avis juridique.");
+      return;
+    }
     const bailleur = document.getElementById("doc-bailleur-nom").textContent;
     const bailleurAdr = document.getElementById("doc-bailleur-adresse").textContent;
     const locataire = document.getElementById("doc-locataire-nom").textContent;
@@ -262,6 +266,7 @@
       `- Nouveau loyer hors charges : ${nouveauHC}`,
       `- Provision sur charges : ${charges}`,
       `- Nouveau total mensuel charges comprises : ${nouveauCC}`,
+      `${document.getElementById("doc-prise-effet").textContent}`,
       ``,
       `Cordialement,`,
       `${bailleur}`
