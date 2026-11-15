@@ -5,10 +5,11 @@
     STORAGE_KEY: "bailclear_owner_data_v1"
   };
 
+  // Valeurs métropolitaines INSEE, série 001515333, jusqu'au T3 2026.
   const IRL_PRESETS = {
-    T1: { ancien: 143.46, nouveau: 145.47, label: "1er Trimestre (T1)" },
-    T2: { ancien: 145.17, nouveau: 146.68, label: "2e Trimestre (T2)" },
-    T3: { ancien: 144.51, nouveau: 145.78, label: "3e Trimestre (T3)" },
+    T1: { ancien: 145.47, nouveau: 146.60, label: "1er Trimestre (T1)" },
+    T2: { ancien: 146.68, nouveau: 148.37, label: "2e Trimestre (T2)" },
+    T3: { ancien: 145.77, nouveau: 148.06, label: "3e Trimestre (T3)" },
     T4: { ancien: 144.64, nouveau: 145.78, label: "4e Trimestre (T4)" }
   };
 
@@ -43,27 +44,12 @@
   function checkUrlUnlock() { /* Pro activation must be verified server-side. */ }
 
   function applyLicenseUI() {
-    const unlocked = isProUnlocked();
     const badge = document.getElementById("license-badge");
     const sheet = document.getElementById("printable-sheet");
-    const watermarkStatus = document.getElementById("watermark-status");
-    const btnDownload = document.getElementById("btn-download-pdf");
-    const unlockHelp = document.getElementById("unlock-help");
-
-    if (unlocked) {
-      badge.textContent = "Pack Pro Activé";
-      badge.className = "badge badge-pro";
-      sheet.classList.remove("watermarked");
-      watermarkStatus.textContent = "Document officiel sans filigrane";
-      btnDownload.textContent = "Imprimer / Enregistrer en PDF (Débloqué)";
-      if (unlockHelp) unlockHelp.style.display = "none";
-    } else {
-      badge.textContent = "Version Gratuite";
-      badge.className = "badge badge-neutral";
-      sheet.classList.add("watermarked");
-      watermarkStatus.textContent = "Aperçu avec filigrane";
-      btnDownload.textContent = "PDF Pro indisponible — paiement à configurer";
-    }
+    const status = document.getElementById("watermark-status");
+    if (badge) badge.textContent = "Outil gratuit";
+    if (sheet) sheet.classList.remove("watermarked");
+    if (status) status.textContent = "Document imprimable";
   }
 
   function initDefaultDates() {
@@ -84,45 +70,54 @@
 
   function evaluateLegalCompliance(dpe, dateAnnivStr, dateEnvoiStr) {
     const diagEl = document.getElementById("legal-diagnostic");
+    const leaseDate = document.getElementById("date-signature-bail")?.value || "";
+    const zone = document.getElementById("zone-logement")?.value || "metropole";
+    const messages = [];
+    let blocked = false;
+    let effectiveDate = formatDateFR(dateAnnivStr || dateEnvoiStr);
 
     if (dpe === "F" || dpe === "G") {
-      diagEl.className = "alert alert-danger";
-      diagEl.innerHTML = `<strong>Alerte Interdiction Légale (DPE ${dpe}) :</strong> En France métropolitaine, toute augmentation de loyer est strictement interdite pour les logements classés F ou G (art. 17-1 modifié par la loi Climat et Résilience). Le loyer doit rester gelé à son montant actuel.`;
-      return { valid: false, effectiveDate: formatDateFR(dateEnvoiStr) };
-    }
-
-    if (dpe === "OUTREMER") {
-      diagEl.className = "alert alert-warning";
-      diagEl.innerHTML = `<strong>Vigilance Outre-Mer :</strong> Depuis le 1er juillet 2024, le gel des loyers s'applique également aux logements classés F ou G en Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Vérifiez la classe DPE avant envoi.`;
+      const cutoff = zone === "outremer" ? "2024-07-01" : "2022-08-24";
+      if (!leaseDate) {
+        messages.push("DPE F/G : date de conclusion ou de dernière reconduction manquante. Impossible de déterminer l'application du gel.");
+      } else if (leaseDate >= cutoff) {
+        blocked = true;
+        messages.push("DPE F/G : au vu de la date et du territoire renseignés, le gel légal des révisions est susceptible de s'appliquer. Ne générez pas de demande de hausse avant vérification.");
+      } else {
+        messages.push("DPE F/G : la date indiquée précède le seuil légal, mais vérifiez qu'aucun renouvellement ou reconduction ultérieur n'a eu lieu.");
+      }
     }
 
     if (dateAnnivStr && dateEnvoiStr) {
-      const dAnniv = new Date(dateAnnivStr + "T00:00:00");
-      const dEnvoi = new Date(dateEnvoiStr + "T00:00:00");
-      const diffDays = Math.floor((dEnvoi - dAnniv) / (1000 * 60 * 60 * 24));
-
-      if (diffDays > 365) {
-        diagEl.className = "alert alert-danger";
-        diagEl.innerHTML = `<strong>Révision Prescrite (+ de 1 an) :</strong> La date d'envoi dépasse de ${diffDays} jours la date de révision prévue au bail. Conformément à la loi ALUR, la révision pour cette échéance annuelle est définitivement perdue.`;
-        return { valid: false, effectiveDate: formatDateFR(dateEnvoiStr) };
+      const anniversary = new Date(dateAnnivStr + "T00:00:00");
+      const request = new Date(dateEnvoiStr + "T00:00:00");
+      const deadline = new Date(anniversary);
+      deadline.setFullYear(deadline.getFullYear() + 1);
+      if (Number.isNaN(anniversary.getTime()) || Number.isNaN(request.getTime())) {
+        blocked = true;
+        messages.push("Dates invalides : vérifiez la date de révision et la date de demande.");
+      } else if (request >= deadline) {
+        blocked = true;
+        messages.push("Délai d'un an dépassé : la révision correspondant à cette échéance est perdue (article 17-1).");
+      } else if (request > anniversary) {
+        effectiveDate = formatDateFR(dateEnvoiStr);
+        messages.push("Demande postérieure à la date de révision : la hausse ne peut prendre effet qu'à compter de la demande, sans rétroactivité.");
+      } else {
+        effectiveDate = formatDateFR(dateAnnivStr);
+        messages.push("Demande effectuée avant ou à la date de révision : vérifiez que la clause du bail prévoit bien cette date.");
       }
-
-      if (diffDays > 0) {
-        diagEl.className = "alert alert-warning";
-        diagEl.innerHTML = `<strong>Demande tardive (${diffDays} jours après la date anniversaire) :</strong> La révision reste valable, mais la loi ALUR interdit toute rétroactivité. Le nouveau loyer s'applique uniquement à compter du <strong>${formatDateFR(dateEnvoiStr)}</strong> (prorata à appliquer sur le mois en cours).`;
-        return { valid: true, effectiveDate: formatDateFR(dateEnvoiStr) };
-      }
+    } else {
+      blocked = true;
+      messages.push("Renseignez la date de révision prévue au bail et la date de demande pour contrôler le délai légal.");
     }
 
-    if (dpe !== "OUTREMER") {
-      diagEl.className = "alert alert-success";
-      diagEl.innerHTML = `<strong>Conformité validée :</strong> La demande respecte le délai légal de prescription d'un an (art. 17-1 loi du 6 juillet 1989) et le logement n'est pas soumis au gel énergétique DPE F/G.`;
+    if (zone !== "metropole") {
+      messages.push("Les indices préremplis sont ceux de la métropole : sélectionnez manuellement les indices officiels du territoire concerné.");
     }
 
-    return {
-      valid: true,
-      effectiveDate: formatDateFR(dateAnnivStr || dateEnvoiStr)
-    };
+    diagEl.className = blocked ? "alert alert-danger" : "alert alert-warning";
+    diagEl.textContent = (blocked ? "Vigilance juridique — hausse non validée : " : "Contrôle partiel — vérification humaine nécessaire : ") + messages.join(" ");
+    return { valid: !blocked, effectiveDate };
   }
 
   function updateIRLCalculation() {
@@ -380,33 +375,16 @@
       document.getElementById("charges").value = "65.00";
       document.getElementById("trimestre-ref").value = "T3";
       document.getElementById("classe-dpe").value = "A-E";
-      document.getElementById("irl-ancien").value = "144.51";
-      document.getElementById("irl-nouveau").value = "145.78";
+      document.getElementById("irl-ancien").value = "145.77";
+      document.getElementById("irl-nouveau").value = "148.06";
       updateIRLCalculation();
     });
 
     document.getElementById("btn-copy-text").addEventListener("click", copyLetterToClipboard);
 
     document.getElementById("btn-download-pdf").addEventListener("click", function () {
-      if (isProUnlocked()) { window.print(); } else { window.alert("Le paiement et l’activation Pro sécurisée ne sont pas configurés. L’aperçu avec filigrane va être imprimé."); window.print(); }
+      window.print();
     });
 
-    const modal = document.getElementById("unlock-modal");
-    const manualUnlock = document.getElementById("btn-manual-unlock");
-    if (manualUnlock) document.getElementById("unlock-help").style.display = "none";
-    document.getElementById("btn-manual-unlock").addEventListener("click", function () {
-      document.getElementById("unlock-error").hidden = true;
-      modal.showModal();
-    });
-
-    document.getElementById("btn-close-modal").addEventListener("click", function () {
-      modal.close();
-    });
-
-    document.getElementById("btn-confirm-code").addEventListener("click", function () {
-      const code = (document.getElementById("unlock-code-input").value || "").trim().toUpperCase();
-      document.getElementById("unlock-error").textContent = "L’activation par code est désactivée : elle doit être vérifiée par le serveur de paiement.";
-      document.getElementById("unlock-error").hidden = false;
-    });
   });
 })();
