@@ -4,7 +4,7 @@
 
   const RULESET_VERSION = "2026-11-15.1";
   function isValidISODate(value) {
-    if (typeof value !== "string" || !/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return false;
+    if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
     const p = value.split("-").map(Number);
     const d = new Date(Date.UTC(p[0], p[1] - 1, p[2]));
     return d.getUTCFullYear() === p[0] && d.getUTCMonth() === p[1] - 1 && d.getUTCDate() === p[2];
@@ -43,7 +43,11 @@
     } else if (input.dpeDate < "2021-07-01") {
       block("DPE réalisé avant le 1er juillet 2021 : il n'est plus valable en 2026. Un DPE valide doit être fourni.");
     } else if (isValidISODate(input.requestDate)) {
-      const expiry = new Date(Date.UTC(Number(input.dpeDate.slice(0, 4)) + 10, Number(input.dpeDate.slice(5, 7)) - 1, Number(input.dpeDate.slice(8, 10))));
+      const year = Number(input.dpeDate.slice(0, 4)) + 10;
+      const month = Number(input.dpeDate.slice(5, 7));
+      const day = Number(input.dpeDate.slice(8, 10));
+      const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+      const expiry = new Date(Date.UTC(year, month - 1, Math.min(day, lastDay)));
       if (input.requestDate >= expiry.toISOString().slice(0, 10)) {
         block("DPE arrivé au terme de sa durée de validité de dix ans à la date de la demande.");
       }
