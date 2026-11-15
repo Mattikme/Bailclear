@@ -51,3 +51,7 @@ L'utilisateur doit sélectionner le trimestre indiqué dans le bail. Si le bail 
 
 ## Prévention des valeurs implicites
 Le trimestre de référence, le loyer et les charges ne sont pas présélectionnés. Le calcul doit être renseigné à partir du bail et des montants réellement applicables. Le choix du trimestre reste une vérification humaine : le site ne lit pas le contrat.
+
+
+## Loyer et charges
+Le loyer hors charges saisi doit inclure le complément de loyer lorsqu'il existe. Le champ de charges concerne une provision : le forfait de charges n'est pas recalculé par BailClear et doit être vérifié séparément selon le bail. Source : Service-Public, https://www.service-public.gouv.fr/particuliers/vosdroits/F1311.
