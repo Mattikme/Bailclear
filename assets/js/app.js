@@ -13,6 +13,8 @@
     T4: { ancien: 144.64, nouveau: 145.78, label: "4e Trimestre (T4)" }
   };
 
+  let lastLegalCheckAllowsPrint = false;
+
   const euroFmt = new Intl.NumberFormat("fr-FR", {
     style: "currency",
     currency: "EUR",
@@ -74,7 +76,7 @@
     let blocked = false;
     let effectiveDate = formatDateFR(dateAnnivStr || dateEnvoiStr);
 
-    if (dpe === "INCONNU") messages.push("Classe DPE non renseignée : vérifiez le diagnostic avant toute demande de révision.");
+    if (dpe === "INCONNU") { blocked = true; messages.push("Classe DPE non renseignée : renseignez le diagnostic avant de préparer une demande de hausse."); }
 
     if (dpe === "F" || dpe === "G") {
       const cutoff = zone === "outremer" ? "2024-07-01" : "2022-08-24";
@@ -149,6 +151,7 @@
     document.getElementById("formula-detail").textContent = formuleStr;
 
     const compliance = evaluateLegalCompliance(dpe, dateAnniv, dateEnvoi);
+    lastLegalCheckAllowsPrint = compliance.valid;
 
     const bailleurNom = escapeText(document.getElementById("bailleur-nom").value, "Nom du Bailleur");
     const bailleurAdresse = escapeText(document.getElementById("bailleur-adresse").value, "Adresse du Bailleur");
@@ -385,6 +388,7 @@
     document.getElementById("btn-copy-text").addEventListener("click", copyLetterToClipboard);
 
     document.getElementById("btn-download-pdf").addEventListener("click", function () {
+      if (!lastLegalCheckAllowsPrint) { window.alert("Le document ne peut pas être imprimé : renseignez les dates et le DPE, puis traitez les alertes juridiques."); return; }
       window.print();
     });
 
