@@ -88,5 +88,20 @@
     "id": "cnil-tracers",
     "label": "CNIL — Cookies et autres traceurs",
     "url": "https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies/FAQ"
+  },
+  {
+    "id": "article-25-10",
+    "label": "Loi du 6 juillet 1989 — article 25-10 (forfait de charges meublé)",
+    "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000028779195"
+  },
+  {
+    "id": "service-public-rent-control",
+    "label": "Service-Public — Encadrement des loyers F1314",
+    "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F1314"
+  },
+  {
+    "id": "arrete-dpe-factor-2027",
+    "label": "Arrêté du 19 août 2026 — facteur électrique DPE à 1,7 au 1er janvier 2027",
+    "url": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000054747079"
   }
 ]

@@ -43,3 +43,11 @@ assert.doesNotMatch(quarterSelect,/<option value="T[1-4]" selected>/,"Aucun trim
 assert.match(html,/id="loyer-hc"[^>]*value=""/,"Le loyer ne doit pas être prérempli par une valeur fictive");
 assert.match(html,/id="charges"[^>]*value=""/,"Les charges ne doivent pas être préremplies par une valeur fictive");
 assert.match(app,/if \(!lastLegalCheckAllowsPrint\)/,"L'impression doit être bloquée si le diagnostic échoue");
+
+assert.ok(html.includes('id="prorata-loyer" step="0.01" min="1" value=""'), "Le prorata ne doit pas utiliser un loyer fictif par défaut");
+assert.ok(html.includes('id="prorata-charges" step="0.01" min="0" value=""'), "Le prorata ne doit pas utiliser des charges fictives par défaut");
+assert.ok(html.includes('id="prorata-date" value=""'), "La date du prorata ne doit pas être figée dans le HTML");
+assert.ok(app.includes('if (!rentRaw || !chargesRaw'), "Le prorata doit attendre des montants réellement saisis");
+assert.ok(app.includes('chargesMismatch'), "Le type « aucune charge » ne doit pas accepter un montant non nul");
+assert.ok(app.includes('doc-charges-label'), "Le libellé de charges doit être présent dans l'application");
+assert.ok(!/857,47 €|922,47 €|488,00 €|value="850\.00"|value="65\.00"/.test(html), "Aucun montant fictif ne doit apparaître au chargement");

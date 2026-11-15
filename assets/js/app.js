@@ -121,7 +121,11 @@
     });
     if (missing.length) result.messages.push("Complétez le document : " + missing.map(([, label]) => label).join(", ") + ".");
     if (invalidNumbers.length) result.messages.push("Vérifiez les valeurs numériques : " + invalidNumbers.map(([, , label]) => label).join(", ") + ".");
-    const valid = result.valid && missing.length === 0 && invalidNumbers.length === 0;
+    const chargesType = document.getElementById("type-charges")?.value || "inconnu";
+    const chargesValue = Number(document.getElementById("charges")?.value);
+    const chargesMismatch = chargesType === "aucune" && chargesValue !== 0;
+    if (chargesMismatch) result.messages.push("Le type de charges indique « aucune », mais un montant non nul est saisi. Corrigez le type ou le montant.");
+    const valid = result.valid && missing.length === 0 && invalidNumbers.length === 0 && !chargesMismatch;
     diagEl.className = valid ? "alert alert-warning" : "alert alert-danger";
     diagEl.textContent = (valid ? "Contrôle partiel — vérification humaine obligatoire : " : "Document bloqué — conditions ou informations manquantes : ") + result.messages.join(" ");
     return { valid, effectiveDate: result.effectiveDate };
@@ -203,7 +207,7 @@
     const chargeLabels = {
       provision: "Provision mensuelle pour charges locatives",
       forfait: "Forfait mensuel de charges (non révisé par BailClear)",
-      aucune: "Charges récupérables",
+      aucune: "Aucune charge récupérable",
       inconnu: "Type de charges à vérifier"
     };
     document.getElementById("doc-charges-label").textContent = chargeLabels[chargesType] || chargeLabels.inconnu;
@@ -229,27 +233,36 @@
   }
 
   function updateProrataCalculation() {
-    const loyer = Math.max(0, parseFloat(document.getElementById("prorata-loyer").value) || 0);
-    const charges = Math.max(0, parseFloat(document.getElementById("prorata-charges").value) || 0);
+    const rentRaw = document.getElementById("prorata-loyer").value.trim();
+    const chargesRaw = document.getElementById("prorata-charges").value.trim();
+    const loyer = Number(rentRaw);
+    const charges = Number(chargesRaw);
     const type = document.getElementById("prorata-type").value;
     const dateStr = document.getElementById("prorata-date").value;
+    const totalEl = document.getElementById("prorata-total-du");
+    const detailEl = document.getElementById("prorata-detail");
 
-    if (!dateStr) return;
+    if (!rentRaw || !chargesRaw || !window.BailClearLegalRules.isValidISODate(dateStr) ||
+        !Number.isFinite(loyer) || loyer <= 0 ||
+        !Number.isFinite(charges) || charges < 0) {
+      totalEl.textContent = "—";
+      detailEl.textContent = "Renseignez un loyer positif, un montant de charges valide et une date.";
+      return;
+    }
 
     const parts = dateStr.split("-");
-    const year = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10);
-    const day = parseInt(parts[2], 10);
-
-    const daysInMonth = new Date(year, month, 0).getDate();
+    const year = Number(parts[0]);
+    const month = Number(parts[1]);
+    const day = Number(parts[2]);
+    const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
     const occupiedDays = type === "entree" ? (daysInMonth - day + 1) : day;
 
     const loyerProrata = Math.round(((loyer * occupiedDays) / daysInMonth) * 100) / 100;
     const chargesProrata = Math.round(((charges * occupiedDays) / daysInMonth) * 100) / 100;
     const totalDu = Math.round((loyerProrata + chargesProrata) * 100) / 100;
 
-    document.getElementById("prorata-total-du").textContent = euroFmt.format(totalDu);
-    document.getElementById("prorata-detail").textContent =
+    totalEl.textContent = euroFmt.format(totalDu);
+    detailEl.textContent =
       `${occupiedDays} jour${occupiedDays > 1 ? "s" : ""} occupé${occupiedDays > 1 ? "s" : ""} sur ${daysInMonth} jours (Loyer : ${euroFmt.format(loyerProrata)} + Charges : ${euroFmt.format(chargesProrata)})`;
   }
 
@@ -298,11 +311,11 @@
       ``,
       `Madame, Monsieur,`,
       ``,
-      `Conformément à notre contrat de location conclu ou reconduit le ${dateBail} et à l'article 17-1 de la loi n° 89-462 du 6 juillet 1989, je vous informe de la révision annuelle de votre loyer :`,
+      `Conformément au contrat initial signé le ${dateBail} et à l'article 17-1 de la loi n° 89-462 du 6 juillet 1989, je vous informe de la révision annuelle de votre loyer :`,
       `- Ancien loyer hors charges : ${ancienHC}`,
       `- Calcul IRL : ${formule}`,
       `- Nouveau loyer hors charges : ${nouveauHC}`,
-      `- Provision sur charges : ${charges}`,
+      `- ${document.getElementById("doc-charges-label").textContent} : ${charges}`,
       `- Nouveau total mensuel charges comprises : ${nouveauCC}`,
       `${document.getElementById("doc-prise-effet").textContent}`,
       ``,

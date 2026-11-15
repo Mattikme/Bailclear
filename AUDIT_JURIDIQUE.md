@@ -12,7 +12,7 @@ L'application peut contrôler les dates, le choix d'indice, le ratio et le déla
 ## DPE et gel des loyers
 Le gel des révisions pour les logements F ou G dépend du territoire et de la date de conclusion, renouvellement ou reconduction : métropole et Corse à compter du 24 août 2022 ; territoires relevant de l'article 73 à compter du 1er juillet 2024.
 
-Le formulaire demande la classe et la date du DPE, la signature initiale du bail et le statut/date de la dernière reconduction. Un DPE réalisé du 1er janvier 2018 au 30 juin 2021 n'est plus valable depuis le 1er janvier 2025 ; les DPE réalisés à compter du 1er juillet 2021 sont valables dix ans. Le contrôle de date n'authentifie pas le document auprès de l'ADEME et ne vérifie pas la classe réelle. En 2026, le facteur de conversion de l'électricité a changé : l'utilisateur doit consulter le DPE ou l'attestation à jour.
+Le formulaire demande la classe et la date du DPE, la signature initiale du bail et le statut/date de la dernière reconduction. Un DPE réalisé du 1er janvier 2018 au 30 juin 2021 n'est plus valable depuis le 1er janvier 2025 ; les DPE réalisés à compter du 1er juillet 2021 sont valables dix ans. Le contrôle de date n'authentifie pas le document auprès de l'ADEME et ne vérifie pas la classe réelle. Le facteur de conversion de l'électricité est passé à 1,9 au 1er janvier 2026 ; l'arrêté du 19 août 2026 prévoit son passage à 1,7 au 1er janvier 2027. Les DPE en cours de validité peuvent recevoir une attestation ADEME qui remplace l'étiquette initiale ; sans attestation, le DPE initial reste valable jusqu'à son terme. L'utilisateur doit donc saisir l'étiquette du DPE valide ou de sa dernière attestation ADEME, pas une ancienne étiquette si elle a été remplacée.
 
 ## Régimes et situations exclues
 Les régimes inconnus, conventions Anah, logements sociaux, loi de 1948, baux mobilité et situations hors périmètre sont bloqués. L'encadrement local des loyers, les compléments de loyer et les plafonds locaux ne sont pas vérifiés. Ces éléments dépendent de données géographiques et contractuelles particulières ; une règle nationale unique ne suffit pas.
@@ -63,3 +63,29 @@ L'arrêté du 9 octobre 2026 modifie la notice d'information annexée à certain
 - CNIL, cookies et traceurs : https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies/FAQ
 
 Cet audit est un examen technique et documentaire, non une consultation juridique ou une certification de conformité.
+
+
+## Revue technique et juridique complémentaire — 15 novembre 2026
+
+### Défauts d'interface corrigés dans cette branche
+- Le calculateur de prorata contenait un loyer de 850 € et 65 € de charges par défaut ; il affichait donc un montant sans donnée fournie par l'utilisateur. Les valeurs ont été supprimées et le calcul attend désormais des montants et une date valides.
+- Les aperçus HTML du courrier et de l'avis d'échéance affichaient encore des montants et indices d'exemple avant l'exécution du JavaScript. Ils sont remplacés par des tirets et des indications d'attente.
+- Le calcul de prorata efface maintenant son résultat lorsque les champs sont vides ou invalides, au lieu de conserver une ancienne estimation.
+- Le libellé des charges dans le document et le texte copié reflète le type sélectionné. Le choix « aucune charge » est incohérent avec un montant non nul et bloque la génération.
+- Le courrier parle désormais du « contrat initial signé le » plutôt que d'un contrat « conclu ou reconduit » à la date de signature initiale, qui était une formulation inexacte en cas de reconduction ultérieure.
+
+### Limite constatée sur la veille juridique
+Le workflow a effectivement créé l'alerte GitHub n°11 le 15 novembre 2026. Cette exécution a reçu HTTP 403 de Légifrance sur plusieurs textes essentiels (articles 17-1, 21, 7-1, D126-19, article 140, article 54 et Code de la consommation). La veille s'exécute, mais elle ne peut pas actuellement garantir la surveillance directe de ces pages primaires depuis GitHub Actions. Une alerte « source indisponible » n'est pas une preuve de changement de droit. Il faut maintenir une source secondaire officielle accessible (Service-Public) et résoudre l'accès aux données primaires avant de qualifier la veille de complète.
+
+### Point de prudence sur le seuil outre-mer du DPE
+L'article 17-1 III vise les contrats conclus, renouvelés ou tacitement reconduits « après le 1er juillet 2024 » dans les cinq territoires mentionnés. La page Service-Public formule l'entrée en application comme « depuis le 1er juillet 2024 ». Pour un événement exactement daté du 1er juillet 2024, ces formulations ne sont pas identiques. Le moteur bloque actuellement cette date par prudence ; ce cas limite doit être validé juridiquement avant de transformer ce blocage en autorisation ou de le présenter comme une interprétation certaine.
+
+### Gouvernance recommandée pour automatiser le droit
+1. Récupérer les textes et données depuis des sources officielles identifiées, avec date, territoire et version.
+2. Détecter les changements et ouvrir une alerte contenant l'ancien et le nouveau texte.
+3. Faire qualifier humainement le changement : champ matériel, personnes concernées, territoire, entrée en vigueur, dispositions transitoires.
+4. Modifier une règle versionnée et ajouter des tests de cas positifs, négatifs et de frontière.
+5. Exécuter les contrôles CI et faire approuver la modification par une personne compétente avant déploiement.
+6. Conserver un historique de la règle appliquée à chaque calcul, avec sa version et les sources consultées.
+
+**Interdiction de conception :** aucun modèle d'IA, scraper ou workflow ne doit modifier directement le moteur juridique de production à la suite d'une simple variation de page. La veille peut détecter et préparer une proposition ; elle ne doit pas décider du sens juridique ni déployer une règle sans revue.
