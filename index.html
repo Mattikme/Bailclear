@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculateur Révision Loyer IRL 2026 &amp; Lettre Officielle Loi ALUR | BailClear</title>
-  <meta name="description" content="Calculez gratuitement l'augmentation de loyer selon l'indice IRL de l'INSEE, vérifiez la conformité Loi ALUR et DPE (F/G), calculez le prorata temporis et éditez un courrier de révision et un avis d’échéance.">
+  <title>Calculateur de révision du loyer IRL et documents locatifs | BailClear</title>
+  <meta name="description" content="Calculez une estimation de révision IRL à partir des indices officiels, consultez des points de vigilance et préparez des documents locatifs à vérifier avant envoi.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://bailclear.fr/">
 
@@ -143,10 +143,30 @@
 <div class="field">
                 <label for="zone-logement">Territoire du logement</label>
                 <select id="zone-logement"><option value="metropole" selected>France métropolitaine</option><option value="corse">Corse</option><option value="outremer">Guadeloupe, Martinique, Guyane, La Réunion ou Mayotte</option></select>
-                <span class="field-hint">Les indices préremplis sont ceux de la métropole.</span>
+                <span class="field-hint">Les indices préremplis sont adaptés au territoire sélectionné. Vérifiez le trimestre et les dates applicables.</span>
+              </div>
+              <div class="field">
+                <label for="type-contrat">Type de contrat</label>
+                <select id="type-contrat">
+                  <option value="inconnu" selected>Non renseigné</option>
+                  <option value="residence-vide">Bail d’habitation — résidence principale vide</option>
+                  <option value="residence-meuble">Bail d’habitation — résidence principale meublée</option>
+                  <option value="mobilite">Bail mobilité</option>
+                  <option value="autre">Autre contrat / situation particulière</option>
+                </select>
+                <span class="field-hint">Le contrôle IRL est limité aux baux classiques soumis à la loi du 6 juillet 1989.</span>
               </div>
             </div>
-
+            <div class="form-row-2">
+              <div class="field">
+                <label for="clause-revision">Le bail contient-il une clause de révision annuelle ?</label>
+                <select id="clause-revision">
+                  <option value="inconnu" selected>Je ne sais pas / à vérifier</option>
+                  <option value="oui">Oui</option>
+                  <option value="non">Non</option>
+                </select>
+              </div>
+            </div>
             <div class="form-row-2">
               <div class="field">
                 <label for="irl-ancien">Ancien IRL (Année N-1)</label>
@@ -156,7 +176,7 @@
               <div class="field">
                 <label for="irl-nouveau">Nouvel IRL (Année N)</label>
                 <input type="number" id="irl-nouveau" step="0.01" min="100" value="148.06" required>
-                <span class="field-hint">Ex. T3 2026 : 148,06 (<a href="https://www.insee.fr/fr/statistiques/serie/001515333" target="_blank" rel="noopener noreferrer">Série INSEE</a>)</span>
+                <span class="field-hint">Paires annuelles disponibles au 15 octobre 2026. <a href="https://www.insee.fr/fr/statistiques/9081853" target="_blank" rel="noopener noreferrer">Consulter les indices officiels</a>.</span>
               </div>
             </div>
 
@@ -232,7 +252,7 @@
             <div id="legal-diagnostic" class="alert alert-warning" role="status">Renseignez les dates, le DPE et le territoire pour afficher les points de vigilance. Ce contrôle ne constitue pas une validation juridique.</div>
 
             <div class="formula-box">
-              <span class="formula-title">Détail du calcul légal :</span>
+              <span class="formula-title">Détail du calcul indicatif :</span>
               <code id="formula-detail">850,00 € × (145,78 ÷ 144,51) = 857,47 €</code>
             </div>
           </div>
@@ -459,7 +479,7 @@
         </article>
         <article class="faq-card">
           <h3>4. Gel des logements classés DPE F et G</h3>
-          <p>Le gel des loyers F/G dépend de la date de conclusion, renouvellement ou reconduction du contrat et du territoire. Le contrôle affiché est une alerte et ne remplace pas la vérification du bail et du DPE.</p>
+          <p>Le gel des loyers F/G dépend de la date de conclusion, renouvellement ou reconduction et du territoire. Le bail mobilité ne permet pas de révision en cours de contrat. BailClear ne vérifie pas l’encadrement local des loyers ni les conventions particulières.</p>
         </article>
       </div>
     </section>
@@ -478,6 +498,7 @@
 
   
 
+  <script src="assets/js/legal-rules.js"></script>
   <script src="assets/js/app.js"></script>
 </body>
 </html>
