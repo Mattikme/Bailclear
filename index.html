@@ -117,9 +117,9 @@
                 <span class="field-hint">Si le bail prévoit un complément de loyer, ajoutez-le au loyer de base pour calculer le montant hors charges à réviser.</span>
               </div>
               <div class="field">
-                <label for="charges">Provision sur charges (€)</label>
+                <label for="charges">Montant mensuel des charges (€)</label>
                 <input type="number" id="charges" step="0.01" min="0" placeholder="Ex. 65,00" value="" required>
-                <span class="field-hint">Saisissez une provision sur charges. Le forfait de charges n’est pas recalculé par cet outil : vérifiez séparément le bail et les règles applicables.</span>
+                <span class="field-hint">Indiquez le montant prévu au bail. Les provisions et forfaits ne suivent pas exactement les mêmes règles ; le forfait n’est pas recalculé par cet outil.</span>
               </div>
             </div>
 
@@ -268,17 +268,17 @@
             <div class="kpi-grid">
               <div class="kpi-box kpi-primary">
                 <span class="kpi-label">Nouveau Loyer Hors Charges</span>
-                <span class="kpi-value" id="res-nouveau-hc">857,47 €</span>
-                <span class="kpi-delta" id="res-variation">+7,47 € / mois (+0,88 %)</span>
+                <span class="kpi-value" id="res-nouveau-hc">—</span>
+                <span class="kpi-delta" id="res-variation">En attente des données</span>
               </div>
               <div class="kpi-box">
                 <span class="kpi-label">Nouveau Total Charges Comprises</span>
-                <span class="kpi-value" id="res-nouveau-cc">922,47 €</span>
-                <span class="kpi-delta muted" id="res-ancien-cc">Ancien total : 915,00 €</span>
+                <span class="kpi-value" id="res-nouveau-cc">—</span>
+                <span class="kpi-delta muted" id="res-ancien-cc">Total en attente</span>
               </div>
               <div class="kpi-box">
                 <span class="kpi-label">Impact Annuel (12 mois)</span>
-                <span class="kpi-value" id="res-impact-annuel">+89,64 €</span>
+                <span class="kpi-value" id="res-impact-annuel">—</span>
                 <span class="kpi-delta muted">Sur le loyer hors charges</span>
               </div>
             </div>
@@ -287,7 +287,7 @@
 
             <div class="formula-box">
               <span class="formula-title">Détail du calcul indicatif :</span>
-              <code id="formula-detail">850,00 € × (145,78 ÷ 144,51) = 857,47 €</code>
+              <code id="formula-detail">Renseignez le loyer et les indices applicables.</code>
             </div>
           </div>
 
@@ -332,13 +332,13 @@
                 <div class="doc-meta">
                   <p>Fait à <span id="doc-ville">Ville</span>, le <span id="doc-date-envoi">--/--/----</span></p>
                   <p><strong>Objet : Révision annuelle du loyer conformément à l'Indice de Référence des Loyers (IRL)</strong></p>
-                  <p class="doc-ref">Réf. contrat conclu ou reconduit le <span id="doc-date-bail">--/--/----</span> — Logement situé : <span id="doc-bien-adresse-2">Adresse du logement</span></p>
+                  <p class="doc-ref">Réf. contrat initial signé le <span id="doc-date-bail">--/--/----</span> — Logement situé : <span id="doc-bien-adresse-2">Adresse du logement</span></p>
                 </div>
 
                 <div class="doc-body">
                   <p>Madame, Monsieur,</p>
 
-                  <p>Conformément aux dispositions de notre contrat de location conclu ou reconduit le <strong id="doc-date-bail-2">--/--/----</strong> et en application de l'article 17-1 de la loi n° 89-462 du 6 juillet 1989 tendant à améliorer les rapports locatifs, le loyer est révisable chaque année à la date convenue selon la variation de l'Indice de Référence des Loyers (IRL) publié par l'INSEE.</p>
+                  <p>Conformément au contrat initial signé le <strong id="doc-date-bail-2">--/--/----</strong> et en application de l'article 17-1 de la loi n° 89-462 du 6 juillet 1989 tendant à améliorer les rapports locatifs, le loyer est révisable chaque année à la date convenue selon la variation de l'Indice de Référence des Loyers (IRL) publié par l'INSEE.</p>
 
                   <p>Le trimestre de référence stipulé au bail étant le <strong id="doc-trimestre">3e Trimestre (T3)</strong>, le calcul de révision s'établit comme suit :</p>
 
@@ -461,11 +461,11 @@
         <div class="form-row-3">
           <div class="field">
             <label for="prorata-loyer">Loyer mensuel hors charges (€)</label>
-            <input type="number" id="prorata-loyer" step="0.01" min="1" value="850.00">
+            <input type="number" id="prorata-loyer" step="0.01" min="1" value="" placeholder="Ex. 850,00">
           </div>
           <div class="field">
             <label for="prorata-charges">Charges mensuelles (€)</label>
-            <input type="number" id="prorata-charges" step="0.01" min="0" value="65.00">
+            <input type="number" id="prorata-charges" step="0.01" min="0" value="" placeholder="Ex. 65,00">
           </div>
           <div class="field">
             <label for="prorata-type">Type d'événement</label>
@@ -479,12 +479,12 @@
         <div class="form-row-2">
           <div class="field">
             <label for="prorata-date">Date exacte d'entrée ou de sortie</label>
-            <input type="date" id="prorata-date" value="2026-11-15">
+            <input type="date" id="prorata-date" value="">
           </div>
           <div class="prorata-result-card">
             <span class="kpi-label">Estimation du prorata pour ce mois</span>
-            <span class="kpi-value" id="prorata-total-du">488,00 €</span>
-            <span class="kpi-delta" id="prorata-detail">16 jours occupés sur 30 jours (Loyer : 453,33 € + Charges : 34,67 €)</span>
+            <span class="kpi-value" id="prorata-total-du">—</span>
+            <span class="kpi-delta" id="prorata-detail">Renseignez le loyer, les charges et la date.</span>
           </div>
         </div>
       </div>
