@@ -27,7 +27,7 @@
 - Politique RGPD à compléter après inventaire réel des traitements, journaux, traceurs, durées et transferts.
 - Prix TTC, contenu précis du pack, modalités de fourniture, support client, garanties, médiateur de la consommation et processus de rétractation à définir.
 - Paiement absent : aucun webhook serveur, aucune preuve durable de commande, aucun déverrouillage fiable.
-- Les indices Corse et Outre-mer ne sont pas inclus dans les valeurs préremplies. Le site doit demander des valeurs officielles saisies par l'utilisateur pour ces territoires.
+- Les indices Corse et des collectivités de l'article 73 sont désormais préremplis séparément, sur la base des séries officielles INSEE.
 - Pas de tests de bout en bout sur le compte Cloudflare de production ni de revue juridique par avocat.
 
 ## Sources officielles
@@ -68,3 +68,19 @@ Les indices sont préremplis mais ne se mettent pas automatiquement à jour dans
 
 ### Contrôle de la date de publication de l'indice
 Le module bloque désormais un calcul si l'indice sélectionné n'était pas encore publié à la date de révision indiquée. Les dates de publication utilisées pour les paires intégrées sont celles des publications INSEE correspondantes (T1 15 avril, T2 10 juillet, T3 15 octobre 2026 ; T4 2025 publié le 15 janvier 2026). Vérification par tests ajoutée. L'utilisateur doit encore confirmer que la paire choisie est celle visée par son bail.
+
+
+## Audit du parcours utilisateur — 15 novembre 2026
+
+### Défaut corrigé
+Le bouton de copie du courrier ne respectait pas le blocage déjà appliqué à l'impression PDF. La copie du courrier est maintenant bloquée lorsque le diagnostic ou les champs obligatoires échouent. La date d'effet indicative est également incluse dans le texte copié.
+
+### Contrôles encore nécessaires
+- Le trimestre choisi doit être comparé à la clause du bail ; si le bail ne précise pas le trimestre, il faut retenir le dernier indice publié à la date de signature. BailClear demande une sélection manuelle et ne lit pas le bail : l'utilisateur doit vérifier ce point.
+- Le calcul ne contrôle pas si le loyer de base inclut un complément de loyer, ni si les charges sont forfaitaires et révisables. Les montants de charges sont affichés à titre informatif.
+- Le contrôle ne détermine pas si le logement relève d'un encadrement local, d'une convention Anah, du logement social ou d'un régime dérogatoire. Ces situations doivent rester hors périmètre et faire l'objet d'une vérification externe.
+- Le texte généré reste un modèle de notification : il ne remplace pas l'envoi effectif ni sa preuve, et la révision n'est pas automatique.
+
+### Sources officielles complémentaires
+- Service-Public, « Augmentation et révision du loyer en cours de bail d'habitation », vérifié le 8 août 2025 : https://www.service-public.gouv.fr/particuliers/vosdroits/F1311. Cette page précise le choix du trimestre, les régimes particuliers et le délai de notification.
+- INSEE, IRL T3 2026, publié le 15 octobre 2026 : https://www.insee.fr/fr/statistiques/9081853.
