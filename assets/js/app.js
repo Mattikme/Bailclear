@@ -5,30 +5,11 @@
     STORAGE_KEY: "bailclear_owner_data_v1"
   };
 
-  // Paires annuelles publiées par l'INSEE au 15 octobre 2026.
-  // T1-T3 : 2025/2026 ; T4 : 2024/2025, le T4 2026 n'étant pas encore publié.
-  const IRL_PRESETS = {
-    metropole: {
-      T1: { ancien: 145.47, nouveau: 146.60, publishedAt: "2026-04-15", validThrough: "2027-04-14", label: "1er trimestre (T1)" },
-      T2: { ancien: 146.68, nouveau: 148.37, publishedAt: "2026-07-10", validThrough: "2027-07-09", label: "2e trimestre (T2)" },
-      T3: { ancien: 145.77, nouveau: 148.06, publishedAt: "2026-10-15", validThrough: "2027-10-14", label: "3e trimestre (T3)" },
-      T4: { ancien: 144.64, nouveau: 145.78, publishedAt: "2026-01-15", validThrough: "2027-01-14", label: "4e trimestre (T4)" }
-    },
-    corse: {
-      T1: { ancien: 141.28, nouveau: 142.38, publishedAt: "2026-04-15", validThrough: "2027-04-14", label: "1er trimestre (T1)" },
-      T2: { ancien: 144.56, nouveau: 146.22, publishedAt: "2026-07-10", validThrough: "2027-07-09", label: "2e trimestre (T2)" },
-      T3: { ancien: 141.58, nouveau: 143.80, publishedAt: "2026-10-15", validThrough: "2027-10-14", label: "3e trimestre (T3)" },
-      T4: { ancien: 140.48, nouveau: 141.59, publishedAt: "2026-01-15", validThrough: "2027-01-14", label: "4e trimestre (T4)" }
-    },
-    outremer: {
-      T1: { ancien: 142.67, nouveau: 143.78, publishedAt: "2026-04-15", validThrough: "2027-04-14", label: "1er trimestre (T1)" },
-      T2: { ancien: 145.27, nouveau: 146.94, publishedAt: "2026-07-10", validThrough: "2027-07-09", label: "2e trimestre (T2)" },
-      T3: { ancien: 142.97, nouveau: 145.21, publishedAt: "2026-10-15", validThrough: "2027-10-14", label: "3e trimestre (T3)" },
-      T4: { ancien: 141.86, nouveau: 142.98, publishedAt: "2026-01-15", validThrough: "2027-01-14", label: "4e trimestre (T4)" }
-    }
-  };
-
   let lastLegalCheckAllowsPrint = false;
+  let irlDataset = null;
+  let selectedIRLPair = null;
+  let selectedIRLPairError = "Base IRL INSEE non chargée.";
+
 
   const euroFmt = new Intl.NumberFormat("fr-FR", {
     style: "currency",
@@ -41,6 +22,22 @@
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   });
+
+  async function loadIRLData() {
+    try {
+      const response = await fetch("assets/data/irl.json", { cache: "no-store" });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      const payload = await response.json();
+      if (payload.schemaVersion !== 1 || !payload.territories) throw new Error("Structure IRL non reconnue");
+      irlDataset = payload;
+      return true;
+    } catch (error) {
+      irlDataset = null;
+      selectedIRLPair = null;
+      selectedIRLPairError = "Impossible de charger la base IRL officielle : " + String(error);
+      return false;
+    }
+  }
 
   function formatDateFR(isoStr) {
     if (!isoStr) return "--/--/----";
@@ -87,14 +84,21 @@
     const diagEl = document.getElementById("legal-diagnostic");
     const result = window.BailClearLegalRules.evaluate({
       contractType: document.getElementById("type-contrat")?.value || "inconnu",
+      specialRegime: document.getElementById("regime-logement")?.value || "inconnu",
       revisionClause: document.getElementById("clause-revision")?.value || "inconnu",
       dpe,
-      leaseDate: document.getElementById("date-signature-bail")?.value || "",
+      dpeDate: document.getElementById("date-dpe")?.value || "",
       territory: document.getElementById("zone-logement")?.value || "metropole",
+      leaseSignatureDate: document.getElementById("date-signature-bail")?.value || "",
+      renewalStatus: document.getElementById("bail-reconduit")?.value || "inconnu",
+      lastRenewalDate: document.getElementById("date-derniere-reconduction")?.value || "",
       revisionDate: dateAnnivStr || "",
       requestDate: dateEnvoiStr || "",
-      indexPublishedAt: IRL_PRESETS[document.getElementById("zone-logement")?.value || "metropole"]?.[document.getElementById("trimestre-ref")?.value || ""]?.publishedAt || "",
-      indexValidThrough: IRL_PRESETS[document.getElementById("zone-logement")?.value || "metropole"]?.[document.getElementById("trimestre-ref")?.value || ""]?.validThrough || ""
+      chargesType: document.getElementById("type-charges")?.value || "inconnu",
+      indexPairValid: Boolean(selectedIRLPair),
+      indexErrorMessage: selectedIRLPairError,
+      oldIndex: Number(document.getElementById("irl-ancien")?.value),
+      newIndex: Number(document.getElementById("irl-nouveau")?.value)
     });
     const required = [
       ["bailleur-nom", "Nom du bailleur"],
@@ -104,8 +108,16 @@
       ["ville-redaction", "Ville de rédaction"]
     ];
     const missing = required.filter(([id]) => !(document.getElementById(id)?.value || "").trim());
-    const numeric = [["loyer-hc", value => value > 0, "Loyer hors charges"], ["charges", value => value >= 0, "Charges"], ["irl-ancien", value => value > 0, "Ancien IRL"], ["irl-nouveau", value => value > 0, "Nouvel IRL"]];
-    const invalidNumbers = numeric.filter(([id, predicate]) => { const el = document.getElementById(id); const raw = el?.value.trim() || ""; const value = Number(raw); return raw === "" || !Number.isFinite(value) || !predicate(value); });
+    const numeric = [
+      ["loyer-hc", value => value > 0, "Loyer hors charges"],
+      ["charges", value => value >= 0, "Charges"]
+    ];
+    const invalidNumbers = numeric.filter(([id, predicate]) => {
+      const el = document.getElementById(id);
+      const raw = el?.value.trim() || "";
+      const value = Number(raw);
+      return raw === "" || !Number.isFinite(value) || !predicate(value);
+    });
     if (missing.length) result.messages.push("Complétez le document : " + missing.map(([, label]) => label).join(", ") + ".");
     if (invalidNumbers.length) result.messages.push("Vérifiez les valeurs numériques : " + invalidNumbers.map(([, , label]) => label).join(", ") + ".");
     const valid = result.valid && missing.length === 0 && invalidNumbers.length === 0;
@@ -113,33 +125,43 @@
     diagEl.textContent = (valid ? "Contrôle partiel — vérification humaine obligatoire : " : "Document bloqué — conditions ou informations manquantes : ") + result.messages.join(" ");
     return { valid, effectiveDate: result.effectiveDate };
   }
+
   function updateIRLCalculation() {
-    const loyerHC = Math.max(0, parseFloat(document.getElementById("loyer-hc").value) || 0);
-    const charges = Math.max(0, parseFloat(document.getElementById("charges").value) || 0);
-    const irlAncien = Math.max(1, parseFloat(document.getElementById("irl-ancien").value) || 1);
-    const irlNouveau = Math.max(1, parseFloat(document.getElementById("irl-nouveau").value) || 1);
-    const trimestreKey = document.getElementById("trimestre-ref").value;
-    const dpe = document.getElementById("classe-dpe").value;
+    const rawRent = document.getElementById("loyer-hc").value.trim();
+    const rawCharges = document.getElementById("charges").value.trim();
+    const loyerHC = Number(rawRent);
+    const charges = Number(rawCharges);
+    const irlAncien = Number(document.getElementById("irl-ancien").value);
+    const irlNouveau = Number(document.getElementById("irl-nouveau").value);
     const dateAnniv = document.getElementById("date-bail-anniv").value;
     const dateEnvoi = document.getElementById("date-envoi").value;
+    const dpe = document.getElementById("classe-dpe").value;
+    const calculationReady = rawRent !== "" && Number.isFinite(loyerHC) && loyerHC > 0 &&
+      rawCharges !== "" && Number.isFinite(charges) && charges >= 0 &&
+      Number.isFinite(irlAncien) && irlAncien > 0 &&
+      Number.isFinite(irlNouveau) && irlNouveau > 0;
 
-    const rawNouveauHC = loyerHC * (irlNouveau / irlAncien);
-    const nouveauHC = Math.round(rawNouveauHC * 100) / 100;
-    const diffMensuelle = Math.round((nouveauHC - loyerHC) * 100) / 100;
-    const pctVariation = loyerHC > 0 ? ((nouveauHC - loyerHC) / loyerHC) * 100 : 0;
-    const ancienCC = Math.round((loyerHC + charges) * 100) / 100;
-    const nouveauCC = Math.round((nouveauHC + charges) * 100) / 100;
-    const impactAnnuel = Math.round(diffMensuelle * 12 * 100) / 100;
+    let nouveauHC = null, diffMensuelle = null, pctVariation = null;
+    let ancienCC = null, nouveauCC = null, impactAnnuel = null;
+    let sign = "";
+    if (calculationReady) {
+      nouveauHC = Math.round((loyerHC * (irlNouveau / irlAncien)) * 100) / 100;
+      diffMensuelle = Math.round((nouveauHC - loyerHC) * 100) / 100;
+      pctVariation = loyerHC > 0 ? ((nouveauHC - loyerHC) / loyerHC) * 100 : 0;
+      ancienCC = Math.round((loyerHC + charges) * 100) / 100;
+      nouveauCC = Math.round((nouveauHC + charges) * 100) / 100;
+      impactAnnuel = Math.round(diffMensuelle * 12 * 100) / 100;
+      sign = diffMensuelle >= 0 ? "+" : "";
+    }
 
-    const sign = diffMensuelle >= 0 ? "+" : "";
-    document.getElementById("res-nouveau-hc").textContent = euroFmt.format(nouveauHC);
-    document.getElementById("res-variation").textContent = `${sign}${euroFmt.format(diffMensuelle)} / mois (${sign}${pctFmt.format(pctVariation)} %)`;
-    document.getElementById("res-nouveau-cc").textContent = euroFmt.format(nouveauCC);
-    document.getElementById("res-ancien-cc").textContent = `Ancien total : ${euroFmt.format(ancienCC)}`;
-    document.getElementById("res-impact-annuel").textContent = `${sign}${euroFmt.format(impactAnnuel)}`;
-
-    const formuleStr = `${euroFmt.format(loyerHC)} × (${irlNouveau.toFixed(2)} ÷ ${irlAncien.toFixed(2)}) = ${euroFmt.format(nouveauHC)}`;
-    document.getElementById("formula-detail").textContent = formuleStr;
+    document.getElementById("res-nouveau-hc").textContent = calculationReady ? euroFmt.format(nouveauHC) : "—";
+    document.getElementById("res-variation").textContent = calculationReady ? `${sign}${euroFmt.format(diffMensuelle)} / mois (${sign}${pctFmt.format(pctVariation)} %)` : "Renseignez le loyer et les indices applicables.";
+    document.getElementById("res-nouveau-cc").textContent = calculationReady ? euroFmt.format(nouveauCC) : "—";
+    document.getElementById("res-ancien-cc").textContent = calculationReady ? `Ancien total : ${euroFmt.format(ancienCC)}` : "Total en attente";
+    document.getElementById("res-impact-annuel").textContent = calculationReady ? `${sign}${euroFmt.format(impactAnnuel)}` : "—";
+    document.getElementById("formula-detail").textContent = calculationReady
+      ? `${euroFmt.format(loyerHC)} × (${irlNouveau.toFixed(2)} ÷ ${irlAncien.toFixed(2)}) = ${euroFmt.format(nouveauHC)}`
+      : "Calcul indisponible tant que les montants et indices ne sont pas renseignés.";
 
     const compliance = evaluateLegalCompliance(dpe, dateAnniv, dateEnvoi);
     lastLegalCheckAllowsPrint = compliance.valid;
@@ -151,9 +173,8 @@
     const dateBailFR = formatDateFR(document.getElementById("date-signature-bail").value);
     const dateEnvoiFR = formatDateFR(dateEnvoi);
     const ville = escapeText(document.getElementById("ville-redaction").value, "À compléter");
-    const territoryKey = document.getElementById("zone-logement")?.value || "metropole";
-    const quarterPreset = IRL_PRESETS[territoryKey]?.[trimestreKey];
-    const trimestreLabel = quarterPreset ? quarterPreset.label : "Trimestre à vérifier";
+    const trimestre = selectedIRLPair?.quarter || "";
+    const trimestreLabel = selectedIRLPair ? `${trimestre} — indice officiel INSEE` : "Trimestre à vérifier";
 
     document.getElementById("doc-bailleur-nom").textContent = bailleurNom;
     document.getElementById("doc-bailleur-adresse").textContent = bailleurAdresse;
@@ -165,26 +186,41 @@
     document.getElementById("doc-date-bail").textContent = dateBailFR;
     document.getElementById("doc-date-bail-2").textContent = dateBailFR;
     document.getElementById("doc-trimestre").textContent = trimestreLabel;
-    document.getElementById("doc-trimestre-2").textContent = trimestreKey;
-    document.getElementById("doc-trimestre-3").textContent = trimestreKey;
-    document.getElementById("doc-ancien-hc").textContent = euroFmt.format(loyerHC);
-    document.getElementById("doc-irl-ancien").textContent = irlAncien.toFixed(2);
-    document.getElementById("doc-irl-nouveau").textContent = irlNouveau.toFixed(2);
-    document.getElementById("doc-formule").textContent = `${euroFmt.format(loyerHC)} × (${irlNouveau.toFixed(2)} / ${irlAncien.toFixed(2)})`;
-    document.getElementById("doc-variation").textContent = `${sign}${euroFmt.format(diffMensuelle)} (${sign}${pctFmt.format(pctVariation)} %)`;
-    document.getElementById("doc-nouveau-hc").textContent = euroFmt.format(nouveauHC);
-    document.getElementById("doc-charges").textContent = euroFmt.format(charges);
-    document.getElementById("doc-nouveau-cc").textContent = euroFmt.format(nouveauCC);
-    document.getElementById("doc-prise-effet").textContent = compliance.effectiveDate ? "Date de prise d’effet indicative : " + formatDateFR(compliance.effectiveDate) + ". Vérifiez la date contractuelle avant envoi." : "Date de prise d’effet à vérifier.";
+    document.getElementById("doc-trimestre-2").textContent = trimestre || "—";
+    document.getElementById("doc-trimestre-3").textContent = trimestre || "—";
+    document.getElementById("doc-ancien-hc").textContent = euroFmt.format(calculationReady ? loyerHC : 0);
+    document.getElementById("doc-irl-ancien").textContent = calculationReady ? irlAncien.toFixed(2) : "—";
+    document.getElementById("doc-irl-nouveau").textContent = calculationReady ? irlNouveau.toFixed(2) : "—";
+    document.getElementById("doc-formule").textContent = calculationReady
+      ? `${euroFmt.format(loyerHC)} × (${irlNouveau.toFixed(2)} / ${irlAncien.toFixed(2)})`
+      : "Calcul en attente des indices et du loyer";
+    document.getElementById("doc-variation").textContent = calculationReady ? `${sign}${euroFmt.format(diffMensuelle)} (${sign}${pctFmt.format(pctVariation)} %)` : "—";
+    document.getElementById("doc-nouveau-hc").textContent = calculationReady ? euroFmt.format(nouveauHC) : "—";
+    document.getElementById("doc-charges").textContent = rawCharges !== "" && Number.isFinite(charges) ? euroFmt.format(charges) : "—";
+    document.getElementById("doc-nouveau-cc").textContent = calculationReady ? euroFmt.format(nouveauCC) : "—";
+    const chargesType = document.getElementById("type-charges").value;
+    const chargeLabels = {
+      provision: "Provision mensuelle pour charges locatives",
+      forfait: "Forfait mensuel de charges (non révisé par BailClear)",
+      aucune: "Charges récupérables",
+      inconnu: "Type de charges à vérifier"
+    };
+    document.getElementById("doc-charges-label").textContent = chargeLabels[chargesType] || chargeLabels.inconnu;
+    document.getElementById("doc-charges-note").textContent = chargesType === "forfait"
+      ? "Le forfait peut faire l’objet d’une révision distincte selon le bail. Le présent total le reprend sans le réviser."
+      : "";
+    document.getElementById("doc-prise-effet").textContent = compliance.effectiveDate
+      ? "Date de prise d’effet indicative : " + formatDateFR(compliance.effectiveDate) + ". Vérifiez la date contractuelle avant envoi."
+      : "Date de prise d’effet à vérifier.";
     document.getElementById("doc-bailleur-sig").textContent = bailleurNom;
 
     document.getElementById("q-bailleur-nom").textContent = bailleurNom;
     document.getElementById("q-bailleur-adresse").textContent = bailleurAdresse;
     document.getElementById("q-locataire-nom").textContent = locataireNom;
     document.getElementById("q-bien-adresse").textContent = bienAdresse;
-    document.getElementById("q-loyer-hc").textContent = euroFmt.format(nouveauHC);
-    document.getElementById("q-charges").textContent = euroFmt.format(charges);
-    document.getElementById("q-total-table").textContent = euroFmt.format(nouveauCC);
+    document.getElementById("q-loyer-hc").textContent = calculationReady ? euroFmt.format(nouveauHC) : "—";
+    document.getElementById("q-charges").textContent = rawCharges !== "" && Number.isFinite(charges) ? euroFmt.format(charges) : "—";
+    document.getElementById("q-total-table").textContent = calculationReady ? euroFmt.format(nouveauCC) : "—";
     document.getElementById("q-ville").textContent = ville;
     document.getElementById("q-date").textContent = dateEnvoiFR;
     document.getElementById("q-bailleur-sig").textContent = bailleurNom;
