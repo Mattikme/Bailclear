@@ -113,7 +113,8 @@ function setupMontage(content, photoUrl) {
     $('montage-progress').value = 0;
     $('montage-start').hidden = false;
     $('montage-opt').hidden = false;
-    $('montage-status').textContent = 'Un film d’environ 30 secondes avec tes photos, ta lettre et vos souvenirs.';
+    $('montage-pace').hidden = false;
+    $('montage-status').textContent = 'Un petit film avec tes photos, ta lettre et vos souvenirs.';
   };
   btn.addEventListener('click', () => { if (!busy) { reset(); dlg.showModal(); } });
   $('montage-start').addEventListener('click', async () => {
@@ -121,6 +122,7 @@ function setupMontage(content, photoUrl) {
     busy = true;
     $('montage-start').hidden = true;
     $('montage-opt').hidden = true;
+    $('montage-pace').hidden = true;
     $('montage-close').disabled = true;
     $('montage-status').textContent = 'Création du montage… garde cet écran ouvert.';
     let lock = null;
@@ -129,6 +131,7 @@ function setupMontage(content, photoUrl) {
       const { renderMontage } = await import('./montage.js');
       const { blob, ext, withMusic } = await renderMontage(content, photoUrl, $('montage-canvas'), {
         music: $('montage-music').checked,
+        pace: (document.querySelector('input[name="pace"]:checked') || {}).value || 'pose',
         onProgress: (x) => { $('montage-progress').value = x; },
       });
       if (url) URL.revokeObjectURL(url);

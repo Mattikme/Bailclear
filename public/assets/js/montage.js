@@ -10,7 +10,12 @@ const H = 1280;
 const FPS = 30;
 const BPM = 96;
 const BEAT = 60 / BPM; // 0,625 s : toutes les durées sont des multiples de temps
-const TR = BEAT * 0.75; // durée des transitions
+let TR = BEAT * 0.75; // durée des transitions (ajustée selon le rythme choisi)
+// Rythme : « posé » laisse le temps de lire chaque texte ; « dynamique » suit le tempo TikTok.
+let POSE = true;
+const KIN = { stagger: 0.06, dur: 0.45 };
+const nWords = (s) => String(s || '').trim().split(/\s+/).filter(Boolean).length;
+const readTime = (s) => (POSE ? nWords(s) / 2.8 + 1.2 : nWords(s) / 4 + 0.5); // secondes pour lire confortablement
 const SAFE_TOP = 170;
 const SAFE_BOTTOM = H - 260; // l'interface de TikTok/Reels couvre le bas
 const SERIF = '"Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif';
@@ -80,8 +85,8 @@ function txt(ctx, s, x, y, o = {}) {
 
 // Typographie cinétique : chaque mot monte et apparaît avec un léger décalage.
 function kinetic(ctx, lines, cx, y0, lineH, t, o = {}) {
-  const per = o.stagger || 0.06;
-  const dur = o.dur || 0.45;
+  const per = o.stagger || KIN.stagger;
+  const dur = o.dur || KIN.dur;
   let k = 0;
   setFont(ctx, o.size || 40, o);
   lines.forEach((line, li) => {
@@ -189,10 +194,12 @@ function buildScenes(content, images, theme, occ) {
   const imgs = images.filter(Boolean);
   const blur = new Map(imgs.map((im) => [im, blurred(im)]));
   const scenes = [];
-  const add = (beats, draw, transition) => scenes.push({ d: beats * BEAT, draw, transition });
+  const add = (sec, draw, transition) => scenes.push({ d: sec, draw, transition });
+  const PH = POSE ? 3.2 : 4 * BEAT; // durée d'une photo
+  const TS = POSE ? 2.5 : 2 * BEAT; // durée d'un souvenir
 
   // 0. Accroche : la plus belle photo plein écran + « Pour toi, Léa »
-  add(3, (ctx, t) => {
+  add(POSE ? 3.4 : 3 * BEAT, (ctx, t) => {
     if (imgs[0]) {
       drawCover(ctx, imgs[0], 0, 0, W, H, 1.18 - 0.1 * easeOut(t / 1.9), 0, -0.2);
       const g = ctx.createLinearGradient(0, H * 0.35, 0, H);
@@ -207,7 +214,7 @@ function buildScenes(content, images, theme, occ) {
   }, 'flash');
 
   // 1. L'enveloppe s'ouvre
-  add(5, (ctx, t) => {
+  add(POSE ? 4.6 : 5 * BEAT, (ctx, t) => {
     const ew = 520; const eh = 340; const ex = (W - ew) / 2; const ey = 640;
     kinetic(ctx, [content.from ? `${content.from} t’a écrit` : 'Une surprise', 'quelque chose…'], W / 2, 250, 66, t, { size: 52, font: SERIF, weight: 600, color: ink, stagger: 0.07 });
     const open = easeInOut(seg(t, 0.8, 1.5));
@@ -239,7 +246,7 @@ function buildScenes(content, images, theme, occ) {
 
   // 2. Titre + compteur
   const days = daysSince(content.date);
-  add(content.date && days > 0 ? 5 : 4, (ctx, t) => {
+  add(POSE ? Math.max(content.date && days > 0 ? 6 : 4.5, readTime(`${content.title} ${content.from || ''}`) + (content.date ? 2.5 : 0.8)) : (content.date && days > 0 ? 5 : 4) * BEAT, (ctx, t) => {
     txt(ctx, `${occ.emoji}  ${occ.label.split(' (')[0].toUpperCase()}`, W / 2, 330, { size: 26, weight: 800, color: accent });
     setFont(ctx, 78, { font: SERIF, weight: 700 });
     const lines = wrap(ctx, content.title, W - 140).slice(0, 4);
@@ -259,10 +266,11 @@ function buildScenes(content, images, theme, occ) {
 
   // 3. La lettre : lignes révélées une à une, la caméra descend doucement
   if (content.letter) {
-    const excerpt = content.letter.length > 260 ? `${content.letter.slice(0, 260).replace(/\s+\S*$/, '')}…` : content.letter;
-    const beats = clamp(Math.round(excerpt.length / 38), 6, 8);
-    add(beats, (ctx, t) => {
-      const d = beats * BEAT;
+    const max = POSE ? 200 : 260;
+    const excerpt = content.letter.length > max ? `${content.letter.slice(0, max).replace(/\s+\S*$/, '')}…` : content.letter;
+    // posé : ~15 caractères/s (vitesse de lecture) + 3 s pour finir de lire ; dynamique : 6 à 8 temps
+    const d = POSE ? clamp(excerpt.length / 18 + 2.6, 6, 14) : clamp(Math.round(excerpt.length / 38), 6, 8) * BEAT;
+    add(d, (ctx, t) => {
       const px = 66; const py = SAFE_TOP + 30; const pw = W - 132; const ph = 800;
       ctx.save();
       ctx.translate(W / 2, H / 2); ctx.rotate(-0.012 + 0.012 * t / d); ctx.scale(1.03 - 0.03 * t / d, 1.03 - 0.03 * t / d); ctx.translate(-W / 2, -H / 2);
@@ -273,7 +281,7 @@ function buildScenes(content, images, theme, occ) {
       ctx.fillStyle = accent; ctx.fillRect(px, py, 8, ph);
       setFont(ctx, 35, { font: SERIF, weight: 400 });
       const lines = wrap(ctx, excerpt, pw - 100).slice(0, 14);
-      const per = (d - 1.2) / Math.max(lines.length, 1);
+      const per = (d - (POSE ? 2.6 : 1.2)) / Math.max(lines.length, 1);
       lines.forEach((l, i) => {
         const p = seg(t, 0.3 + i * per, 0.3 + (i + 1) * per);
         if (!p) return;
@@ -282,7 +290,7 @@ function buildScenes(content, images, theme, occ) {
         txt(ctx, l, px + 50, y, { size: 35, font: SERIF, weight: 400, color: '#2b2326', align: 'left' });
         ctx.restore();
       });
-      if (content.from && t > d - 1.2) txt(ctx, `— ${content.from}`, px + pw - 50, py + ph - 60, { size: 36, font: SERIF, italic: true, weight: 400, color: '#2b2326', align: 'right' });
+      if (content.from && t > d - (POSE ? 2.6 : 1.2)) txt(ctx, `— ${content.from}`, px + pw - 50, py + ph - 60, { size: 36, font: SERIF, italic: true, weight: 400, color: '#2b2326', align: 'right' });
       ctx.restore();
     }, 'whip');
   }
@@ -298,7 +306,7 @@ function buildScenes(content, images, theme, occ) {
   const layouts = [
     // A. Plein écran, mouvement de caméra
     (img, dir) => (ctx, t) => {
-      const d = 4 * BEAT;
+      const d = PH;
       drawCover(ctx, img, 0, 0, W, H, 1.06 + 0.1 * (t / d), dir * (0.6 - 1.2 * t / d), 0);
       const g = ctx.createLinearGradient(0, H * 0.45, 0, H); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.6)');
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
@@ -323,7 +331,7 @@ function buildScenes(content, images, theme, occ) {
     (img) => (ctx, t) => {
       drawCover(ctx, blur.get(img), 0, 0, W, H, 1.3);
       ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillRect(0, 0, W, H);
-      const s = 0.92 + 0.06 * easeOut(t / (4 * BEAT));
+      const s = 0.92 + 0.06 * easeOut(t / PH);
       const bw = W - 80; const bh = 820; const by = 210;
       ctx.save(); ctx.translate(W / 2, by + bh / 2); ctx.scale(s, s); ctx.translate(-W / 2, -(by + bh / 2));
       ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 40; rr(ctx, 40, by, bw, bh, 26); ctx.fillStyle = '#000'; ctx.fill(); ctx.restore();
@@ -351,21 +359,21 @@ function buildScenes(content, images, theme, occ) {
   let li = 0;
   let k = 0;
   while (li < list.length) {
-    if (k % 4 === 3 && li + 1 < list.length) { add(4, duo(list[li], list[li + 1]), CYCLE[(k + 2) % CYCLE.length]); li += 2; }
-    else { add(4, layouts[k % 3](list[li], k % 2 ? 1 : -1), CYCLE[(k + 2) % CYCLE.length]); li += 1; }
+    if (k % 4 === 3 && li + 1 < list.length) { add(PH + (POSE ? 0.6 : 0), duo(list[li], list[li + 1]), CYCLE[(k + 2) % CYCLE.length]); li += 2; }
+    else { add(PH, layouts[k % 3](list[li], k % 2 ? 1 : -1), CYCLE[(k + 2) % CYCLE.length]); li += 1; }
     k++;
   }
 
   // 5. Souvenirs : une ligne se dessine et chaque étape apparaît
   const tl = content.timeline.slice(0, 3);
   if (tl.length) {
-    add(2 + tl.length * 2, (ctx, t) => {
+    add((POSE ? 1.8 : 2 * BEAT) + tl.length * TS, (ctx, t) => {
       kinetic(ctx, [occ.timelineTitle], W / 2, SAFE_TOP + 60, 70, t, { size: 60, font: SERIF, weight: 700, color: ink });
       const x = 130; const y0 = 360; const step = 200;
-      const lineP = easeInOut(seg(t, 0.2, 0.4 + tl.length * 2 * BEAT));
+      const lineP = easeInOut(seg(t, 0.2, 0.4 + tl.length * TS));
       ctx.fillStyle = soft; ctx.fillRect(x - 3, y0, 6, (step * tl.length - 60) * lineP);
       tl.forEach((item, i) => {
-        const p = easeBack(seg(t, 0.4 + i * 2 * BEAT, 0.9 + i * 2 * BEAT));
+        const p = easeBack(seg(t, 0.4 + i * TS, (POSE ? 1.1 : 0.9) + i * TS));
         if (!p) return;
         const y = y0 + i * step;
         ctx.save(); ctx.globalAlpha *= clamp(p); ctx.translate((1 - p) * 60, 0);
@@ -379,11 +387,12 @@ function buildScenes(content, images, theme, occ) {
   }
 
   // 6. « Ce que j'aime chez toi » : une carte géante par raison, retournée en 3D
-  content.reasons.slice(0, 4).forEach((r, i) => {
-    add(2.5, (ctx, t) => {
+  const nR = POSE ? 3 : 4;
+  content.reasons.slice(0, nR).forEach((r, i) => {
+    add(POSE ? Math.max(3.6, readTime(r) + 1.4) : 2.5 * BEAT, (ctx, t) => {
       if (i === 0 || t < 0.6) txt(ctx, occ.reasonsTitle, W / 2, SAFE_TOP + 50, { size: 46, font: SERIF, weight: 700, color: ink });
-      txt(ctx, `${i + 1} / ${Math.min(content.reasons.length, 4)}`, W / 2, SAFE_TOP + 110, { size: 26, weight: 700, color: accent });
-      const flip = easeInOut(seg(t, 0.25, 0.85));
+      txt(ctx, `${i + 1} / ${Math.min(content.reasons.length, nR)}`, W / 2, SAFE_TOP + 110, { size: 26, weight: 700, color: accent });
+      const flip = easeInOut(POSE ? seg(t, 0.5, 1.4) : seg(t, 0.25, 0.85));
       const sx = Math.max(0.001, Math.abs(Math.cos(flip * Math.PI)));
       const back = flip > 0.5;
       const cw = 500; const ch = 620; const cy = 330;
@@ -410,7 +419,7 @@ function buildScenes(content, images, theme, occ) {
 
   // 7. Le mot de la fin
   if (content.finalMessage) {
-    add(5, (ctx, t) => {
+    add(POSE ? Math.max(5, readTime(content.finalMessage) + 2) : 5 * BEAT, (ctx, t) => {
       setFont(ctx, 58, { font: SERIF, weight: 600 });
       const lines = wrap(ctx, content.finalMessage, W - 140).slice(0, 7);
       const y0 = H / 2 - 150 - (lines.length - 1) * 36;
@@ -423,7 +432,7 @@ function buildScenes(content, images, theme, occ) {
   }
 
   // 8. Signature (fait connaître le site)
-  add(4, (ctx, t) => {
+  add(POSE ? 4 : 4 * BEAT, (ctx, t) => {
     const a = easeBack(seg(t, 0, 0.6));
     ctx.save(); ctx.translate(W / 2, 520); ctx.scale(a, a); ctx.rotate((1 - a) * 0.4);
     rr(ctx, -64, -64, 128, 128, 32); ctx.fillStyle = accent; ctx.fill();
@@ -485,7 +494,11 @@ function scheduleMusic(ac, dest, total) {
 }
 
 /* ---------- Rendu ---------- */
-export async function renderMontage(content, photoUrl, canvas, { onProgress, music = true } = {}) {
+export async function renderMontage(content, photoUrl, canvas, { onProgress, music = true, pace = 'pose' } = {}) {
+  POSE = pace !== 'dynamique';
+  TR = POSE ? 0.75 : BEAT * 0.75;
+  KIN.stagger = POSE ? 0.11 : 0.06;
+  KIN.dur = POSE ? 0.7 : 0.45;
   const mimeType = recorderSupport();
   if (!mimeType) throw new Error('Ton navigateur ne sait pas fabriquer de vidéo. Essaie avec Chrome ou Safari à jour.');
   const theme = THEMES[content.theme] || THEMES.rose;

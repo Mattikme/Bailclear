@@ -217,3 +217,7 @@ body.opened .hero h1 .w { animation: wordUp .7s cubic-bezier(.34, 1.56, .64, 1) 
   .hero h1 .w, .final.words-in .w, .final.words-in .big-heart { opacity: 1 !important; filter: none !important; transform: none !important; }
   .letter.reveal.unfold { clip-path: none; }
 }
+.montage-pace { border: 0; padding: 0; margin: 10px 0 0; display: flex; flex-direction: column; gap: 6px; text-align: left; font-size: 14px; }
+.montage-pace legend { font-weight: 700; margin-bottom: 4px; }
+.montage-pace label { display: flex; gap: 8px; align-items: flex-start; }
+.montage-pace input { margin-top: 3px; accent-color: var(--accent); }
