@@ -106,6 +106,14 @@ const steps = `<div class="grid3">
   <div class="card"><span class="step-n">3</span><h3>Tu offres</h3><p>Envoie le lien ou imprime la carte QR code. La personne ouvre l’enveloppe… et découvre ta surprise.</p></div>
 </div>`;
 
+const howVideo = `<div class="how">
+  <figure class="how-video">
+    <div class="phone video-phone"><video data-autoplay src="/assets/video/demo-creation.mp4" poster="/assets/video/demo-poster.jpg" muted loop playsinline preload="none" aria-label="Démonstration : création d’une page puis ouverture par la personne qui la reçoit"></video></div>
+    <figcaption>Démo réelle, sans montage : 36 secondes</figcaption>
+  </figure>
+  <div class="how-steps">${steps}</div>
+</div>`;
+
 const features = `<ul class="features">
   <li>Une enveloppe animée à l’ouverture</li>
   <li>Ta lettre, mise en page comme une vraie lettre</li>
@@ -126,7 +134,7 @@ pages['index.html'] = layout({
   description: `Crée une page web unique pour la personne que tu aimes : lettre, photos, souvenirs et chanson, à offrir par lien ou QR code. Saint-Valentin, anniversaire, fête des mères… ${PRICE_LABEL}.`,
   path: '/',
   jsonld: faqLd(generalFaq),
-  scripts: '<script type="module" src="/assets/js/season.js"></script>',
+  scripts: '<script type="module" src="/assets/js/season.js"></script><script type="module" src="/assets/js/video.js"></script>',
   body: `<main>
 <div class="wrap"><p class="season" id="season" hidden></p></div>
 <section class="wrap hero">
@@ -141,7 +149,7 @@ pages['index.html'] = layout({
 <section class="section"><div class="wrap">
   <h2>Comment ça marche</h2>
   <p class="sub">Pas besoin d’être doué(e) en informatique : si tu sais écrire un message, tu sais créer ta page.</p>
-  ${steps}
+  ${howVideo}
 </div></section>
 <section class="section" id="occasions"><div class="wrap">
   <h2>Pour toutes les occasions</h2>
@@ -171,6 +179,7 @@ for (const o of OCCASIONS) {
     description: o.lead.slice(0, 155),
     path: `/${o.id}`,
     jsonld: faqLd(faq),
+    scripts: '<script type="module" src="/assets/js/video.js"></script>',
     body: `<main>
 <section class="wrap hero">
   <div>
@@ -192,7 +201,7 @@ for (const o of OCCASIONS) {
 </div></section>
 <section class="section"><div class="wrap">
   <h2>Comment ça marche</h2>
-  ${steps}
+  ${howVideo}
 </div></section>
 <section class="section"><div class="wrap">${priceBox}</div></section>
 <section class="section"><div class="wrap narrow">

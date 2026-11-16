@@ -16,7 +16,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/site.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Comment la personne reçoit-elle sa page ?","acceptedAnswer":{"@type":"Answer","text":"Après le paiement, tu obtiens un lien et un QR code. Envoie le lien par message, ou imprime la carte avec le QR code fournie (format A6) : il suffit de la scanner avec l’appareil photo d’un téléphone."}},{"@type":"Question","name":"Combien de temps la page reste-t-elle en ligne ?","acceptedAnswer":{"@type":"Answer","text":"2 ans à compter du paiement. Tu peux la modifier gratuitement pendant toute cette durée, ou la supprimer quand tu veux."}},{"@type":"Question","name":"Qui peut voir la page ?","acceptedAnswer":{"@type":"Answer","text":"Uniquement les personnes qui ont le lien. La page n’est pas référencée sur Google et son adresse est impossible à deviner. Tu peux en plus ajouter une question secrète à l’ouverture."}},{"@type":"Question","name":"Faut-il créer un compte ?","acceptedAnswer":{"@type":"Answer","text":"Non. Tu crées ta page, tu paies, c’est en ligne. Un lien de modification secret te permet de revenir la modifier."}},{"@type":"Question","name":"Quelles photos puis-je ajouter ?","acceptedAnswer":{"@type":"Answer","text":"Jusqu’à 10 photos (JPEG, PNG, ou photos d’iPhone depuis un iPhone). Elles sont allégées dans ton navigateur et leurs données de localisation sont supprimées avant l’envoi."}}]}</script>
-
+<script type="module" src="/assets/js/video.js"></script>
 </head>
 <body>
 <header class="site-header"><div class="wrap">
@@ -49,10 +49,16 @@
 </div></section>
 <section class="section"><div class="wrap">
   <h2>Comment ça marche</h2>
-  <div class="grid3">
+  <div class="how">
+  <figure class="how-video">
+    <div class="phone video-phone"><video data-autoplay src="/assets/video/demo-creation.mp4" poster="/assets/video/demo-poster.jpg" muted loop playsinline preload="none" aria-label="Démonstration : création d’une page puis ouverture par la personne qui la reçoit"></video></div>
+    <figcaption>Démo réelle, sans montage : 36 secondes</figcaption>
+  </figure>
+  <div class="how-steps"><div class="grid3">
   <div class="card"><span class="step-n">1</span><h3>Tu écris</h3><p>Choisis l’occasion, écris ta lettre, ajoute tes photos, vos souvenirs et votre chanson. L’aperçu se met à jour en direct.</p></div>
   <div class="card"><span class="step-n">2</span><h3>Tu publies</h3><p>Paiement sécurisé de 9,90 €. Ta page est en ligne immédiatement, avec son lien secret et son QR code.</p></div>
   <div class="card"><span class="step-n">3</span><h3>Tu offres</h3><p>Envoie le lien ou imprime la carte QR code. La personne ouvre l’enveloppe… et découvre ta surprise.</p></div>
+</div></div>
 </div>
 </div></section>
 <section class="section"><div class="wrap"><div class="price-box">
