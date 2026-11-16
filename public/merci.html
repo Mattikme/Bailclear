@@ -37,8 +37,26 @@
     <div class="share-box"><input id="page-url" type="text" readonly aria-label="Lien de la page"><button class="btn" id="copy-btn" type="button">Copier</button></div>
     <p style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
       <a class="btn ghost" id="open-link" href="#" target="_blank" rel="noopener">Voir ma page</a>
-      <button class="btn ghost" id="share-btn" type="button" hidden>Partager</button>
     </p>
+    <section class="send-box" aria-labelledby="send-title">
+      <h2 id="send-title">💌 Envoie-la</h2>
+      <p class="send-sub">Choisis un message (tu peux le modifier), puis envoie-le comme tu veux.</p>
+      <div class="chips" id="msg-styles" role="group" aria-label="Style du message">
+        <button type="button" class="chip" data-style="mystere" aria-pressed="true">🤫 Mystérieux</button>
+        <button type="button" class="chip" data-style="tendre" aria-pressed="false">🥰 Tendre</button>
+        <button type="button" class="chip" data-style="complice" aria-pressed="false">😄 Complice</button>
+        <button type="button" class="chip" data-style="lien" aria-pressed="false">🔗 Juste le lien</button>
+      </div>
+      <textarea id="send-msg" rows="5" aria-label="Message à envoyer"></textarea>
+      <div class="send-btns">
+        <a class="btn send-wa" id="send-wa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+        <a class="btn ghost" id="send-sms" href="#">SMS</a>
+        <a class="btn ghost" id="send-mail" href="#">E-mail</a>
+        <button class="btn ghost" id="send-copy" type="button">Copier le message</button>
+        <button class="btn ghost" id="share-btn" type="button" hidden>Autres applis…</button>
+      </div>
+      <p class="send-sub">Astuce : sur WhatsApp et Messenger, le lien s’affiche avec un aperçu « Quelqu’un t’a préparé une surprise 💌 », sans rien dévoiler.</p>
+    </section>
     <h2>Le QR code</h2>
     <div class="qr" id="qr"></div>
     <p style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
@@ -50,7 +68,7 @@
       <p style="margin:6px 0">Il permet de modifier ou supprimer ta page. Il est enregistré sur cet appareil, mais copie-le ou mets-le en favori pour ne pas le perdre.</p>
       <a class="edit-link" id="edit-link" href="#"></a>
     </div>
-    <p style="margin-top:30px;font-size:14px;color:var(--muted)">Ta facture, qui confirme ta commande, t’est envoyée par e-mail. Une question ? <span class="todo">[À compléter : e-mail de contact]</span></p>
+    <p style="margin-top:30px;font-size:14px;color:var(--muted)"><span id="invoice-note">Ta facture, qui confirme ta commande, t’est envoyée par e-mail. </span>Une question ? <span class="todo">[À compléter : e-mail de contact]</span></p>
   </div>
   <div class="print-card" aria-hidden="true">
     <p>💌</p>

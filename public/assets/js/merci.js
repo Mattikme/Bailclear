@@ -60,13 +60,11 @@ async function main() {
     $('card-to').textContent = `Pour ${mine.to || 'toi'}`;
   }
 
+  setupSend(url, mine);
+
   $('copy-btn').onclick = async () => {
     try { await navigator.clipboard.writeText(url); $('copy-btn').textContent = 'Copié ✓'; } catch { $('page-url').select(); }
   };
-  if (navigator.share) {
-    $('share-btn').hidden = false;
-    $('share-btn').onclick = () => navigator.share({ title: 'Une surprise pour toi 💌', url }).catch(() => {});
-  }
   $('print-btn').onclick = () => window.print();
   $('download-qr').onclick = () => {
     const blob = new Blob([svg], { type: 'image/svg+xml' });
@@ -75,6 +73,46 @@ async function main() {
     a.download = `qr-code-${id}.svg`;
     a.click();
   };
+}
+
+async function setupSend(url, mine) {
+  if (sessionId === 'gratuit') $('invoice-note').hidden = true;
+  let to = (mine && mine.to) || '';
+  let from = '';
+  try {
+    const res = await fetch(`/api/pages/${encodeURIComponent(id)}`);
+    if (res.ok) { const d = await res.json(); to = d.content.to || to; from = d.content.from || ''; }
+  } catch { /* hors ligne */ }
+  const sig = from ? `\n— ${from}` : '';
+  const TEMPLATES = {
+    mystere: () => `${to ? `${to}, j’ai` : 'J’ai'} préparé quelque chose rien que pour toi… 💌\nOuvre-le quand tu seras tranquille :\n${url}${sig}`,
+    tendre: () => `Pour toi${to ? ` ${to}` : ''} ❤️\nJ’ai mis dans cette page tout ce que je ne te dis pas assez.\n${url}${sig}`,
+    complice: () => `Psst${to ? ` ${to}` : ''} 👀 J’ai un petit truc pour toi. Interdiction de spoiler !\n${url}${sig}`,
+    lien: () => url,
+  };
+  const msg = $('send-msg');
+  const update = () => {
+    const text = msg.value;
+    $('send-wa').href = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    $('send-sms').href = `sms:?&body=${encodeURIComponent(text)}`;
+    $('send-mail').href = `mailto:?subject=${encodeURIComponent('Une surprise pour toi 💌')}&body=${encodeURIComponent(text)}`;
+  };
+  const choose = (style) => {
+    document.querySelectorAll('#msg-styles .chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.style === style)));
+    msg.value = TEMPLATES[style]();
+    update();
+  };
+  document.querySelectorAll('#msg-styles .chip').forEach((c) => { c.onclick = () => choose(c.dataset.style); });
+  msg.oninput = update;
+  choose('mystere');
+  $('send-copy').onclick = async () => {
+    try { await navigator.clipboard.writeText(msg.value); $('send-copy').textContent = 'Copié ✓'; setTimeout(() => { $('send-copy').textContent = 'Copier le message'; }, 2000); }
+    catch { msg.select(); }
+  };
+  if (navigator.share) {
+    $('share-btn').hidden = false;
+    $('share-btn').onclick = () => navigator.share({ text: msg.value }).catch(() => {});
+  }
 }
 
 main();

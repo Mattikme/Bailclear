@@ -344,6 +344,11 @@ function setupPublish() {
     notice('');
     if (!checkReady()) return;
     if (isEdit) return saveEdit();
+    const already = FREE && listPages().find((x) => x.free);
+    if (already) {
+      notice(`Offre de lancement : une page gratuite par personne, et tu as déjà créé la tienne (« ${already.title || 'ta page'} »). Tu peux la modifier autant que tu veux depuis « Tes pages » en haut de cette page. Les pages suivantes seront à 9,90 € à partir du 1er décembre.`, 'error');
+      return;
+    }
     dlg.showModal();
   };
 
@@ -358,7 +363,7 @@ function setupPublish() {
         body: JSON.stringify({ content, consent: { terms: true, waiver: !FREE } }),
       });
       const { id, token } = created;
-      rememberPage({ id, token, title: state.title, to: state.to, createdAt: Date.now() });
+      rememberPage({ id, token, title: state.title, to: state.to, createdAt: Date.now(), free: Boolean(created.free) });
       await uploadPhotos(id, token, progress);
       if (created.free) { dirty = false; location.href = `/merci?id=${id}&session_id=gratuit`; return; }
       progress('Redirection vers le paiement sécurisé…');

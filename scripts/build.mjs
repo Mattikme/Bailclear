@@ -349,8 +349,26 @@ pages['merci.html'] = layout({
     <div class="share-box"><input id="page-url" type="text" readonly aria-label="Lien de la page"><button class="btn" id="copy-btn" type="button">Copier</button></div>
     <p style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
       <a class="btn ghost" id="open-link" href="#" target="_blank" rel="noopener">Voir ma page</a>
-      <button class="btn ghost" id="share-btn" type="button" hidden>Partager</button>
     </p>
+    <section class="send-box" aria-labelledby="send-title">
+      <h2 id="send-title">💌 Envoie-la</h2>
+      <p class="send-sub">Choisis un message (tu peux le modifier), puis envoie-le comme tu veux.</p>
+      <div class="chips" id="msg-styles" role="group" aria-label="Style du message">
+        <button type="button" class="chip" data-style="mystere" aria-pressed="true">🤫 Mystérieux</button>
+        <button type="button" class="chip" data-style="tendre" aria-pressed="false">🥰 Tendre</button>
+        <button type="button" class="chip" data-style="complice" aria-pressed="false">😄 Complice</button>
+        <button type="button" class="chip" data-style="lien" aria-pressed="false">🔗 Juste le lien</button>
+      </div>
+      <textarea id="send-msg" rows="5" aria-label="Message à envoyer"></textarea>
+      <div class="send-btns">
+        <a class="btn send-wa" id="send-wa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+        <a class="btn ghost" id="send-sms" href="#">SMS</a>
+        <a class="btn ghost" id="send-mail" href="#">E-mail</a>
+        <button class="btn ghost" id="send-copy" type="button">Copier le message</button>
+        <button class="btn ghost" id="share-btn" type="button" hidden>Autres applis…</button>
+      </div>
+      <p class="send-sub">Astuce : sur WhatsApp et Messenger, le lien s’affiche avec un aperçu « Quelqu’un t’a préparé une surprise 💌 », sans rien dévoiler.</p>
+    </section>
     <h2>Le QR code</h2>
     <div class="qr" id="qr"></div>
     <p style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
@@ -362,7 +380,7 @@ pages['merci.html'] = layout({
       <p style="margin:6px 0">Il permet de modifier ou supprimer ta page. Il est enregistré sur cet appareil, mais copie-le ou mets-le en favori pour ne pas le perdre.</p>
       <a class="edit-link" id="edit-link" href="#"></a>
     </div>
-    <p style="margin-top:30px;font-size:14px;color:var(--muted)">Ta facture, qui confirme ta commande, t’est envoyée par e-mail. Une question ? ${email}</p>
+    <p style="margin-top:30px;font-size:14px;color:var(--muted)"><span id="invoice-note">Ta facture, qui confirme ta commande, t’est envoyée par e-mail. </span>Une question ? ${email}</p>
   </div>
   <div class="print-card" aria-hidden="true">
     <p>💌</p>
@@ -451,6 +469,7 @@ pages['confidentialite.html'] = layout({
 <li><strong>Lien de modification</strong> : nous n’en conservons qu’une empreinte chiffrée (non réversible).</li>
 <li><strong>Paiement</strong> : traité par Stripe, qui nous transmet ton nom, ton e-mail et le statut du paiement (exécution du contrat). Les pièces comptables sont conservées 10 ans (obligation légale).</li>
 <li><strong>Signalements</strong> (motif, explication, e-mail facultatif) : pour traiter le signalement (obligation légale d’hébergeur), conservés 1 an. En cas de retrait d’une Page, une trace minimale sans contenu est gardée 30 jours.</li>
+<li><strong>Offre de lancement</strong> : pour limiter l’offre gratuite à une page par personne, une empreinte chiffrée et non réversible de ton adresse IP est conservée 24 heures (intérêt légitime : prévenir les abus).</li>
 <li><strong>Données d’identification des créateurs</strong> (adresse IP, date et type d’opération : création, modification, suppression d’une Page) : conservées 1 an, comme l’impose aux hébergeurs l’article 6 de la loi pour la confiance dans l’économie numérique (obligation légale).</li>
 <li><strong>Preuve de ta commande</strong> (identifiant de la Page, date, version des CGV acceptée, renonciation au droit de rétractation, référence du paiement, sans le contenu) : conservée 5 ans pour pouvoir répondre à une éventuelle réclamation (intérêt légitime), même si la Page est supprimée.</li>
 <li><strong>Journaux techniques</strong> (adresse IP, date) traités par notre hébergeur pour la sécurité du service (intérêt légitime).</li>

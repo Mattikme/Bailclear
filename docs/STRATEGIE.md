@@ -119,6 +119,16 @@ Trois critiques ont ensuite débattu de la sélection : un avocat du diable, un 
   - pages collaboratives où plusieurs personnes écrivent ;
   - plus de thèmes.
 
+## 6 bis. Options payantes à ajouter après le lancement
+
+- **Fond d'écran personnalisé** (2,90 € en option, ou inclus dans une formule « Premium » à 14,90 €) :
+  - un montage des photos de la page au format écran de téléphone ;
+  - la zone de l'horloge est laissée libre, avec un petit mot ou une date discrète ;
+  - plusieurs modèles : collage, polaroïds, cœur de photos, minimaliste ;
+  - généré dans le navigateur, comme la vidéo souvenir, donc sans coût de serveur.
+- **Vidéo souvenir en HD sans la signature « Une page pour toi »** (option payante, la version avec signature restant gratuite pour la viralité).
+- **Page « à vie »** au lieu de 2 ans.
+
 ## 7. Idées de secours (qui réutilisent la même base technique)
 
 1. **Générateur de chasse au trésor d'anniversaire** pour enfants : le parent saisit le prénom, l'âge et le lieu, et reçoit un PDF immédiat à 9 à 12 €.

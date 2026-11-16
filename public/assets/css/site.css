@@ -190,3 +190,10 @@ dialog h2 { margin-top: 0; }
 .launch-bar { background: var(--accent); color: #fff; text-align: center; padding: 10px max(16px, env(safe-area-inset-left, 0px)); font-weight: 700; font-size: 15px; }
 .launch-bar a { color: #fff; text-decoration: none; }
 .free-note { color: var(--accent); font-weight: 700; }
+.send-box { text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin: 26px 0; }
+.send-box h2 { margin: 0 0 4px; text-align: center; }
+.send-sub { font-size: 14px; color: var(--muted); margin: 6px 0 12px; text-align: center; }
+.send-box .chips { justify-content: center; margin-bottom: 10px; }
+.send-box textarea { min-height: 120px; }
+.send-btns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+.send-wa { background: #1f9d55; }
