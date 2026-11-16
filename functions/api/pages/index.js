@@ -1,11 +1,12 @@
 import { MAX_BODY_BYTES, TERMS_VERSION } from '../../../lib/config.js';
 import { randomId, randomToken, sha256Hex } from '../../../lib/crypto.js';
-import { handle, json, error, readJson } from '../../../lib/http.js';
+import { handle, json, error, readJson, paymentDisabled, PAYMENT_DISABLED_MSG } from '../../../lib/http.js';
 import { logAction, newDraft, savePage } from '../../../lib/store.js';
 import { validateContent, ValidationError } from '../../../lib/validate.js';
 
 // Crée un brouillon juste avant le paiement. Le contenu n'est jamais public tant qu'il n'est pas payé.
 export const onRequestPost = handle(async ({ request, env }) => {
+  if (paymentDisabled(env, request)) return error(PAYMENT_DISABLED_MSG, 503);
   const body = await readJson(request, MAX_BODY_BYTES);
   if (!body.consent || body.consent.terms !== true || body.consent.waiver !== true) {
     return error('Tu dois accepter les CGV et la renonciation au droit de rétractation.', 400);

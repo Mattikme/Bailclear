@@ -43,7 +43,17 @@ Puis lance `npm run build`. La commande affiche un avertissement tant qu'une inf
 - `unepagepourtoi.fr` était **libre le 16/11/2026**. Achète-le vite, chez OVH, Gandi, IONOS ou un autre registrar (environ 7 à 12 € par an).
 - Crée une adresse e-mail de contact sur ce domaine. La plupart des registrars proposent une redirection gratuite vers ta boîte Gmail.
 
-## 4. Mettre le site en ligne (Cloudflare Pages, gratuit)
+## 4. Mettre le site en ligne
+
+> **Déjà fait (16/11/2026)** : le site tourne en **Worker Cloudflare** sur https://unepagepourtoi.matthieu-gonthier-660.workers.dev, avec son stockage KV `upt-pages`.
+> - **Redéployer** après une modification : `npm run deploy:worker`. Il faut `CLOUDFLARE_API_TOKEN` et `CLOUDFLARE_ACCOUNT_ID` dans le terminal.
+> - **Clés secrètes du Worker** : tableau de bord Cloudflare → Workers & Pages → `unepagepourtoi` → Settings → Variables and Secrets. Tu peux aussi passer par `npx wrangler secret put STRIPE_SECRET_KEY -c wrangler.worker.toml` (même chose pour `STRIPE_WEBHOOK_SECRET`, `ADMIN_TOKEN` et `SITE_URL`).
+> - **Ton domaine** : Settings → Domains & Routes → *Add custom domain* → `unepagepourtoi.fr`.
+> - **Tant que `STRIPE_SECRET_KEY` est absente**, le bouton « Payer » affiche « le paiement n'est pas encore ouvert ». Le site n'est pas indexé par Google tant qu'il reste sur l'adresse `.workers.dev`.
+>
+> La méthode Cloudflare Pages ci-dessous reste une alternative.
+
+### Alternative : Cloudflare Pages
 
 1. Crée un compte sur https://dash.cloudflare.com.
 2. **Stockage** : Workers & Pages → KV → *Create namespace*, nommé `upt-pages`.

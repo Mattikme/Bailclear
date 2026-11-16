@@ -1,0 +1,8 @@
+# Configuration Cloudflare Pages (déploiement : npm run deploy)
+name = "unepagepourtoi"
+pages_build_output_dir = "public"
+compatibility_date = "2025-09-01"
+
+[[kv_namespaces]]
+binding = "PAGES_KV"
+id = "cb16baada3d8421792cf0bffeda934c4"

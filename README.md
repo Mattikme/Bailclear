@@ -1,5 +1,7 @@
 # Une page pour toi
 
+En ligne (préversion) : https://unepagepourtoi.matthieu-gonthier-660.workers.dev
+
 Site de **pages cadeaux personnalisées** : lettre, photos, frise de souvenirs, cartes à retourner, compteur de jours, musique (YouTube ou Spotify) et question secrète. La page est offerte par lien ou par QR code (une carte A6 est fournie à imprimer). Prix : **9,90 €**, en paiement unique.
 
 - **Démarrer (micro-entreprise, Stripe, mise en ligne)** : [`docs/DEMARRAGE.md`](docs/DEMARRAGE.md)
@@ -46,7 +48,8 @@ npm install
 npm run build     # régénère les pages HTML (après modification de site.config.json, occasions.js ou config.js)
 npm run dev       # serveur local http://localhost:8788 (paiement simulé si DEV_FAKE_PAYMENT=1 dans .dev.vars)
 npm test          # tests unitaires
-npm run deploy    # déploiement manuel via wrangler (sinon : connexion Git dans Cloudflare Pages)
+npm run deploy:worker  # déploiement en Worker Cloudflare (méthode actuelle, voir docs/DEMARRAGE.md)
+npm run deploy    # alternative : Cloudflare Pages
 ```
 
 ## Personnaliser

@@ -1,10 +1,11 @@
 import { PRICE_CENTS, PRODUCT_NAME, TERMS_VERSION } from '../../lib/config.js';
 import { ID_RE } from '../../lib/crypto.js';
-import { bearer, devFakePayment, error, handle, json, readJson } from '../../lib/http.js';
+import { bearer, devFakePayment, error, handle, json, paymentDisabled, PAYMENT_DISABLED_MSG, readJson } from '../../lib/http.js';
 import { checkToken, getPage } from '../../lib/store.js';
 import { createCheckoutSession } from '../../lib/stripe.js';
 
 export const onRequestPost = handle(async ({ request, env }) => {
+  if (paymentDisabled(env, request)) return error(PAYMENT_DISABLED_MSG, 503);
   const { id } = await readJson(request, 1024);
   if (!ID_RE.test(String(id))) return error('Page invalide.', 400);
   const page = await getPage(env, id);
