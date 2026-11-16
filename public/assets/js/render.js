@@ -137,15 +137,46 @@ function timeline(content, occ) {
       el('li', { class: 'reveal' }, t.when ? el('span', { class: 'when', text: t.when }) : null, el('p', { text: t.text })))));
 }
 
+// Petite explosion de cœurs au centre d'une carte qu'on retourne.
+function cardBurst(card, symbol = '♥', count = 10) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  for (let i = 0; i < count; i++) {
+    const a = (Math.PI * 2 * i) / count + Math.random() * 0.5;
+    const d = 45 + Math.random() * 45;
+    const p = el('span', { class: 'spark', 'aria-hidden': 'true', text: symbol });
+    p.style.setProperty('--dx', `${Math.cos(a) * d}px`);
+    p.style.setProperty('--dy', `${Math.sin(a) * d - 20}px`);
+    p.style.fontSize = `${10 + Math.random() * 12}px`;
+    card.append(p);
+    setTimeout(() => p.remove(), 900);
+  }
+}
+
 function reasons(content, occ) {
   if (!content.reasons.length) return null;
-  return el('section', { class: 'block' },
-    el('h2', { text: occ.reasonsTitle }),
-    el('p', { class: 'hint', text: 'Touche les cartes pour les retourner' }),
-    el('div', { class: 'reasons' }, content.reasons.map((r, i) =>
-      el('button', { class: 'reason reveal', type: 'button', 'aria-label': `Carte ${i + 1}`, onclick: (e) => e.currentTarget.classList.add('flipped') },
-        el('span', { class: 'front', text: String(i + 1) }),
-        el('span', { class: 'back', text: r })))));
+  const symbol = occ.id === 'noel' ? '❄' : occ.id === 'anniversaire' ? '✦' : '♥';
+  const total = content.reasons.length;
+  const hint = el('p', { class: 'hint', text: 'Touche les cartes pour les découvrir' });
+  const grid = el('div', { class: 'reasons reveal' });
+  const flip = (card) => {
+    const opening = !card.classList.contains('flipped');
+    card.classList.toggle('flipped');
+    card.setAttribute('aria-pressed', String(opening));
+    if (!opening) return;
+    grid.classList.add('touched');
+    cardBurst(card, symbol);
+    const done = grid.querySelectorAll('.reason.flipped').length;
+    hint.textContent = done === total ? 'Toutes les cartes sont découvertes ' + symbol : `${done} / ${total} découvertes`;
+    if (done === total) setTimeout(() => burst(document.body, symbol, 36), 450);
+  };
+  content.reasons.forEach((r, i) => {
+    const card = el('button', { class: 'reason', type: 'button', 'aria-pressed': 'false', 'aria-label': `Carte ${i + 1} : ${r}`, onclick: (e) => flip(e.currentTarget) },
+      el('span', { class: 'face front' }, el('span', { class: 'card-heart', 'aria-hidden': 'true', text: symbol }), el('span', { class: 'card-n', text: String(i + 1) })),
+      el('span', { class: 'face back', text: r }));
+    card.style.setProperty('--i', i);
+    grid.append(card);
+  });
+  return el('section', { class: 'block' }, el('h2', { text: occ.reasonsTitle }), hint, grid);
 }
 
 const YT_ORIGIN = 'https://www.youtube-nocookie.com';

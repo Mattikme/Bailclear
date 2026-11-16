@@ -49,14 +49,30 @@ main#page { max-width: 680px; margin: 0 auto; padding: 0 18px 40px; }
 .timeline .when { font-weight: 700; color: var(--accent); font-size: 14px; text-transform: uppercase; letter-spacing: .05em; }
 .timeline p { margin: 2px 0 0; overflow-wrap: anywhere; white-space: pre-line; }
 
-.reasons { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-.reason { position: relative; height: 120px; border: 0; padding: 0; background: none; cursor: pointer; perspective: 600px; color: inherit; }
-.reason span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 10px; border-radius: 14px; backface-visibility: hidden; transition: transform .6s; }
-.reason .front { background: var(--accent); color: #fff; font-family: var(--serif); font-size: 34px; }
-.reason .back { background: var(--soft); transform: rotateY(180deg); font-size: 15px; line-height: 1.35; overflow-wrap: anywhere; }
+.reasons { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.reason { position: relative; height: 130px; border: 0; padding: 0; background: none; cursor: pointer; perspective: 800px; color: inherit; -webkit-tap-highlight-color: transparent; }
+.reason .face { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 12px; border-radius: 16px; backface-visibility: hidden; -webkit-backface-visibility: hidden; transition: transform .75s cubic-bezier(.34, 1.56, .64, 1), box-shadow .3s; transform-style: preserve-3d; }
+.reason .front { flex-direction: column; gap: 2px; color: #fff; background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.35), transparent 45%), var(--accent); box-shadow: 0 10px 22px -12px var(--accent); overflow: hidden; }
+.reason .front::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.45) 50%, transparent 65%); transform: translateX(-120%); animation: shine 3.6s ease-in-out infinite; animation-delay: calc(var(--i) * .25s); }
+.card-heart { font-size: 30px; line-height: 1; animation: pulse 1.8s ease-in-out infinite; animation-delay: calc(var(--i) * .15s); }
+.card-n { font-family: var(--serif); font-size: 15px; opacity: .85; }
+.reason .back { background: #fff; color: #2b2326; border: 2px solid var(--soft); transform: rotateY(180deg); font-family: var(--serif); font-size: 16px; line-height: 1.35; overflow-wrap: anywhere; box-shadow: 0 12px 26px -14px rgba(0,0,0,.35); }
 .reason.flipped .front { transform: rotateY(180deg); }
 .reason.flipped .back { transform: rotateY(360deg); }
-.reason:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 14px; }
+.reason:active .face { scale: .97; }
+.reason:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 16px; }
+/* Distribution des cartes quand la section apparaît */
+.reasons.reveal { opacity: 1; transform: none; }
+.reasons.reveal .reason { opacity: 0; transform: translateY(40px) rotate(-6deg) scale(.85); transition: opacity .5s ease, transform .7s cubic-bezier(.34, 1.56, .64, 1); transition-delay: calc(var(--i) * 110ms); }
+.reasons.reveal .reason:nth-child(even) { transform: translateY(40px) rotate(6deg) scale(.85); }
+.reasons.reveal.visible .reason { opacity: 1; transform: none; }
+/* Invitation à toucher : la première carte frétille tant qu'aucune n'a été retournée */
+.reasons.visible:not(.touched) .reason:first-child .face.front { animation: wiggle 2.8s ease-in-out 1.6s infinite; }
+.spark { position: absolute; left: 50%; top: 50%; color: var(--accent); pointer-events: none; z-index: 2; animation: spark .85s ease-out forwards; }
+@keyframes spark { from { transform: translate(-50%, -50%) scale(.4); opacity: 1; } to { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); opacity: 0; } }
+@keyframes shine { 0%, 60% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
+@keyframes pulse { 50% { transform: scale(1.15); } }
+@keyframes wiggle { 0%, 88%, 100% { transform: rotate(0); } 91% { transform: rotate(-5deg); } 94% { transform: rotate(5deg); } 97% { transform: rotate(-3deg); } }
 
 .music { text-align: center; }
 .music-bar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px; padding: 8px max(12px, env(safe-area-inset-right, 0px)) 8px max(12px, env(safe-area-inset-left, 0px)); background: rgba(22, 17, 24, .94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #fff; box-shadow: 0 6px 20px -12px rgba(0,0,0,.5); }
