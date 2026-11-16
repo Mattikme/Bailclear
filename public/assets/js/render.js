@@ -85,9 +85,9 @@ function counter(content) {
   if (days == null || days < 0) return null;
   const label = content.dateLabel || 'Depuis';
   const dateFr = new Date(content.date + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-  return el('div', { class: 'counter reveal' },
+  return el('div', { class: 'counter reveal pop' },
     el('div', { class: 'counter-label', text: `${label} le ${dateFr}` }),
-    el('div', { class: 'counter-value' }, el('strong', { text: days.toLocaleString('fr-FR') }), ' jours'),
+    el('div', { class: 'counter-value' }, el('strong', { class: 'count-up', 'data-target': String(days), text: days.toLocaleString('fr-FR') }), ' jours'),
   );
 }
 
@@ -95,7 +95,7 @@ function gallery(content, photoUrl) {
   if (!content.photos.length) return null;
   const figs = content.photos.map((p, n) => {
     const img = el('img', { src: photoUrl(n), alt: p.caption || `Photo ${n + 1}`, loading: n < 2 ? 'eager' : 'lazy', decoding: 'async' });
-    return el('figure', { class: 'photo reveal', tabindex: '0', onclick: () => lightbox(content, photoUrl, n), onkeydown: (e) => { if (e.key === 'Enter') lightbox(content, photoUrl, n); } },
+    return el('figure', { class: `photo reveal ${n === 0 ? 'zoom-in' : n % 2 ? 'from-right' : 'from-left'}`, tabindex: '0', onclick: () => lightbox(content, photoUrl, n), onkeydown: (e) => { if (e.key === 'Enter') lightbox(content, photoUrl, n); } },
       img, p.caption ? el('figcaption', { text: p.caption }) : null);
   });
   return el('section', { class: 'gallery' }, figs);
@@ -133,8 +133,8 @@ function timeline(content, occ) {
   if (!content.timeline.length) return null;
   return el('section', { class: 'block' },
     el('h2', { text: occ.timelineTitle }),
-    el('ol', { class: 'timeline' }, content.timeline.map((t) =>
-      el('li', { class: 'reveal' }, t.when ? el('span', { class: 'when', text: t.when }) : null, el('p', { text: t.text })))));
+    el('ol', { class: 'timeline' }, content.timeline.map((t, i) =>
+      el('li', { class: 'reveal slide-in', style: `--i:${i}` }, t.when ? el('span', { class: 'when', text: t.when }) : null, el('p', { text: t.text })))));
 }
 
 // Petite explosion de cœurs au centre d'une carte qu'on retourne.
@@ -261,18 +261,44 @@ export function renderPage(root, content, { photoUrl, preview = false } = {}) {
     preview ? el('div', { class: 'preview-banner', text: 'Aperçu — page non publiée' }) : null,
     el('header', { class: 'hero' },
       el('p', { class: 'eyebrow', text: `${occ.emoji} Pour ${content.to || '…'}` }),
-      el('h1', { text: content.title || '' }),
+      el('h1', { 'aria-label': content.title || '' }, words(content.title || '', 0.25)),
       content.from ? el('p', { class: 'from', text: `de la part de ${content.from}` }) : null,
       counter(content)),
-    content.letter ? el('section', { class: 'block letter reveal' }, paragraphs(content.letter), content.from ? el('p', { class: 'signature', text: `— ${content.from}` }) : null) : null,
+    content.letter ? el('section', { class: 'block letter reveal unfold' }, paragraphs(content.letter), content.from ? el('p', { class: 'signature', text: `— ${content.from}` }) : null) : null,
     gallery(content, photoUrl),
     timeline(content, occ),
     reasons(content, occ),
-    content.finalMessage ? el('section', { class: 'block final reveal' }, el('p', { text: content.finalMessage }), el('div', { class: 'big-heart', 'aria-hidden': 'true', text: '♥' })) : null,
+    content.finalMessage ? el('section', { class: 'block final reveal words-in' }, el('p', { 'aria-label': content.finalMessage }, words(content.finalMessage, 0)), el('div', { class: 'big-heart', 'aria-hidden': 'true', text: '♥' })) : null,
   ];
   root.replaceChildren(...sections.filter(Boolean));
+  if (preview) document.body.classList.add('opened');
   mountMusic(content);
   observeReveal(root);
+}
+
+// Découpe un texte en mots animables (décalage --i) ; le texte reste lisible par les lecteurs d'écran via aria-label.
+function words(text, delay) {
+  const out = [];
+  text.split(/(\s+)/).forEach((w, i) => {
+    if (/^\s+$/.test(w)) { out.push(w.includes('\n') ? el('br') : ' '); return; }
+    if (w) out.push(el('span', { class: 'w', 'aria-hidden': 'true', style: `--i:${i / 2};--d:${delay}s`, text: w }));
+  });
+  return out;
+}
+
+function countUp(node) {
+  const n = node.querySelector && node.querySelector('.count-up');
+  if (!n || n.dataset.done) return;
+  n.dataset.done = '1';
+  const target = Number(n.dataset.target) || 0;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches || target < 2) return;
+  const t0 = performance.now();
+  const step = (now) => {
+    const p = Math.min(1, (now - t0) / 1600);
+    n.textContent = Math.round(target * (1 - Math.pow(1 - p, 4))).toLocaleString('fr-FR');
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 
 function observeReveal(root) {
@@ -282,7 +308,7 @@ function observeReveal(root) {
     return;
   }
   const io = new IntersectionObserver((entries) => {
-    for (const e of entries) if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add('visible'); countUp(e.target); io.unobserve(e.target); }
   }, { threshold: 0.12 });
   items.forEach((i) => io.observe(i));
 }

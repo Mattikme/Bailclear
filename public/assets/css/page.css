@@ -169,3 +169,51 @@ dialog.montage { width: min(420px, calc(100vw - 24px)); max-height: calc(100vh -
 dialog.montage progress { width: 100%; height: 8px; accent-color: var(--accent); }
 dialog.montage .row { justify-content: center; flex-wrap: wrap; }
 .montage-note { font-size: 13px; opacity: .7; margin: 12px 0 0; }
+.montage-opt { display: flex; gap: 8px; align-items: flex-start; justify-content: center; font-size: 14px; margin: 10px 0 0; text-align: left; }
+.montage-opt input { margin-top: 3px; accent-color: var(--accent); }
+
+/* ===== Animations variées ===== */
+/* Titre : les mots arrivent un à un après l'ouverture de l'enveloppe */
+.hero h1 .w { display: inline-block; opacity: 0; transform: translateY(.45em) rotate(3deg); }
+body.opened .hero h1 .w { animation: wordUp .7s cubic-bezier(.34, 1.56, .64, 1) forwards; animation-delay: calc(var(--d) + var(--i) * 90ms); }
+@keyframes wordUp { to { opacity: 1; transform: none; } }
+/* Compteur : apparition en rebond */
+.counter.reveal.pop { transform: scale(.7); }
+.counter.reveal.pop.visible { transform: none; transition: opacity .6s ease, transform .8s cubic-bezier(.34, 1.56, .64, 1); }
+/* Lettre : se déplie de haut en bas */
+.letter.reveal.unfold { transform: perspective(900px) rotateX(-18deg); transform-origin: top center; clip-path: inset(0 0 100% 0 round 6px); transition: opacity .5s ease, transform 1.1s cubic-bezier(.22, 1, .36, 1), clip-path 1.2s cubic-bezier(.22, 1, .36, 1); }
+.letter.reveal.unfold.visible { transform: none; clip-path: inset(0 0 0 0 round 6px); }
+/* Photos : entrées alternées */
+.photo.reveal.zoom-in { transform: scale(.82) rotate(-1deg); transition: opacity .8s ease, transform 1s cubic-bezier(.22, 1, .36, 1); }
+.photo.reveal.from-left { transform: translateX(-70px) rotate(-8deg); }
+.photo.reveal.from-right { transform: translateX(70px) rotate(8deg); }
+.photo.reveal.from-left, .photo.reveal.from-right { transition: opacity .7s ease, transform .9s cubic-bezier(.34, 1.4, .64, 1); }
+.photo.reveal.zoom-in.visible:nth-child(odd), .photo.reveal.from-left.visible:nth-child(odd), .photo.reveal.from-right.visible:nth-child(odd) { transform: rotate(-1deg); }
+.photo.reveal.from-left.visible:nth-child(even), .photo.reveal.from-right.visible:nth-child(even) { transform: rotate(1.2deg); }
+/* Souvenirs : glissent en cascade, le point « pulse » à l'arrivée */
+.timeline li.reveal.slide-in { transform: translateX(-36px); transition: opacity .6s ease, transform .7s cubic-bezier(.22, 1, .36, 1); transition-delay: calc(var(--i) * 120ms); }
+.timeline li.reveal.slide-in.visible { transform: none; }
+.timeline li.reveal.slide-in.visible::before { animation: dotPop .6s cubic-bezier(.34, 1.56, .64, 1) both; animation-delay: calc(var(--i) * 120ms + .15s); }
+@keyframes dotPop { from { transform: scale(0); } 60% { transform: scale(1.5); } to { transform: scale(1); } }
+/* Cartes : sens d'arrivée et de retournement variés */
+.reasons.reveal .reason:nth-child(3n+2) { transform: translateY(60px) scale(.6); }
+.reasons.reveal .reason:nth-child(3n) { transform: translateX(60px) rotate(12deg) scale(.85); }
+.reasons.reveal.visible .reason:nth-child(n) { transform: none; }
+.reason:nth-child(3n+2) .back { transform: rotateX(180deg); }
+.reason:nth-child(3n+2).flipped .front { transform: rotateX(180deg); }
+.reason:nth-child(3n+2).flipped .back { transform: rotateX(360deg); }
+.reason:nth-child(3n) .back { transform: rotateY(-180deg); }
+.reason:nth-child(3n).flipped .front { transform: rotateY(-180deg); }
+.reason:nth-child(3n).flipped .back { transform: rotateY(-360deg); }
+/* Mot de la fin : s'écrit mot à mot */
+.final.reveal.words-in { opacity: 1; transform: none; }
+.final.words-in .w { display: inline-block; opacity: 0; filter: blur(6px); transform: translateY(10px); }
+.final.words-in.visible .w { animation: wordBlur .8s ease forwards; animation-delay: calc(var(--i) * 110ms); }
+@keyframes wordBlur { to { opacity: 1; filter: none; transform: none; } }
+.final.words-in .big-heart { opacity: 0; }
+.final.words-in.visible .big-heart { animation: heartIn .9s cubic-bezier(.34, 1.56, .64, 1) 1.1s forwards, beat 1.6s ease-in-out 2s infinite; }
+@keyframes heartIn { from { opacity: 0; transform: scale(.2) rotate(-20deg); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .hero h1 .w, .final.words-in .w, .final.words-in .big-heart { opacity: 1 !important; filter: none !important; transform: none !important; }
+  .letter.reveal.unfold { clip-path: none; }
+}

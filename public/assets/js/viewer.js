@@ -29,6 +29,7 @@ function envelope(content, onOpen) {
   env.hidden = false;
   const open = () => {
     env.classList.add('gone');
+    document.body.classList.add('opened');
     const music = mountMusic(content); // lecteur déjà préchargé par renderPage
     if (music) music.play(); // dans le geste « Ouvrir » : le navigateur autorise le son
     onOpen();
@@ -105,21 +106,31 @@ function setupMontage(content, photoUrl) {
   let url = null;
   $('montage-close').addEventListener('click', () => { if (!busy) dlg.close(); });
   dlg.addEventListener('cancel', (e) => { if (busy) e.preventDefault(); });
-  btn.addEventListener('click', async () => {
-    if (busy) return;
-    busy = true;
+  const reset = () => {
     $('montage-actions').hidden = true;
     $('montage-video').hidden = true;
     $('montage-canvas').hidden = false;
-    $('montage-close').disabled = true;
     $('montage-progress').value = 0;
+    $('montage-start').hidden = false;
+    $('montage-opt').hidden = false;
+    $('montage-status').textContent = 'Un film d’environ 30 secondes avec tes photos, ta lettre et vos souvenirs.';
+  };
+  btn.addEventListener('click', () => { if (!busy) { reset(); dlg.showModal(); } });
+  $('montage-start').addEventListener('click', async () => {
+    if (busy) return;
+    busy = true;
+    $('montage-start').hidden = true;
+    $('montage-opt').hidden = true;
+    $('montage-close').disabled = true;
     $('montage-status').textContent = 'Création du montage… garde cet écran ouvert.';
-    dlg.showModal();
     let lock = null;
     try { lock = await navigator.wakeLock.request('screen'); } catch { /* facultatif */ }
     try {
       const { renderMontage } = await import('./montage.js');
-      const { blob, ext } = await renderMontage(content, photoUrl, $('montage-canvas'), { onProgress: (x) => { $('montage-progress').value = x; } });
+      const { blob, ext, withMusic } = await renderMontage(content, photoUrl, $('montage-canvas'), {
+        music: $('montage-music').checked,
+        onProgress: (x) => { $('montage-progress').value = x; },
+      });
       if (url) URL.revokeObjectURL(url);
       url = URL.createObjectURL(blob);
       const video = $('montage-video');
@@ -133,9 +144,13 @@ function setupMontage(content, photoUrl) {
       share.hidden = !(navigator.canShare && navigator.canShare({ files: [file] }));
       share.onclick = () => navigator.share({ files: [file], title: 'Notre vidéo souvenir' }).catch(() => {});
       $('montage-actions').hidden = false;
-      $('montage-status').textContent = ext === 'mp4' ? 'Ta vidéo est prête !' : 'Ta vidéo est prête ! (format WebM : si une appli le refuse, télécharge-la puis importe-la.)';
+      let msg = 'Ta vidéo est prête !';
+      if (!withMusic && $('montage-music').checked) msg += ' (Sans musique : ton navigateur ne l’a pas permis.)';
+      if (ext !== 'mp4') msg += ' Format WebM : si une appli le refuse, télécharge-la puis importe-la.';
+      $('montage-status').textContent = msg;
     } catch (err) {
       $('montage-status').textContent = err.message || 'La création de la vidéo a échoué.';
+      $('montage-start').hidden = false;
     } finally {
       busy = false;
       $('montage-close').disabled = false;
