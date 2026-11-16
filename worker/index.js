@@ -24,7 +24,7 @@ const SECURITY = {
   'x-content-type-options': 'nosniff',
   'referrer-policy': 'strict-origin-when-cross-origin',
   'permissions-policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
-  'content-security-policy': "default-src 'self'; img-src 'self' data: blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-src 'self' https://www.youtube-nocookie.com https://open.spotify.com; form-action 'self'; base-uri 'self'; frame-ancestors 'self'; object-src 'none'",
+  'content-security-policy': "default-src 'self'; img-src 'self' data: blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-src 'self' https://www.youtube-nocookie.com https://open.spotify.com; media-src 'self' blob:; form-action 'self'; base-uri 'self'; frame-ancestors 'self'; object-src 'none'",
 };
 const NOINDEX = /^\/(p\/|voir|merci|admin)/;
 const NO_REFERRER = /^\/(p\/|merci|creer)/;

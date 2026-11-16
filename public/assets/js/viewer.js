@@ -88,6 +88,62 @@ async function loadPublished(id) {
   return { content: data.content, photoUrl: (n) => `/api/photos/${id}/${n}?v=${v}` };
 }
 
+function setupMontage(content, photoUrl) {
+  const block = document.createElement('section');
+  block.className = 'block share-block';
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'btn';
+  btn.textContent = '🎬 Créer la vidéo souvenir';
+  const p = document.createElement('p');
+  p.className = 'hint';
+  p.textContent = 'Un petit film de cette page (environ 30 s) à télécharger ou à partager sur TikTok, Instagram, Snapchat…';
+  block.append(btn, p);
+  main.append(block);
+
+  const dlg = $('montage-dialog');
+  let busy = false;
+  let url = null;
+  $('montage-close').addEventListener('click', () => { if (!busy) dlg.close(); });
+  dlg.addEventListener('cancel', (e) => { if (busy) e.preventDefault(); });
+  btn.addEventListener('click', async () => {
+    if (busy) return;
+    busy = true;
+    $('montage-actions').hidden = true;
+    $('montage-video').hidden = true;
+    $('montage-canvas').hidden = false;
+    $('montage-close').disabled = true;
+    $('montage-progress').value = 0;
+    $('montage-status').textContent = 'Création du montage… garde cet écran ouvert.';
+    dlg.showModal();
+    let lock = null;
+    try { lock = await navigator.wakeLock.request('screen'); } catch { /* facultatif */ }
+    try {
+      const { renderMontage } = await import('./montage.js');
+      const { blob, ext } = await renderMontage(content, photoUrl, $('montage-canvas'), { onProgress: (x) => { $('montage-progress').value = x; } });
+      if (url) URL.revokeObjectURL(url);
+      url = URL.createObjectURL(blob);
+      const video = $('montage-video');
+      video.src = url; video.hidden = false; $('montage-canvas').hidden = true;
+      video.play().catch(() => {});
+      const name = `video-souvenir.${ext}`;
+      const dl = $('montage-download');
+      dl.href = url; dl.download = name;
+      const file = new File([blob], name, { type: blob.type });
+      const share = $('montage-share');
+      share.hidden = !(navigator.canShare && navigator.canShare({ files: [file] }));
+      share.onclick = () => navigator.share({ files: [file], title: 'Notre vidéo souvenir' }).catch(() => {});
+      $('montage-actions').hidden = false;
+      $('montage-status').textContent = ext === 'mp4' ? 'Ta vidéo est prête !' : 'Ta vidéo est prête ! (format WebM : si une appli le refuse, télécharge-la puis importe-la.)';
+    } catch (err) {
+      $('montage-status').textContent = err.message || 'La création de la vidéo a échoué.';
+    } finally {
+      busy = false;
+      $('montage-close').disabled = false;
+      if (lock) lock.release().catch(() => {});
+    }
+  });
+}
+
 async function main_() {
   // Mode aperçu : l'éditeur (même origine) envoie le contenu par postMessage.
   if (params.get('preview') === '1') {
@@ -110,6 +166,7 @@ async function main_() {
     applyTheme(content.theme);
     envelope(content, () => {});
     renderPage(main, content, { photoUrl });
+    setupMontage(content, photoUrl);
     $('footer').hidden = false;
     setupReport(id);
   } catch (err) {

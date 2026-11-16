@@ -159,3 +159,13 @@ dialog .btn.secondary { background: #eee; color: #222; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Vidéo souvenir */
+.share-block { text-align: center; padding-top: 10px; }
+.share-block .hint { margin-top: 10px; }
+dialog.montage { width: min(420px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto; text-align: center; }
+.montage-stage { margin: 10px auto; width: min(260px, 60vw); aspect-ratio: 9 / 16; border-radius: 14px; overflow: hidden; background: #111; }
+.montage-stage canvas, .montage-stage video { width: 100%; height: 100%; display: block; object-fit: cover; }
+dialog.montage progress { width: 100%; height: 8px; accent-color: var(--accent); }
+dialog.montage .row { justify-content: center; flex-wrap: wrap; }
+.montage-note { font-size: 13px; opacity: .7; margin: 12px 0 0; }
