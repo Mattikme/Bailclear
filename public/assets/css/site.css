@@ -186,3 +186,4 @@ dialog h2 { margin-top: 0; }
 .video-phone { aspect-ratio: 540 / 1168; width: min(280px, 72vw); }
 .video-phone video { width: 100%; height: 100%; object-fit: cover; border-radius: 28px; display: block; background: #fff; }
 @media (max-width: 760px) { .how { grid-template-columns: 1fr; gap: 28px; } }
+.error-text { color: #b3261e; }

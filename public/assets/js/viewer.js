@@ -1,4 +1,4 @@
-import { renderPage, burst, sha256Hex, normalizeAnswer, applyTheme, playMusic } from './render.js';
+import { renderPage, burst, sha256Hex, normalizeAnswer, applyTheme, mountMusic } from './render.js';
 import { getOccasion } from './occasions.js';
 
 const $ = (id) => document.getElementById(id);
@@ -29,7 +29,8 @@ function envelope(content, onOpen) {
   env.hidden = false;
   const open = () => {
     env.classList.add('gone');
-    playMusic(content); // dans le geste « Ouvrir » : le navigateur autorise le son
+    const music = mountMusic(content); // lecteur déjà préchargé par renderPage
+    if (music) music.play(); // dans le geste « Ouvrir » : le navigateur autorise le son
     onOpen();
     burst(document.body, occ.id === 'noel' ? '❄' : occ.id === 'anniversaire' ? '✦' : '♥');
     setTimeout(() => { env.hidden = true; }, 800);

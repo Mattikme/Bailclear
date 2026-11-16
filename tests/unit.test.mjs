@@ -129,3 +129,18 @@ test('paiement simulé refusé hors localhost ou avec une clé réelle', async (
   assert.equal(devFakePayment({ DEV_FAKE_PAYMENT: '1', STRIPE_SECRET_KEY: 'sk_live_x' }, req('localhost')), false);
   assert.equal(devFakePayment({}, req('localhost')), false);
 });
+
+test('moment de départ de la musique', async () => {
+  const { startFromUrl, parseTime, formatTime } = await import('../public/assets/js/render.js');
+  assert.equal(startFromUrl('https://youtu.be/2Vv-BfVoq4g?t=65'), 65);
+  assert.equal(startFromUrl('https://www.youtube.com/watch?v=2Vv-BfVoq4g&t=1m05s'), 65);
+  assert.equal(startFromUrl('https://www.youtube.com/watch?v=2Vv-BfVoq4g'), 0);
+  assert.equal(parseTime('1:05'), 65);
+  assert.equal(parseTime('90'), 90);
+  assert.equal(parseTime(''), 0);
+  assert.equal(parseTime('1:75'), null);
+  assert.equal(formatTime(65), '1:05');
+  assert.equal(validateContent({ ...base, music: 'https://youtu.be/dQw4w9WgXcQ', musicStart: 65 }).musicStart, 65);
+  assert.equal(validateContent({ ...base, music: 'https://youtu.be/dQw4w9WgXcQ', musicStart: -3 }).musicStart, 0);
+  assert.equal(validateContent({ ...base, musicStart: 65 }).musicStart, 0);
+});

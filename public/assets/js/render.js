@@ -7,10 +7,35 @@ const SPOTIFY = /^https:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album
 export function musicEmbed(url) {
   if (!url) return null;
   const y = YT.exec(url);
-  if (y) return { provider: 'youtube', src: `https://www.youtube-nocookie.com/embed/${y[1]}?autoplay=1&rel=0&playsinline=1&loop=1&playlist=${y[1]}` };
+  if (y) return { provider: 'youtube', id: y[1] };
   const s = SPOTIFY.exec(url);
-  if (s) return { provider: 'spotify', src: `https://open.spotify.com/embed/${s[1]}/${s[2]}` };
+  if (s) return { provider: 'spotify', kind: s[1], id: s[2] };
   return null;
+}
+
+// Lit le moment de départ dans un lien YouTube (?t=65, t=1m05s, start=65). Renvoie des secondes ou 0.
+export function startFromUrl(url) {
+  try {
+    const u = new URL(url);
+    const t = u.searchParams.get('t') || u.searchParams.get('start') || '';
+    if (/^\d+s?$/.test(t)) return parseInt(t, 10);
+    const m = /^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$/.exec(t);
+    if (m && t) return (+(m[1] || 0)) * 3600 + (+(m[2] || 0)) * 60 + (+(m[3] || 0));
+  } catch { /* lien invalide */ }
+  return 0;
+}
+
+// « 1:05 » ↔ 65 secondes
+export function formatTime(sec) {
+  const s = Math.max(0, Math.floor(sec || 0));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+export function parseTime(text) {
+  const v = String(text || '').trim();
+  if (!v) return 0;
+  if (/^\d+$/.test(v)) return parseInt(v, 10);
+  const m = /^(\d{1,3})[:'h](\d{1,2})$/.exec(v);
+  return m && +m[2] < 60 ? +m[1] * 60 + +m[2] : null;
 }
 
 function el(tag, attrs = {}, ...children) {
@@ -123,30 +148,77 @@ function reasons(content, occ) {
         el('span', { class: 'back', text: r })))));
 }
 
-// Lecteur flottant : lancé à l'ouverture de l'enveloppe, il reste visible pendant la lecture de la page.
-export function playMusic(content) {
+const YT_ORIGIN = 'https://www.youtube-nocookie.com';
+
+// Bandeau musique fixé en haut de la page. Le lecteur est préchargé (sans son) dès l'affichage,
+// puis play() le lance au moment du clic sur « Ouvrir » : le démarrage est quasi immédiat.
+export function mountMusic(content) {
   const m = musicEmbed(content && content.music);
-  if (!m) return false;
-  document.querySelectorAll('.mini-player').forEach((x) => x.remove());
-  const iframe = el('iframe', {
-    src: m.src, title: 'Notre chanson',
+  const start = Math.max(0, Math.floor((content && content.musicStart) || 0));
+  const key = m ? `${m.provider}:${m.id}:${start}` : '';
+  const existing = document.querySelector('.music-bar');
+  if (existing && existing.dataset.key === key) return existing._ctrl;
+  if (existing) existing.remove();
+  if (!m) return null;
+
+  const common = {
+    title: 'Notre chanson',
     allow: 'autoplay; encrypted-media; clipboard-write; fullscreen; picture-in-picture',
     // YouTube exige l'origine du site (erreur 153 sinon) ; on n'envoie que le domaine, jamais l'adresse secrète de la page.
     referrerpolicy: 'strict-origin-when-cross-origin',
-  });
-  const box = el('aside', { class: `mini-player ${m.provider}`, 'aria-label': 'Notre chanson' },
-    el('div', { class: 'mp-bar' },
-      el('span', { text: '♪ Notre chanson' }),
-      el('button', { type: 'button', class: 'mp-close', 'aria-label': 'Arrêter la musique', text: '×', onclick: () => box.remove() })),
-    iframe);
-  document.body.append(box);
-  return true;
-}
-
-function music(content) {
-  if (!musicEmbed(content.music)) return null;
-  return el('section', { class: 'block music reveal' },
-    el('button', { class: 'btn music-btn', type: 'button', text: '▶ Écouter notre chanson', onclick: () => playMusic(content) }));
+  };
+  let ctrl;
+  let bar;
+  if (m.provider === 'spotify') {
+    const iframe = el('iframe', { ...common, src: `https://open.spotify.com/embed/${m.kind}/${m.id}?theme=0` });
+    bar = el('div', { class: 'music-bar spotify', 'aria-label': 'Notre chanson' }, iframe);
+    ctrl = { play() {} }; // Spotify ne permet pas de lancer la lecture à distance.
+  } else {
+    const params = new URLSearchParams({ enablejsapi: '1', rel: '0', playsinline: '1', loop: '1', playlist: m.id, origin: location.origin });
+    if (start) params.set('start', String(start));
+    const iframe = el('iframe', { ...common, src: `${YT_ORIGIN}/embed/${m.id}?${params}` });
+    const status = el('span', { class: 'mb-status', text: 'Prête à jouer' });
+    bar = el('div', { class: 'music-bar youtube', 'aria-label': 'Notre chanson' },
+      el('div', { class: 'mb-player' }, iframe),
+      el('div', { class: 'mb-info' },
+        el('span', { class: 'mb-title' }, el('span', { class: 'mb-eq', 'aria-hidden': 'true' }, el('i'), el('i'), el('i')), 'Notre chanson'),
+        status));
+    let ready = false;
+    let wanted = false;
+    let tries = 0;
+    const post = (msg) => { try { iframe.contentWindow.postMessage(JSON.stringify(msg), YT_ORIGIN); } catch { /* lecteur pas prêt */ } };
+    const playNow = () => post({ event: 'command', func: 'playVideo', args: [] });
+    const hello = setInterval(() => {
+      if (ready || ++tries > 40) return clearInterval(hello);
+      post({ event: 'listening', id: 'upt', channel: 'widget' });
+    }, 250);
+    const onMsg = (e) => {
+      if (e.origin !== YT_ORIGIN || e.source !== iframe.contentWindow) return;
+      let d;
+      try { d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data; } catch { return; }
+      if (!d || !d.event) return;
+      if ((d.event === 'onReady' || d.event === 'initialDelivery') && !ready) {
+        ready = true;
+        if (wanted) playNow();
+      }
+      const state = d.event === 'onStateChange' ? d.info : d.info && d.info.playerState;
+      if (state === 1) { bar.classList.add('playing'); status.textContent = 'En cours de lecture'; }
+      if (state === 2) { bar.classList.remove('playing'); status.textContent = 'En pause'; }
+    };
+    window.addEventListener('message', onMsg);
+    ctrl = {
+      play() {
+        wanted = true;
+        if (ready) playNow();
+        setTimeout(() => { if (!bar.classList.contains('playing')) status.textContent = 'Appuie sur ▶ pour écouter'; }, 2500);
+      },
+    };
+  }
+  bar.dataset.key = key;
+  bar._ctrl = ctrl;
+  const main = document.querySelector('main');
+  if (main && main.parentNode) main.parentNode.insertBefore(bar, main); else document.body.prepend(bar);
+  return ctrl;
 }
 
 // Construit la page complète dans `root`.
@@ -165,10 +237,10 @@ export function renderPage(root, content, { photoUrl, preview = false } = {}) {
     gallery(content, photoUrl),
     timeline(content, occ),
     reasons(content, occ),
-    music(content),
     content.finalMessage ? el('section', { class: 'block final reveal' }, el('p', { text: content.finalMessage }), el('div', { class: 'big-heart', 'aria-hidden': 'true', text: '♥' })) : null,
   ];
   root.replaceChildren(...sections.filter(Boolean));
+  mountMusic(content);
   observeReveal(root);
 }
 

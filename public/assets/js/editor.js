@@ -1,5 +1,5 @@
 import { OCCASIONS, THEMES, getOccasion } from './occasions.js';
-import { musicEmbed, sha256Hex, normalizeAnswer } from './render.js';
+import { musicEmbed, sha256Hex, normalizeAnswer, startFromUrl, formatTime, parseTime } from './render.js';
 import { idbGet, idbSet, idbDel, listPages, rememberPage } from './storage.js';
 
 const MAX_PHOTOS = 10;
@@ -22,7 +22,7 @@ function blankState(occId) {
   return {
     occasion: occ.id, theme: occ.theme, to: '', from: '',
     title: occ.defaults.title, intro: occ.defaults.intro, date: '', dateLabel: occ.defaults.dateLabel,
-    letter: '', photos: [], timeline: [], reasons: [], music: '', finalMessage: occ.defaults.finalMessage,
+    letter: '', photos: [], timeline: [], reasons: [], music: '', musicStart: 0, finalMessage: occ.defaults.finalMessage,
     secret: { question: '', answer: '', answerHash: '' },
   };
 }
@@ -65,8 +65,19 @@ function bindFields() {
   form.querySelectorAll('[data-field]').forEach((input) => {
     const key = input.dataset.field;
     input.value = state[key] || '';
-    input.oninput = () => { state[key] = input.value; updateCounters(); if (key === 'music') checkMusic(); changed(); };
+    input.oninput = () => {
+      state[key] = input.value;
+      if (key === 'music') { const t = startFromUrl(input.value); if (t) { state.musicStart = t; $('f-musicStart').value = formatTime(t); } checkMusic(); }
+      updateCounters(); changed();
+    };
   });
+  const startInput = $('f-musicStart');
+  startInput.value = state.musicStart ? formatTime(state.musicStart) : '';
+  startInput.oninput = () => {
+    const v = parseTime(startInput.value);
+    $('start-help').classList.toggle('error-text', v === null);
+    if (v !== null) { state.musicStart = v; changed(); }
+  };
   $('f-question').value = state.secret.question || '';
   $('f-answer').value = state.secret.answer || '';
   $('f-question').oninput = (e) => { state.secret.question = e.target.value; changed(); };
@@ -86,6 +97,9 @@ function checkMusic() {
   const s = $('music-status');
   if (!v) s.textContent = '';
   else s.textContent = musicEmbed(v) ? '✓ Lien reconnu' : 'Lien non reconnu : colle un lien YouTube ou Spotify (morceau, album ou playlist).';
+  const spotify = musicEmbed(v) && musicEmbed(v).provider === 'spotify';
+  $('f-musicStart').disabled = Boolean(spotify);
+  if (spotify) s.textContent += ' — avec Spotify, la musique démarre au début et la personne doit appuyer sur ▶.';
 }
 
 /* ---------- Occasion & thème ---------- */
