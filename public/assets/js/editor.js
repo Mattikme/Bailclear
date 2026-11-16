@@ -1,6 +1,9 @@
 import { OCCASIONS, THEMES, getOccasion } from './occasions.js';
 import { musicEmbed, sha256Hex, normalizeAnswer, startFromUrl, formatTime, parseTime } from './render.js';
 import { idbGet, idbSet, idbDel, listPages, rememberPage } from './storage.js';
+import { isFreeLaunch, FREE_UNTIL_LABEL } from './launch.js';
+
+const FREE = isFreeLaunch();
 
 const MAX_PHOTOS = 10;
 const $ = (id) => document.getElementById(id);
@@ -325,7 +328,15 @@ function setupPublish() {
   const dlg = $('publish-dialog');
   const confirmBtn = $('publish-confirm');
   const terms = $('c-terms'), waiver = $('c-waiver');
-  const sync = () => { confirmBtn.disabled = !(terms.checked && waiver.checked); };
+  if (FREE) {
+    $('publish-btn').textContent = 'Publier gratuitement';
+    confirmBtn.textContent = 'Publier ma page';
+    waiver.closest('label').hidden = true;
+    document.querySelectorAll('.pay-only').forEach((x) => { x.hidden = true; });
+    $('free-info').hidden = false;
+    $('free-info').querySelector('span').textContent = FREE_UNTIL_LABEL;
+  }
+  const sync = () => { confirmBtn.disabled = !(terms.checked && (FREE || waiver.checked)); };
   terms.onchange = sync; waiver.onchange = sync; sync();
   $('publish-cancel').onclick = () => dlg.close();
 
@@ -342,12 +353,14 @@ function setupPublish() {
     try {
       progress('Envoi de ta page…');
       const content = await serverContent();
-      const { id, token } = await api('/api/pages', {
+      const created = await api('/api/pages', {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ content, consent: { terms: true, waiver: true } }),
+        body: JSON.stringify({ content, consent: { terms: true, waiver: !FREE } }),
       });
+      const { id, token } = created;
       rememberPage({ id, token, title: state.title, to: state.to, createdAt: Date.now() });
       await uploadPhotos(id, token, progress);
+      if (created.free) { dirty = false; location.href = `/merci?id=${id}&session_id=gratuit`; return; }
       progress('Redirection vers le paiement sécurisé…');
       const { url } = await api('/api/checkout', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id }) }, token);
       dirty = false;

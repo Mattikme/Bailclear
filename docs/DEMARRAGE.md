@@ -4,6 +4,18 @@ Compte environ une demi-journée de démarches et 1 à 2 heures de configuration
 
 ---
 
+## 0. Phase de lancement gratuite (jusqu'au 30 novembre 2026)
+
+- Jusqu'au 30/11/2026 inclus, la publication est **gratuite**, sans paiement : un bandeau l'annonce en haut du site. Le 1er décembre à 00 h 00 (heure de Paris), le site repasse **automatiquement** au payant.
+- **Pas besoin d'entreprise** tant que rien n'est vendu. Les mentions légales présentent alors le site comme édité par un particulier : il suffit de remplir `editor.name` et `contactEmail` dans `site.config.json`, en laissant `siret` vide.
+- **Avant le 1er décembre**, il faut :
+  - avoir le SIRET ;
+  - avoir rempli tout `site.config.json` (SIRET, adresse, téléphone, médiateur) ;
+  - avoir branché Stripe.
+  Sinon, le bouton affiche « le paiement n'est pas encore ouvert ».
+- **Changer la date** : modifie `FREE_UNTIL` et `FREE_UNTIL_LABEL` dans `public/assets/js/launch.js`, puis redéploie.
+- **Anti-abus** : 4 pages et 40 photos par minute et par adresse IP au maximum. Le plan gratuit de Cloudflare permet environ 40 à 80 pages par jour.
+
 ## 1. Créer la micro-entreprise (avant la première vente)
 
 1. **Déclaration** sur le guichet unique de l'INPI : https://formalites.entreprises.gouv.fr (gratuit).

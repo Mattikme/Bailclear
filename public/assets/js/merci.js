@@ -14,6 +14,11 @@ function qrSvg(text) {
 }
 
 async function confirm() {
+  if (sessionId === 'gratuit') {
+    const res = await fetch(`/api/pages/${encodeURIComponent(id)}`);
+    if (res.ok) return true;
+    throw new Error('Page introuvable.');
+  }
   for (let i = 0; i < 12; i++) {
     const res = await fetch(`/api/confirm?id=${encodeURIComponent(id)}&session_id=${encodeURIComponent(sessionId)}`);
     const data = await res.json().catch(() => ({}));

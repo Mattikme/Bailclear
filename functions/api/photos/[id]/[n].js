@@ -39,6 +39,10 @@ export const onRequestPut = handle(async ({ request, env, params }) => {
   if (!page || page.status === 'removed') return error('Page introuvable.', 404);
   if (!(await checkToken(page, bearer(request)))) return error('Lien de modification invalide.', 403);
   if (p.n >= page.photoCount) return error('Numéro de photo hors limite.', 400);
+  if (env.UPLOAD_LIMITER) {
+    const { success } = await env.UPLOAD_LIMITER.limit({ key: request.headers.get('cf-connecting-ip') || 'local' });
+    if (!success) return error('Trop d’envois en peu de temps. Réessaie dans une minute.', 429);
+  }
   const len = Number(request.headers.get('content-length') || 0);
   if (len > MAX_PHOTO_BYTES) return error('Photo trop lourde.', 413);
   const bytes = await request.arrayBuffer();

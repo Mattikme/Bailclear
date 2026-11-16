@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { OCCASIONS } from '../public/assets/js/occasions.js';
 import { PRICE_LABEL, PUBLISHED_DAYS, TERMS_VERSION, SITE_NAME } from '../lib/config.js';
+import { FREE_UNTIL_LABEL } from '../public/assets/js/launch.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const pub = join(root, 'public');
@@ -39,6 +40,7 @@ ${noindex ? '<meta name="robots" content="noindex">' : `<link rel="canonical" hr
 <meta name="theme-color" content="#d63c72">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/site.css">
+<script type="module" src="/assets/js/launch-banner.js"></script>
 ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld)}</script>` : ''}
 ${scripts}
 </head>
@@ -98,6 +100,7 @@ const priceBox = `<div class="price-box">
   </ul><br>
   <a class="btn" href="/creer">Créer ma page</a>
   <p class="price-note">Aperçu gratuit avant de payer · satisfait(e) ou remboursé(e) 14 jours.<br>TVA non applicable, art. 293 B du CGI.</p>
+  <p class="price-note free-note" data-free-note="${PRICE_LABEL}" hidden></p>
 </div>`;
 
 const steps = `<div class="grid3">
@@ -143,6 +146,7 @@ pages['index.html'] = layout({
     <p class="lead">Ta lettre, vos photos, vos souvenirs et votre chanson, réunis sur une page secrète qui s’ouvre comme une enveloppe. À offrir par lien ou par QR code.</p>
     <div class="cta"><a class="btn" href="/creer">Créer ma page</a><a class="btn ghost" href="/p/demo" target="_blank" rel="noopener">Voir un exemple</a></div>
     <p class="price-note">${PRICE_LABEL} · aperçu gratuit · prête en 10 minutes · satisfait ou remboursé 14 jours</p>
+    <p class="price-note free-note" data-free-note="${PRICE_LABEL}" hidden></p>
   </div>
   <div class="phone"><iframe src="/p/demo" title="Exemple de page" loading="lazy"></iframe></div>
 </section>
@@ -188,6 +192,7 @@ for (const o of OCCASIONS) {
     <p class="lead">${esc(o.lead)}</p>
     <div class="cta"><a class="btn" href="/creer?occasion=${o.id}">${esc(o.cta || 'Créer ma page')}</a><a class="btn ghost" href="/p/demo" target="_blank" rel="noopener">Voir un exemple</a></div>
     <p class="price-note">${PRICE_LABEL} · aperçu gratuit avant de payer · en ligne immédiatement</p>
+    <p class="price-note free-note" data-free-note="${PRICE_LABEL}" hidden></p>
   </div>
   <div class="phone"><iframe src="/p/demo" title="Exemple de page" loading="lazy"></iframe></div>
 </section>
@@ -317,10 +322,11 @@ pages['creer.html'] = layout({
 </div></div>
 <dialog id="publish-dialog">
   <h2>Publier ta page</h2>
-  <p>Ta page sera en ligne <strong>immédiatement après le paiement</strong> de <strong>${PRICE_LABEL}</strong> (TVA non applicable, art. 293 B du CGI), hébergée ${YEARS} ans et modifiable gratuitement.</p>
-  <label class="check"><input type="checkbox" id="c-terms"><span>J’ai lu et j’accepte les <a href="/cgv" target="_blank">conditions générales de vente</a> et les <a href="/regles-de-contenu" target="_blank">règles de contenu</a>, et je confirme avoir le droit de publier ces photos et textes.</span></label>
+  <p id="free-info" hidden>🎉 <strong>Offre de lancement</strong> : jusqu’au <span></span>, ta page est publiée <strong>gratuitement</strong>, sans paiement. Elle est hébergée ${YEARS} ans et modifiable quand tu veux.</p>
+  <p class="pay-only" id="pay-info">Ta page sera en ligne <strong>immédiatement après le paiement</strong> de <strong>${PRICE_LABEL}</strong> (TVA non applicable, art. 293 B du CGI), hébergée ${YEARS} ans et modifiable gratuitement.</p>
+  <label class="check"><input type="checkbox" id="c-terms"><span>J’ai lu et j’accepte les <a href="/cgv" target="_blank">conditions générales</a> et les <a href="/regles-de-contenu" target="_blank">règles de contenu</a>, et je confirme avoir le droit de publier ces photos et textes.</span></label>
   <label class="check"><input type="checkbox" id="c-waiver"><span>Je demande la mise en ligne immédiate de ma page et je reconnais <strong>perdre mon droit de rétractation</strong> dès qu’elle est fournie (art. L221-28 13° du Code de la consommation).</span></label>
-  <p style="font-size:14px;margin:0">🔒 Paiement sécurisé par Stripe : carte bancaire, Apple Pay, Google Pay. Ta page reste modifiable gratuitement après le paiement, et tu es <strong>satisfait(e) ou remboursé(e) pendant 14 jours</strong>.</p>
+  <p class="pay-only" style="font-size:14px;margin:0">🔒 Paiement sécurisé par Stripe : carte bancaire, Apple Pay, Google Pay. Ta page reste modifiable gratuitement après le paiement, et tu es <strong>satisfait(e) ou remboursé(e) pendant 14 jours</strong>.</p>
   <p class="progress" id="publish-progress" role="status"></p>
   <div class="dialog-actions">
     <button type="button" class="btn ghost" id="publish-cancel">Revenir à ma page</button>
@@ -380,12 +386,15 @@ pages['admin.html'] = layout({
 });
 
 const e = cfg.editor;
+// Sans SIRET : site édité par un particulier pendant la phase de lancement gratuite (aucune vente).
+const pro = Boolean(e.siret && String(e.siret).trim());
+const launchNote = pro ? '' : `<div class="callout"><p><strong>Phase de lancement :</strong> jusqu’au ${FREE_UNTIL_LABEL} 2026 inclus, la création de pages est gratuite et aucune vente n’a lieu. Pendant cette période, les présentes conditions valent conditions d’utilisation ; les articles 3 à 5 (prix, paiement, rétractation) et la médiation ne s’appliqueront qu’aux commandes payantes, après l’immatriculation de l’éditeur.</p></div>`;
 pages['mentions-legales.html'] = layout({
   title: `Mentions légales — ${SITE_NAME}`, description: 'Mentions légales du site.', path: '/mentions-legales',
   body: `<main class="wrap narrow prose">
 <h1>Mentions légales</h1>
 <h2>Éditeur du site</h2>
-<p>${fill(e.name, 'prénom et nom')}<br>${esc(e.status)}<br>SIRET : ${fill(e.siret, 'SIRET')}<br>Adresse : ${fill(e.address, 'adresse')}<br>E-mail : ${email}<br>Téléphone : ${fill(e.phone, 'téléphone')}<br>Immatriculation : Registre national des entreprises (RNE)<br>TVA non applicable, art. 293 B du CGI.</p>
+${pro ? `<p>${fill(e.name, 'prénom et nom')}<br>${esc(e.status)}<br>SIRET : ${fill(e.siret, 'SIRET')}<br>Adresse : ${fill(e.address, 'adresse')}<br>E-mail : ${email}<br>Téléphone : ${fill(e.phone, 'téléphone')}<br>Immatriculation : Registre national des entreprises (RNE)<br>TVA non applicable, art. 293 B du CGI.</p>` : `<p>${fill(e.name, 'prénom et nom')}<br>${esc(e.status)}<br>E-mail : ${email}</p><p>Le site est actuellement édité par un particulier, à titre non commercial, pendant sa phase de lancement : aucune vente n’a lieu. Les informations de l’entreprise seront publiées ici avant l’ouverture des ventes.</p>`}
 <p>Directeur de la publication : ${fill(e.name, 'prénom et nom')}.</p>
 <h2>Hébergeur</h2>
 <p>Cloudflare, Inc. — 101 Townsend St, San Francisco, CA 94107, États-Unis — Tél. : +1 650 319 8930 — www.cloudflare.com</p>
@@ -403,7 +412,8 @@ pages['cgv.html'] = layout({
 <h1>Conditions générales de vente</h1>
 <p>Version du ${TERMS_VERSION}.</p>
 <h2>1. Vendeur</h2>
-<p>${fill(e.name, 'prénom et nom')}, ${esc(e.status)}, SIRET ${fill(e.siret, 'SIRET')}, ${fill(e.address, 'adresse')}, ${email} (ci-après « nous »).</p>
+<p>${pro ? `${fill(e.name, 'prénom et nom')}, ${esc(e.status)}, SIRET ${fill(e.siret, 'SIRET')}, ${fill(e.address, 'adresse')}, ${email} (ci-après « nous »).` : `${fill(e.name, 'prénom et nom')}, ${email} (ci-après « nous »).`}</p>
+${launchNote}
 <h2>2. Service</h2>
 <p>${SITE_NAME} permet de créer une page web personnalisée (textes, photos, liens musicaux) accessible par un lien privé non référencé et un QR code (la « Page »). La Page est un contenu numérique fourni sans support matériel. Elle est hébergée pendant ${YEARS} ans à compter du paiement, puis supprimée automatiquement. Elle peut être modifiée gratuitement ou supprimée à tout moment pendant cette durée grâce au lien de modification remis après l’achat.</p>
 <p>Un aperçu gratuit et complet est disponible avant toute commande. La Page s’affiche dans tout navigateur récent (téléphone ou ordinateur) avec une connexion internet. La lecture de la musique dépend de la disponibilité du morceau sur YouTube ou Spotify.</p>
@@ -424,7 +434,7 @@ pages['cgv.html'] = layout({
 <h2>8. Données personnelles</h2>
 <p>Voir la <a href="/confidentialite">politique de confidentialité</a>.</p>
 <h2>9. Réclamations et médiation</h2>
-<p>Pour toute réclamation : ${email}. En cas de litige non résolu, tu peux recourir gratuitement au médiateur de la consommation : ${fill(m.name, 'nom du médiateur')}${m.url ? ` — <a href="${esc(m.url)}" rel="noopener">${esc(m.url)}</a>` : ''}${m.address ? ` — ${esc(m.address)}` : ''}.</p>
+<p>Pour toute réclamation : ${email}. ${pro ? `En cas de litige non résolu, tu peux recourir gratuitement au médiateur de la consommation : ${fill(m.name, 'nom du médiateur')}${m.url ? ` — <a href="${esc(m.url)}" rel="noopener">${esc(m.url)}</a>` : ''}${m.address ? ` — ${esc(m.address)}` : ''}.` : 'Le médiateur de la consommation sera indiqué ici avant l’ouverture des ventes.'}</p>
 <h2>10. Droit applicable</h2>
 <p>Les présentes conditions sont soumises au droit français. Les règles impératives de protection du consommateur de ton pays de résidence restent applicables.</p>
 </main>`,

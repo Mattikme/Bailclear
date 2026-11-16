@@ -11,3 +11,14 @@ rules = [
 [[kv_namespaces]]
 binding = "PAGES_KV"
 id = "cb16baada3d8421792cf0bffeda934c4"
+
+# Anti-abus : nombre d'actions par adresse IP et par minute
+[[ratelimits]]
+name = "CREATE_LIMITER"
+namespace_id = "1001"
+simple = { limit = 4, period = 60 }
+
+[[ratelimits]]
+name = "UPLOAD_LIMITER"
+namespace_id = "1002"
+simple = { limit = 40, period = 60 }

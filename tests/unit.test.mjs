@@ -144,3 +144,10 @@ test('moment de départ de la musique', async () => {
   assert.equal(validateContent({ ...base, music: 'https://youtu.be/dQw4w9WgXcQ', musicStart: -3 }).musicStart, 0);
   assert.equal(validateContent({ ...base, musicStart: 65 }).musicStart, 0);
 });
+
+test('offre de lancement gratuite jusqu’au 30 novembre inclus (heure de Paris)', async () => {
+  const { freeLaunch } = await import('../lib/config.js');
+  assert.equal(freeLaunch({}, Date.parse('2026-11-30T23:59:00+01:00')), true);
+  assert.equal(freeLaunch({}, Date.parse('2026-12-01T00:00:00+01:00')), false);
+  assert.equal(freeLaunch({ FREE_UNTIL: '2026-12-15T00:00:00+01:00' }, Date.parse('2026-12-05T12:00:00+01:00')), true);
+});
