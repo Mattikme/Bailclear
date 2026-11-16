@@ -68,7 +68,9 @@ test('webhook Stripe : signature', async () => {
 });
 
 test('paramètres Checkout', () => {
-  const p = buildCheckoutParams({ pageId: 'abcdefghijkm', origin: 'https://x.fr', priceCents: PRICE_CENTS, productName: 'P', invoice: true });
+  const p = buildCheckoutParams({ pageId: 'abcdefghijkm', origin: 'https://x.fr', priceCents: PRICE_CENTS, productName: 'P', invoice: true, termsVersion: '2026-11-16', expiresAt: 123 });
+  assert.equal(p.expires_at, 123);
+  assert.match(p.invoice_creation.invoice_data.footer, /2026-11-16/);
   assert.equal(p.metadata.page_id, 'abcdefghijkm');
   assert.equal(p.line_items[0].price_data.unit_amount, PRICE_CENTS);
   assert.match(p.success_url, /^https:\/\/x\.fr\/merci\?id=abcdefghijkm&session_id=\{CHECKOUT_SESSION_ID\}$/);
@@ -102,4 +104,28 @@ test('le prix affiché dans les pages correspond au prix facturé', () => {
     assert.deepEqual(others, [], `${f} contient un autre prix`);
   }
   assert.ok(readdirSync(dir).includes('_headers'));
+});
+
+test('les occasions ne masquent aucune page système', async () => {
+  const { OCCASION_IDS } = await import('../public/assets/js/occasions.js');
+  const reserved = ['index', 'creer', 'merci', 'admin', 'voir', 'cgv', 'confidentialite', 'mentions-legales', 'regles-de-contenu', '404', 'p', 'api', 'assets'];
+  for (const id of OCCASION_IDS) assert.ok(!reserved.includes(id), `occasion « ${id} » réservée`);
+  assert.equal(new Set(OCCASION_IDS).size, OCCASION_IDS.length);
+});
+
+test('paiement abouti (y compris code promo à 100 %)', async () => {
+  const { isSessionPaid } = await import('../lib/stripe.js');
+  assert.equal(isSessionPaid({ payment_status: 'paid', status: 'complete' }), true);
+  assert.equal(isSessionPaid({ payment_status: 'no_payment_required', status: 'complete' }), true);
+  assert.equal(isSessionPaid({ payment_status: 'no_payment_required', status: 'open' }), false);
+  assert.equal(isSessionPaid({ payment_status: 'unpaid', status: 'complete' }), false);
+});
+
+test('paiement simulé refusé hors localhost ou avec une clé réelle', async () => {
+  const { devFakePayment } = await import('../lib/http.js');
+  const req = (host) => new Request(`http://${host}/api/checkout`);
+  assert.equal(devFakePayment({ DEV_FAKE_PAYMENT: '1' }, req('localhost:8788')), true);
+  assert.equal(devFakePayment({ DEV_FAKE_PAYMENT: '1' }, req('unepagepourtoi.fr')), false);
+  assert.equal(devFakePayment({ DEV_FAKE_PAYMENT: '1', STRIPE_SECRET_KEY: 'sk_live_x' }, req('localhost')), false);
+  assert.equal(devFakePayment({}, req('localhost')), false);
 });

@@ -40,7 +40,7 @@
 <dialog id="report-dialog">
   <form id="report-form">
     <h2>Signaler cette page</h2>
-    <p style="font-size:14px;margin:0">Ton signalement est transmis à l’éditeur du site, qui l’examine rapidement.</p>
+    <p style="font-size:14px;margin:0">Ton signalement est examiné par une personne, rapidement. Nom et e-mail sont facultatifs uniquement pour un contenu impliquant un mineur.</p>
     <label for="report-reason">Motif</label>
     <select id="report-reason" required>
       <option value="vie-privee">Atteinte à ma vie privée / mon image</option>
@@ -51,8 +51,11 @@
     </select>
     <label for="report-details">Explication (obligatoire)</label>
     <textarea id="report-details" rows="4" minlength="10" maxlength="2000" required></textarea>
-    <label for="report-email">Ton e-mail (facultatif, pour te répondre)</label>
-    <input id="report-email" type="email" maxlength="200">
+    <label for="report-name">Ton nom</label>
+    <input id="report-name" type="text" maxlength="120" autocomplete="name">
+    <label for="report-email">Ton e-mail (pour t’informer de la suite donnée)</label>
+    <input id="report-email" type="email" maxlength="200" autocomplete="email">
+    <label class="goodfaith" style="display:flex;gap:8px;font-weight:400"><input id="report-goodfaith" type="checkbox" required style="width:auto"> <span>Je déclare de bonne foi que les informations fournies sont exactes et complètes.</span></label>
     <p id="report-status" role="status" style="font-size:14px"></p>
     <div class="row">
       <button class="btn secondary" type="button" id="report-cancel">Annuler</button>

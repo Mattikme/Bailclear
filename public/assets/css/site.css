@@ -174,3 +174,6 @@ dialog h2 { margin-top: 0; }
 /* Admin */
 .admin-table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .admin-table td, .admin-table th { border-bottom: 1px solid var(--line); padding: 8px; text-align: left; vertical-align: top; }
+
+.season { margin: 16px 0 0; padding: 12px 16px; border-radius: 12px; background: var(--soft); text-align: center; font-weight: 600; }
+.season a { color: inherit; }

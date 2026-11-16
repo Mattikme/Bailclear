@@ -1,7 +1,7 @@
 import { MAX_BODY_BYTES, TERMS_VERSION } from '../../../lib/config.js';
 import { randomId, randomToken, sha256Hex } from '../../../lib/crypto.js';
 import { handle, json, error, readJson } from '../../../lib/http.js';
-import { newDraft, savePage } from '../../../lib/store.js';
+import { logAction, newDraft, savePage } from '../../../lib/store.js';
 import { validateContent, ValidationError } from '../../../lib/validate.js';
 
 // Crée un brouillon juste avant le paiement. Le contenu n'est jamais public tant qu'il n'est pas payé.
@@ -22,5 +22,6 @@ export const onRequestPost = handle(async ({ request, env }) => {
   const consent = { terms: true, waiver: true, termsVersion: TERMS_VERSION, at: new Date().toISOString() };
   const page = newDraft(id, await sha256Hex(token), content, consent);
   await savePage(env, page);
+  await logAction(env, request, id, 'create');
   return json({ id, token, expiresAt: page.expiresAt }, 201);
 });

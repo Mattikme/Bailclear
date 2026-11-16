@@ -1,7 +1,7 @@
 import { ID_RE } from '../../lib/crypto.js';
-import { error, handle, isLocalhost, json } from '../../lib/http.js';
+import { devFakePayment, error, handle, json } from '../../lib/http.js';
 import { getPage, markPaid } from '../../lib/store.js';
-import { retrieveSession } from '../../lib/stripe.js';
+import { isSessionPaid, retrieveSession } from '../../lib/stripe.js';
 
 // Appelée par la page « merci » au retour de Stripe : vérifie le paiement côté serveur.
 export const onRequestGet = handle(async ({ request, env }) => {
@@ -15,14 +15,14 @@ export const onRequestGet = handle(async ({ request, env }) => {
   if (page.status !== 'draft') return error('Page indisponible.', 410);
 
   if (sessionId === 'dev_fake') {
-    if (env.DEV_FAKE_PAYMENT === '1' && isLocalhost(request)) {
+    if (devFakePayment(env, request)) {
       await markPaid(env, page, 'dev_fake');
       return json({ status: 'paid' });
     }
     return error('Paiement introuvable.', 402);
   }
   const session = await retrieveSession(env, sessionId);
-  const ok = session.payment_status === 'paid' && session.metadata && session.metadata.page_id === id;
+  const ok = isSessionPaid(session) && session.metadata && session.metadata.page_id === id;
   if (!ok) return json({ status: 'pending' }, 202);
   await markPaid(env, page, session.id);
   return json({ status: 'paid' });

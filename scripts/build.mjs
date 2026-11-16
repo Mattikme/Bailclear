@@ -97,7 +97,7 @@ const priceBox = `<div class="price-box">
     <li>Sans publicité, sans compte</li>
   </ul><br>
   <a class="btn" href="/creer">Créer ma page</a>
-  <p class="price-note">Aperçu gratuit avant de payer. TVA non applicable, art. 293 B du CGI.</p>
+  <p class="price-note">Aperçu gratuit avant de payer · satisfait(e) ou remboursé(e) 14 jours.<br>TVA non applicable, art. 293 B du CGI.</p>
 </div>`;
 
 const steps = `<div class="grid3">
@@ -126,13 +126,15 @@ pages['index.html'] = layout({
   description: `Crée une page web unique pour la personne que tu aimes : lettre, photos, souvenirs et chanson, à offrir par lien ou QR code. Saint-Valentin, anniversaire, fête des mères… ${PRICE_LABEL}.`,
   path: '/',
   jsonld: faqLd(generalFaq),
+  scripts: '<script type="module" src="/assets/js/season.js"></script>',
   body: `<main>
+<div class="wrap"><p class="season" id="season" hidden></p></div>
 <section class="wrap hero">
   <div>
     <h1>Offre une page rien qu’à elle. Ou à lui.</h1>
     <p class="lead">Ta lettre, vos photos, vos souvenirs et votre chanson, réunis sur une page secrète qui s’ouvre comme une enveloppe. À offrir par lien ou par QR code.</p>
     <div class="cta"><a class="btn" href="/creer">Créer ma page</a><a class="btn ghost" href="/p/demo" target="_blank" rel="noopener">Voir un exemple</a></div>
-    <p class="price-note">${PRICE_LABEL} · aperçu gratuit · prête en 10 minutes · sans compte</p>
+    <p class="price-note">${PRICE_LABEL} · aperçu gratuit · prête en 10 minutes · satisfait ou remboursé 14 jours</p>
   </div>
   <div class="phone"><iframe src="/p/demo" title="Exemple de page" loading="lazy"></iframe></div>
 </section>
@@ -152,7 +154,7 @@ pages['index.html'] = layout({
 </div></section>
 <section class="section" id="prix"><div class="wrap">
   <h2>Un prix simple</h2>
-  <p class="sub">Moins cher qu’un bouquet, et ça ne fane pas.</p>
+  <p class="sub">Un bouquet : environ 40 €, fané en une semaine. Ta page : ${PRICE_LABEL}, en ligne ${YEARS} ans.</p>
   ${priceBox}
 </div></section>
 <section class="section" id="faq"><div class="wrap narrow">
@@ -175,7 +177,7 @@ for (const o of OCCASIONS) {
     <p class="eyebrow" style="color:var(--accent);font-weight:600;margin:0 0 8px">${o.emoji} ${esc(o.label)}</p>
     <h1>${esc(o.h1)}</h1>
     <p class="lead">${esc(o.lead)}</p>
-    <div class="cta"><a class="btn" href="/creer?occasion=${o.id}">Créer ma page ${esc(o.label.split(' (')[0].toLowerCase())}</a><a class="btn ghost" href="/p/demo" target="_blank" rel="noopener">Voir un exemple</a></div>
+    <div class="cta"><a class="btn" href="/creer?occasion=${o.id}">${esc(o.cta || 'Créer ma page')}</a><a class="btn ghost" href="/p/demo" target="_blank" rel="noopener">Voir un exemple</a></div>
     <p class="price-note">${PRICE_LABEL} · aperçu gratuit avant de payer · en ligne immédiatement</p>
   </div>
   <div class="phone"><iframe src="/p/demo" title="Exemple de page" loading="lazy"></iframe></div>
@@ -256,7 +258,7 @@ pages['creer.html'] = layout({
       </label>
       <p class="help" id="photo-status" role="status"></p>
       <div class="photo-list" id="photo-list"></div>
-      <p class="help">N’ajoute que des photos que tu as le droit de partager, avec l’accord des personnes visibles.</p>
+      <p class="help">N’ajoute que des photos que tu as le droit de partager, avec l’accord des personnes visibles. Pour un enfant, demande l’accord de ses parents et évite nom complet, école ou adresse.</p>
     </fieldset>
     <fieldset>
       <legend id="timeline-legend">Frise de souvenirs</legend>
@@ -272,7 +274,7 @@ pages['creer.html'] = layout({
       <div class="ideas" id="reason-ideas"></div>
     </fieldset>
     <fieldset>
-      <legend>Votre chanson</legend>
+      <legend>La chanson</legend>
       <div class="field"><label for="f-music">Lien YouTube ou Spotify</label><input id="f-music" type="url" data-field="music" maxlength="300" placeholder="https://www.youtube.com/watch?v=…" inputmode="url"><p class="help" id="music-status" role="status"></p></div>
     </fieldset>
     <fieldset>
@@ -309,9 +311,10 @@ pages['creer.html'] = layout({
   <p>Ta page sera en ligne <strong>immédiatement après le paiement</strong> de <strong>${PRICE_LABEL}</strong> (TVA non applicable, art. 293 B du CGI), hébergée ${YEARS} ans et modifiable gratuitement.</p>
   <label class="check"><input type="checkbox" id="c-terms"><span>J’ai lu et j’accepte les <a href="/cgv" target="_blank">conditions générales de vente</a> et les <a href="/regles-de-contenu" target="_blank">règles de contenu</a>, et je confirme avoir le droit de publier ces photos et textes.</span></label>
   <label class="check"><input type="checkbox" id="c-waiver"><span>Je demande la mise en ligne immédiate de ma page et je reconnais <strong>perdre mon droit de rétractation</strong> dès qu’elle est fournie (art. L221-28 13° du Code de la consommation).</span></label>
+  <p style="font-size:14px;margin:0">🔒 Paiement sécurisé par Stripe : carte bancaire, Apple Pay, Google Pay. Ta page reste modifiable gratuitement après le paiement, et tu es <strong>satisfait(e) ou remboursé(e) pendant 14 jours</strong>.</p>
   <p class="progress" id="publish-progress" role="status"></p>
   <div class="dialog-actions">
-    <button type="button" class="btn ghost" id="publish-cancel">Annuler</button>
+    <button type="button" class="btn ghost" id="publish-cancel">Revenir à ma page</button>
     <button type="button" class="btn" id="publish-confirm">Payer ${PRICE_LABEL}</button>
   </div>
 </dialog>`,
@@ -344,7 +347,7 @@ pages['merci.html'] = layout({
       <p style="margin:6px 0">Il permet de modifier ou supprimer ta page. Il est enregistré sur cet appareil, mais copie-le ou mets-le en favori pour ne pas le perdre.</p>
       <a class="edit-link" id="edit-link" href="#"></a>
     </div>
-    <p style="margin-top:30px;font-size:14px;color:var(--muted)">Un reçu de paiement t’est envoyé par e-mail par Stripe. Une question ? ${email}</p>
+    <p style="margin-top:30px;font-size:14px;color:var(--muted)">Ta facture, qui confirme ta commande, t’est envoyée par e-mail. Une question ? ${email}</p>
   </div>
   <div class="print-card" aria-hidden="true">
     <p>💌</p>
@@ -373,10 +376,10 @@ pages['mentions-legales.html'] = layout({
   body: `<main class="wrap narrow prose">
 <h1>Mentions légales</h1>
 <h2>Éditeur du site</h2>
-<p>${fill(e.name, 'prénom et nom')}<br>${esc(e.status)}<br>SIRET : ${fill(e.siret, 'SIRET')}<br>Adresse : ${fill(e.address, 'adresse')}<br>E-mail : ${email}${e.phone ? `<br>Téléphone : ${esc(e.phone)}` : ''}<br>TVA non applicable, art. 293 B du CGI.</p>
+<p>${fill(e.name, 'prénom et nom')}<br>${esc(e.status)}<br>SIRET : ${fill(e.siret, 'SIRET')}<br>Adresse : ${fill(e.address, 'adresse')}<br>E-mail : ${email}<br>Téléphone : ${fill(e.phone, 'téléphone')}<br>Immatriculation : Registre national des entreprises (RNE)<br>TVA non applicable, art. 293 B du CGI.</p>
 <p>Directeur de la publication : ${fill(e.name, 'prénom et nom')}.</p>
 <h2>Hébergeur</h2>
-<p>Cloudflare, Inc. — 101 Townsend St, San Francisco, CA 94107, États-Unis — www.cloudflare.com</p>
+<p>Cloudflare, Inc. — 101 Townsend St, San Francisco, CA 94107, États-Unis — Tél. : +1 650 319 8930 — www.cloudflare.com</p>
 <h2>Contenus publiés par les utilisateurs</h2>
 <p>Les pages personnalisées sont créées par les utilisateurs, qui sont responsables de leur contenu. ${SITE_NAME} agit comme hébergeur de ces contenus. Pour signaler un contenu : bouton « Signaler un contenu » présent sur chaque page, ou ${email}. Voir les <a href="/regles-de-contenu">règles de contenu</a>.</p>
 <h2>Propriété intellectuelle</h2>
@@ -394,18 +397,21 @@ pages['cgv.html'] = layout({
 <p>${fill(e.name, 'prénom et nom')}, ${esc(e.status)}, SIRET ${fill(e.siret, 'SIRET')}, ${fill(e.address, 'adresse')}, ${email} (ci-après « nous »).</p>
 <h2>2. Service</h2>
 <p>${SITE_NAME} permet de créer une page web personnalisée (textes, photos, liens musicaux) accessible par un lien privé non référencé et un QR code (la « Page »). La Page est un contenu numérique fourni sans support matériel. Elle est hébergée pendant ${YEARS} ans à compter du paiement, puis supprimée automatiquement. Elle peut être modifiée gratuitement ou supprimée à tout moment pendant cette durée grâce au lien de modification remis après l’achat.</p>
-<p>Un aperçu gratuit et complet est disponible avant toute commande.</p>
+<p>Un aperçu gratuit et complet est disponible avant toute commande. La Page s’affiche dans tout navigateur récent (téléphone ou ordinateur) avec une connexion internet. La lecture de la musique dépend de la disponibilité du morceau sur YouTube ou Spotify.</p>
+<p>Pour commander, tu dois être majeur(e) ou avoir l’accord d’un parent.</p>
 <h2>3. Prix</h2>
 <p>Le prix est de ${PRICE_LABEL} TTC par Page, payable une seule fois. TVA non applicable, art. 293 B du CGI. Des codes de réduction peuvent être proposés ponctuellement.</p>
 <h2>4. Commande et paiement</h2>
-<p>La commande est passée en cliquant sur « Payer » après avoir accepté les présentes conditions. Le paiement est réalisé par carte bancaire (ou portefeuille compatible) via le prestataire Stripe. Nous n’avons jamais accès à tes données bancaires. La Page est mise en ligne dès la confirmation du paiement. Un reçu est envoyé par e-mail.</p>
+<p>La commande est passée en cliquant sur « Payer » après avoir accepté les présentes conditions. Le paiement est réalisé par carte bancaire, Apple Pay ou Google Pay via le prestataire Stripe. Nous n’avons jamais accès à tes données bancaires. La Page est mise en ligne dès la confirmation du paiement. Une facture confirmant la commande, la version des présentes conditions et ta renonciation au droit de rétractation t’est envoyée par e-mail.</p>
 <h2>5. Droit de rétractation</h2>
-<p>Conformément à l’article L221-28 13° du Code de la consommation, le droit de rétractation ne peut être exercé pour la fourniture d’un contenu numérique non fourni sur un support matériel dont l’exécution a commencé après accord préalable exprès du consommateur et renoncement exprès à son droit de rétractation. Avant le paiement, tu demandes expressément la mise en ligne immédiate de ta Page et tu reconnais perdre ton droit de rétractation (case à cocher obligatoire). Cette confirmation figure également sur le reçu ou la facture transmis par e-mail.</p>
+<p>Conformément à l’article L221-28 13° du Code de la consommation, le droit de rétractation ne peut être exercé pour la fourniture d’un contenu numérique non fourni sur un support matériel dont l’exécution a commencé après accord préalable exprès du consommateur et renoncement exprès à son droit de rétractation. Avant le paiement, tu demandes expressément la mise en ligne immédiate de ta Page et tu reconnais perdre ton droit de rétractation (case à cocher obligatoire). Cette confirmation figure également sur la facture transmise par e-mail.</p>
+<p><strong>Satisfait(e) ou remboursé(e) 14 jours :</strong> indépendamment de ce qui précède, et à titre de geste commercial, tu peux demander le remboursement intégral de ta Page pendant 14 jours après l’achat en écrivant à ${email}. Ta Page est alors supprimée.</p>
 <h2>6. Ton contenu</h2>
 <p>Tu es seul(e) responsable des textes, photos et liens que tu publies. Tu garantis disposer des droits nécessaires, avoir obtenu l’accord des personnes reconnaissables sur les photos (et de leurs parents s’il s’agit de mineurs), et respecter les <a href="/regles-de-contenu">règles de contenu</a>. Aucun fichier audio n’est hébergé : la musique est lue depuis YouTube ou Spotify.</p>
 <p>Nous pouvons retirer sans délai une Page manifestement illicite ou contraire aux règles de contenu, notamment après signalement. Dans ce cas, aucun remboursement n’est dû si le retrait résulte d’un manquement de ta part.</p>
-<h2>7. Conformité et disponibilité</h2>
-<p>Tu bénéficies de la garantie légale de conformité des contenus et services numériques (articles L224-25-1 et suivants du Code de la consommation). Si ta Page ne fonctionne pas comme décrit, écris-nous : nous la corrigeons, ou te remboursons si la correction est impossible. Nous mettons tout en œuvre pour que la Page reste accessible pendant toute sa durée d’hébergement ; des interruptions ponctuelles pour maintenance ou incident restent possibles.</p>
+<h2>7. Garantie légale de conformité et disponibilité</h2>
+<div class="callout"><p><strong>Garantie légale de conformité.</strong> Tu disposes de la garantie légale de conformité des contenus et services numériques (articles L224-25-12 et suivants du Code de la consommation) pendant toute la durée de fourniture de ta Page, soit ${YEARS} ans. Pendant cette durée, tu n’as à prouver que l’existence du défaut de conformité, pas sa date d’apparition. La garantie te donne droit à la mise en conformité sans frais, ou, si elle est impossible, refusée ou tardive, à une réduction du prix ou à la résolution du contrat avec remboursement. Pour l’exercer, écris à ${email}. Cette garantie s’applique indépendamment de toute garantie commerciale.</p></div>
+<p>Si ta Page ne fonctionne pas comme décrit, écris-nous : nous la corrigeons, ou te remboursons si la correction est impossible. Nous mettons tout en œuvre pour que la Page reste accessible pendant toute sa durée d’hébergement ; des interruptions ponctuelles pour maintenance ou incident restent possibles.</p>
 <h2>8. Données personnelles</h2>
 <p>Voir la <a href="/confidentialite">politique de confidentialité</a>.</p>
 <h2>9. Réclamations et médiation</h2>
@@ -424,8 +430,10 @@ pages['confidentialite.html'] = layout({
 <ul>
 <li><strong>Contenu de ta Page</strong> (prénoms, textes, photos, lien musical, question secrète sous forme chiffrée) : pour fournir le service (exécution du contrat). Brouillon envoyé mais non payé : effacé automatiquement après 48 heures. Page payée : ${YEARS} ans, puis effacement automatique. Tu peux la supprimer à tout moment.</li>
 <li><strong>Lien de modification</strong> : nous n’en conservons qu’une empreinte chiffrée (non réversible).</li>
-<li><strong>Paiement</strong> : traité par Stripe, qui nous transmet ton nom, ton e-mail et le statut du paiement. Les pièces comptables sont conservées 10 ans (obligation légale).</li>
+<li><strong>Paiement</strong> : traité par Stripe, qui nous transmet ton nom, ton e-mail et le statut du paiement (exécution du contrat). Les pièces comptables sont conservées 10 ans (obligation légale).</li>
 <li><strong>Signalements</strong> (motif, explication, e-mail facultatif) : pour traiter le signalement (obligation légale d’hébergeur), conservés 1 an. En cas de retrait d’une Page, une trace minimale sans contenu est gardée 30 jours.</li>
+<li><strong>Données d’identification des créateurs</strong> (adresse IP, date et type d’opération : création, modification, suppression d’une Page) : conservées 1 an, comme l’impose aux hébergeurs l’article 6 de la loi pour la confiance dans l’économie numérique (obligation légale).</li>
+<li><strong>Preuve de ta commande</strong> (identifiant de la Page, date, version des CGV acceptée, renonciation au droit de rétractation, référence du paiement, sans le contenu) : conservée 5 ans pour pouvoir répondre à une éventuelle réclamation (intérêt légitime), même si la Page est supprimée.</li>
 <li><strong>Journaux techniques</strong> (adresse IP, date) traités par notre hébergeur pour la sécurité du service (intérêt légitime).</li>
 </ul>
 <h2>Photos</h2>
@@ -433,14 +441,14 @@ pages['confidentialite.html'] = layout({
 <h2>Personnes figurant sur une Page</h2>
 <p>Si tu apparais sur une Page sans y avoir consenti, utilise le bouton « Signaler un contenu » de la Page ou écris à ${email} : nous traitons ces demandes en priorité.</p>
 <h2>Cookies et stockage local</h2>
-<p>Aucun cookie publicitaire ni outil de mesure d’audience tiers. Ton brouillon et tes liens de modification sont enregistrés uniquement sur ton appareil (stockage local du navigateur), ce qui est strictement nécessaire au service. Stripe dépose ses propres cookies sur sa page de paiement. Les lecteurs YouTube et Spotify ne sont chargés que si le visiteur clique sur « Écouter ».</p>
+<p>Aucun cookie publicitaire ni outil de mesure d’audience tiers. Ton brouillon et tes liens de modification sont enregistrés uniquement sur ton appareil (stockage local du navigateur), ce qui est strictement nécessaire au service. Stripe dépose ses propres cookies sur sa page de paiement. Les lecteurs YouTube (version « sans cookie ») et Spotify ne sont chargés que si le visiteur clique sur « Écouter » : Google ou Spotify reçoivent alors son adresse IP et peuvent déposer leurs propres traceurs, selon leurs politiques.</p>
 <h2>Sous-traitants</h2>
 <ul>
 <li>Cloudflare, Inc. (hébergement et stockage) — données susceptibles d’être traitées aux États-Unis, encadrées par le Data Privacy Framework et des clauses contractuelles types.</li>
-<li>Stripe Payments Europe, Ltd. (paiement, Irlande).</li>
+<li>Stripe Payments Europe, Ltd. (paiement, Irlande) — certaines données peuvent être transférées à Stripe, Inc. aux États-Unis, encadrées par le Data Privacy Framework et des clauses contractuelles types.</li>
 </ul>
 <h2>Tes droits</h2>
-<p>Tu disposes des droits d’accès, de rectification, d’effacement, de limitation, d’opposition et de portabilité. Écris à ${email}. Tu peux aussi saisir la CNIL (www.cnil.fr).</p>
+<p>Tu disposes des droits d’accès, de rectification, d’effacement, de limitation, d’opposition et de portabilité. Écris à ${email}. Tu peux aussi définir des directives relatives au sort de tes données après ton décès, et saisir la CNIL (www.cnil.fr).</p>
 </main>`,
 });
 
@@ -460,7 +468,8 @@ pages['regles-de-contenu.html'] = layout({
 <h2>Signaler un contenu</h2>
 <p>Chaque Page comporte un bouton « Signaler un contenu ». Tu peux aussi écrire à ${email} en indiquant le lien de la Page, le motif et une explication. Point de contact unique (y compris pour les autorités) : ${email}, en français ou en anglais.</p>
 <h2>Ce que nous faisons</h2>
-<p>Nous examinons chaque signalement avec diligence et retirons promptement les contenus manifestement illicites. Quand nous retirons une Page, nous en informons son auteur lorsque nous disposons de son adresse e-mail, en précisant le motif ; il peut contester cette décision en nous répondant. L’auteur d’un signalement abusif s’expose à des poursuites (article 6 de la loi pour la confiance dans l’économie numérique).</p>
+<p>Chaque signalement est examiné par une personne, sans outil automatisé, avec diligence. Nous retirons promptement les contenus manifestement illicites ou contraires à ces règles. En cas de menace pour la vie ou la sécurité d’une personne, nous informons les autorités compétentes (plateforme Pharos, procureur de la République).</p>
+<p>Quand nous retirons une Page, nous en informons son auteur par e-mail (adresse fournie lors du paiement) avec un exposé des motifs : la mesure prise, les faits en cause, la règle enfreinte (loi ou présentes règles), le fait que la décision a été prise sans moyen automatisé, et les voies de recours : nous répondre pour contester, saisir un médiateur, ou saisir le juge. L’auteur d’un signalement en est également informé s’il a laissé son adresse. L’auteur d’un signalement abusif s’expose à des poursuites (article 6 de la loi pour la confiance dans l’économie numérique).</p>
 </main>`,
 });
 

@@ -1,7 +1,7 @@
 import { MAX_BODY_BYTES } from '../../../lib/config.js';
 import { ID_RE } from '../../../lib/crypto.js';
 import { bearer, error, handle, json, readJson } from '../../../lib/http.js';
-import { checkToken, deletePage, deletePhotosFrom, getPage, publicView, savePage } from '../../../lib/store.js';
+import { checkToken, deletePage, deletePhotosFrom, getPage, logAction, publicView, savePage } from '../../../lib/store.js';
 import { validateContent, ValidationError } from '../../../lib/validate.js';
 
 async function load(params, env) {
@@ -32,12 +32,16 @@ export const onRequestPut = handle(async ({ request, env, params }) => {
     if (e instanceof ValidationError) return error(e.message, 422);
     throw e;
   }
-  const before = page.photoCount;
-  page.content = content;
-  page.photoCount = content.photos.length;
-  await savePage(env, page);
-  if (page.photoCount < before) await deletePhotosFrom(env, page.id, page.photoCount, before);
-  return json({ ok: true, status: page.status });
+  // Relecture juste avant l'écriture : on ne modifie que le contenu (jamais le statut ni l'expiration).
+  const fresh = await getPage(env, page.id);
+  if (!fresh || fresh.status === 'removed') return error('Page introuvable.', 404);
+  const before = fresh.photoCount;
+  fresh.content = content;
+  fresh.photoCount = content.photos.length;
+  await savePage(env, fresh);
+  if (fresh.photoCount < before) await deletePhotosFrom(env, fresh.id, fresh.photoCount, before);
+  await logAction(env, request, page.id, 'update');
+  return json({ ok: true, status: fresh.status });
 });
 
 export const onRequestDelete = handle(async ({ request, env, params }) => {
@@ -45,5 +49,6 @@ export const onRequestDelete = handle(async ({ request, env, params }) => {
   if (!page || page.status === 'removed') return error('Page introuvable.', 404);
   if (!(await checkToken(page, bearer(request)))) return error('Lien de modification invalide.', 403);
   await deletePage(env, page);
+  await logAction(env, request, page.id, 'delete');
   return json({ ok: true });
 });

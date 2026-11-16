@@ -18,7 +18,7 @@ export const onRequest = handle(async ({ request, env, params }) => {
       const r = await kv.get(k.name, { type: 'json' });
       if (r) reports.push({ key: k.name, ...r });
     }
-    return json({ reports: reports.reverse() });
+    return json({ reports, more: !list.list_complete });
   }
   if (request.method === 'GET' && path === 'page') {
     const id = new URL(request.url).searchParams.get('id') || '';
@@ -38,7 +38,7 @@ export const onRequest = handle(async ({ request, env, params }) => {
   }
   if (request.method === 'POST' && path === 'dismiss') {
     const b = await readJson(request, 4096);
-    if (!/^report:\d+:[a-zA-Z0-9]{6}$/.test(String(b.key))) return error('Clé invalide.', 400);
+    if (!/^report:\d{13}:[a-zA-Z0-9]{6}$/.test(String(b.key))) return error('Clé invalide.', 400);
     await kv.delete(b.key);
     return json({ ok: true });
   }

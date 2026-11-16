@@ -23,8 +23,11 @@ export const onRequestGet = handle(async ({ request, env, params }) => {
   return new Response(value, {
     headers: {
       'content-type': (metadata && metadata.type) || 'image/jpeg',
-      'cache-control': page.status === 'paid' ? 'public, max-age=3600' : 'private, no-store',
+      'cache-control': page.status === 'paid' && !bearer(request) ? 'public, max-age=300' : 'private, no-store',
       'x-robots-tag': 'noindex',
+      'x-content-type-options': 'nosniff',
+      'content-security-policy': "default-src 'none'; sandbox",
+      'content-disposition': 'inline',
     },
   });
 });

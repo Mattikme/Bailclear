@@ -13,8 +13,8 @@ function cell(text) { const td = document.createElement('td'); td.textContent = 
 async function load() {
   $('out').textContent = 'Chargement…';
   try {
-    const { reports } = await api('reports');
-    $('out').textContent = reports.length ? '' : 'Aucun signalement.';
+    const { reports, more } = await api('reports');
+    $('out').textContent = reports.length ? (more ? 'Plus de 200 signalements : traite ceux-ci pour voir les suivants.' : '') : 'Aucun signalement.';
     const tbody = $('reports');
     tbody.replaceChildren(...reports.map((r) => {
       const tr = document.createElement('tr');
@@ -24,14 +24,17 @@ async function load() {
       rm.onclick = async () => {
         const reason = prompt('Motif du retrait (conservé 30 jours) :', r.reason);
         if (reason == null) return;
-        await api('remove', { method: 'POST', body: JSON.stringify({ id: r.id, reason }) });
-        await api('dismiss', { method: 'POST', body: JSON.stringify({ key: r.key }) });
+        try {
+          await api('remove', { method: 'POST', body: JSON.stringify({ id: r.id, reason }) }).catch((e) => { if (!/introuvable/i.test(e.message)) throw e; });
+          await api('dismiss', { method: 'POST', body: JSON.stringify({ key: r.key }) });
+          alert('Page retirée. Pense à informer l’acheteur par e-mail (motif, règle enfreinte, recours).');
+        } catch (e) { alert(`Erreur : ${e.message}`); }
         load();
       };
       const ok = document.createElement('button'); ok.className = 'btn small ghost'; ok.textContent = 'Classer sans suite';
       ok.onclick = async () => { await api('dismiss', { method: 'POST', body: JSON.stringify({ key: r.key }) }); load(); };
       actions.append(view, ' ', rm, ' ', ok);
-      tr.append(cell(new Date(r.at).toLocaleString('fr-FR')), cell(r.id), cell(r.reason), cell(r.details), cell(r.email || '—'), actions);
+      tr.append(cell(new Date(r.at).toLocaleString('fr-FR')), cell(r.id), cell(r.reason), cell(r.details), cell([r.name, r.email].filter(Boolean).join(' — ') || '—'), actions);
       return tr;
     }));
   } catch (e) {

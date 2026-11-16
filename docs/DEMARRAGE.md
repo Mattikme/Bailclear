@@ -27,10 +27,12 @@ Ouvre `site.config.json` et remplis :
 {
   "siteUrl": "https://unepagepourtoi.fr",
   "contactEmail": "contact@unepagepourtoi.fr",
-  "editor": { "name": "Prénom Nom", "status": "Entrepreneur individuel (micro-entreprise)", "siret": "123 456 789 00012", "address": "…", "phone": "" },
+  "editor": { "name": "Prénom Nom", "status": "Entrepreneur individuel (micro-entreprise)", "siret": "123 456 789 00012", "address": "…", "phone": "06 …" },
   "mediator": { "name": "Nom du médiateur", "url": "https://…", "address": "…" }
 }
 ```
+
+Le **téléphone est obligatoire** dans les mentions légales (loi LCEN) : tu peux utiliser un numéro secondaire (ligne virtuelle, forfait à 2 €).
 
 Puis lance `npm run build`. La commande affiche un avertissement tant qu'une information manque.
 
@@ -66,7 +68,7 @@ Puis lance `npm run build`. La commande affiche un avertissement tant qu'une inf
 
    Pour générer un `ADMIN_TOKEN` de 64 caractères : `openssl rand -hex 32`. Garde-le précieusement : il ouvre la page `/admin`.
 6. **Domaine** : Custom domains → ajoute `unepagepourtoi.fr`, puis suis les instructions DNS.
-7. **Protection anti-abus** (recommandé, gratuit) : Security → WAF → *Rate limiting rules*. Crée une règle qui limite les requêtes `POST` sur `/api/` à environ 30 par minute et par adresse IP.
+7. **Protection anti-abus (OBLIGATOIRE avant le lancement, gratuit)** : Security → WAF → *Rate limiting rules*. Crée une règle sur les requêtes dont le chemin commence par `/api/` et la méthode est `POST` ou `PUT`, limitée à environ 40 requêtes par minute et par adresse IP, avec blocage pendant 10 minutes. Sans cette règle, un petit malin peut épuiser le quota d’écritures gratuit en quelques minutes et bloquer les publications.
 
 ### Limites du plan gratuit
 - **Cloudflare KV gratuit** : 1 000 écritures par jour. Une page avec 10 photos consomme environ 22 écritures (brouillon, photos, puis prolongation au paiement), soit **environ 40 à 80 pages par jour**.
@@ -85,7 +87,7 @@ Puis lance `npm run build`. La commande affiche un avertissement tant qu'une inf
    - Événements : `checkout.session.completed` et `checkout.session.async_payment_succeeded`
    - Copie le *Signing secret* (`whsec_…`) dans `STRIPE_WEBHOOK_SECRET`.
    - Le webhook sert de filet de sécurité si l'acheteur ferme l'onglet avant la page « merci ».
-4. **E-mails clients** : Settings → Customer emails → active « Successful payments ». Le reçu sert de confirmation sur support durable.
+4. **E-mails clients** : Settings → Customer emails → active « Successful payments » **et** l’envoi des factures payées. La facture contient la confirmation de la renonciation au droit de rétractation et la version des CGV : c’est ta preuve sur « support durable », exigée par la loi. Fais un achat test et vérifie que la facture arrive bien par e-mail.
 5. **Factures** : le site demande à Stripe de générer une facture à chaque vente. Elle porte la mention 293 B et la renonciation au droit de rétractation.
    - Stripe peut facturer ce service : vérifie leur grille.
    - Pour le désactiver, ajoute la variable `STRIPE_INVOICE=0`. Garde-le de préférence : c'est ta preuve de renonciation.
@@ -108,5 +110,8 @@ npm test           # tests unitaires
   - « Retirer la page » supprime le contenu et les photos.
   - Si tu retires une page, préviens l'acheteur par e-mail (adresse visible dans Stripe) avec le motif.
 - **Demandes RGPD ou de suppression** : une personne qui apparaît sur une page sans son accord ? Retire la page depuis `/admin`.
-- **Remboursements** : depuis le tableau de bord Stripe. Un geste commercial vaut souvent mieux qu'un litige à 9,90 €.
+- **« Satisfait ou remboursé 14 jours »** (promis dans les CGV) : sur demande par e-mail dans les 14 jours, rembourse depuis Stripe (Paiements → Rembourser), puis retire la page depuis `/admin` (ou demande au client de la supprimer avec son lien de modification).
+- **Paiement sans page** : si les journaux Cloudflare affichent « PAIEMENT SANS PAGE », rembourse ce paiement dans Stripe (cas rarissime : brouillon expiré ou supprimé pendant le paiement).
+- **Double paiement** (le client a payé deux fois la même page) : rembourse le second paiement dans Stripe.
+- **Retrait d’une page** : préviens l’acheteur par e-mail (adresse dans Stripe) en indiquant la mesure prise, les faits, la règle enfreinte, que la décision n’est pas automatisée, et ses recours (te répondre, médiateur, juge). Obligation du DSA.
 - **Lien de modification perdu** : il n'existe pas de récupération automatique en V1. Tu peux retrouver l'identifiant de la page dans Stripe (métadonnée `page_id`), mais pas le jeton. Améliore ce point en V2 : envoi du lien par e-mail, via Brevo ou Resend.

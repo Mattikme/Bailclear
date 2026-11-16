@@ -15,6 +15,7 @@ let photoBlobs = [];
 let photoUrls = [];
 let serverStatus = null;
 let dirty = false;
+let pendingOccasion = null;
 
 function blankState(occId) {
   const occ = getOccasion(occId);
@@ -347,6 +348,7 @@ function setupPublish() {
 }
 
 async function saveEdit() {
+  if (!checkReady()) return false;
   const btn = $('publish-btn');
   btn.disabled = true;
   try {
@@ -355,10 +357,12 @@ async function saveEdit() {
     await uploadPhotos(editId, editToken, setStatus);
     dirty = false;
     setStatus('Modifications enregistrées ✓');
-    notice(serverStatus === 'paid' ? 'Modifications enregistrées. Elles peuvent mettre jusqu’à une minute à apparaître sur la page.' : 'Modifications enregistrées.', 'ok');
+    notice(serverStatus === 'paid' ? 'Modifications enregistrées. Elles peuvent mettre quelques minutes à apparaître sur la page.' : 'Modifications enregistrées.', 'ok');
+    return true;
   } catch (e) {
     notice(`Oups : ${e.message}`, 'error');
     setStatus('Échec de l’enregistrement');
+    return false;
   } finally { btn.disabled = false; }
 }
 
@@ -376,7 +380,7 @@ async function loadEdit() {
     if (data.status === 'draft') $('pay-btn').hidden = false;
     setStatus('Chargement des photos…');
     for (let n = 0; n < data.photoCount; n++) {
-      const res = await fetch(`/api/photos/${editId}/${n}`, { headers: { authorization: `Bearer ${editToken}` } });
+      const res = await fetch(`/api/photos/${editId}/${n}`, { headers: { authorization: `Bearer ${editToken}` }, cache: 'no-store' });
       if (!res.ok) throw new Error('Une photo n’a pas pu être chargée.');
       const blob = await res.blob();
       photoBlobs.push(blob); photoUrls.push(URL.createObjectURL(blob));
@@ -398,7 +402,7 @@ async function loadEdit() {
   };
   $('pay-btn').onclick = async () => {
     try {
-      await saveEdit();
+      if (!(await saveEdit())) return;
       const { url } = await api('/api/checkout', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: editId }) }, editToken);
       location.href = url;
     } catch (e) { notice(e.message, 'error'); }
@@ -408,13 +412,16 @@ async function loadEdit() {
 async function loadDraft() {
   try {
     const d = await idbGet('draft');
-    if (d && d.state && !params.get('occasion')) {
+    if (d && d.state) {
       state = { ...blankState(d.state.occasion), ...d.state };
       photoBlobs = d.photos || [];
       photoUrls = photoBlobs.map((b) => URL.createObjectURL(b));
       state.photos = state.photos.slice(0, photoBlobs.length);
       setStatus('Brouillon retrouvé sur cet appareil');
       $('reset-btn').hidden = false;
+      notice('Ton brouillon précédent a été retrouvé. Tu peux continuer, ou cliquer sur « Recommencer à zéro » en bas du formulaire.');
+      const wanted = params.get('occasion');
+      if (wanted && wanted !== state.occasion) pendingOccasion = wanted;
     }
   } catch { /* stockage indisponible */ }
 }
@@ -454,6 +461,7 @@ function setupMisc() {
 async function init() {
   if (isEdit) await loadEdit(); else await loadDraft();
   renderOccasions(); bindFields(); renderPhotos(); renderTimeline(); renderReasons();
+  if (pendingOccasion) switchOccasion(pendingOccasion);
   setupDropzone(); setupPublish(); setupMisc(); renderMyPages();
   iframe.src = '/voir?preview=1';
   dirty = false;

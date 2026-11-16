@@ -1,6 +1,7 @@
 import { REPORT_TTL_SECONDS } from '../../lib/config.js';
 import { ID_RE, randomId } from '../../lib/crypto.js';
 import { error, handle, json, readJson } from '../../lib/http.js';
+import { getPage, putReport } from '../../lib/store.js';
 
 const REASONS = ['illicite', 'vie-privee', 'haine', 'enfant', 'autre'];
 
@@ -12,8 +13,12 @@ export const onRequestPost = handle(async ({ request, env }) => {
   if (!REASONS.includes(b.reason)) return error('Motif invalide.', 400);
   const details = String(b.details || '').slice(0, 2000);
   const email = String(b.email || '').slice(0, 200);
+  if (b.goodFaith !== true) return error('Merci de confirmer que ton signalement est fait de bonne foi.', 400);
+  const name = String(b.name || '').slice(0, 120);
   if (details.trim().length < 10) return error('Décris le problème en quelques mots (10 caractères minimum).', 400);
-  const report = { id, reason: b.reason, details, email, at: new Date().toISOString() };
-  await env.PAGES_KV.put(`report:${Date.now()}:${randomId(6)}`, JSON.stringify(report), { expirationTtl: REPORT_TTL_SECONDS });
+  const page = await getPage(env, id);
+  if (!page || page.status !== 'paid') return error('Page introuvable.', 404);
+  const report = { id, reason: b.reason, details, name, email, at: new Date().toISOString() };
+  await putReport(env, report, REPORT_TTL_SECONDS, randomId(6));
   return json({ ok: true });
 });

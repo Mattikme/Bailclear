@@ -61,11 +61,11 @@ function setupReport(id) {
       const res = await fetch('/api/report', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ id, reason: $('report-reason').value, details: $('report-details').value, email: $('report-email').value }),
+        body: JSON.stringify({ id, reason: $('report-reason').value, details: $('report-details').value, name: $('report-name').value, email: $('report-email').value, goodFaith: $('report-goodfaith').checked }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur');
-      status.textContent = 'Merci, ton signalement a bien été reçu.';
+      status.textContent = 'Merci, ton signalement a bien été reçu. Il sera examiné rapidement.';
       setTimeout(() => dlg.close(), 1800);
     } catch (err) {
       status.textContent = err.message;
