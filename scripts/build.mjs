@@ -73,7 +73,7 @@ const generalFaq = [
   ['Qui peut voir la page ?', 'Uniquement les personnes qui ont le lien. La page n’est pas référencée sur Google et son adresse est impossible à deviner. Tu peux en plus ajouter une question secrète à l’ouverture.'],
   ['Faut-il créer un compte ?', 'Non. Tu crées ta page, tu paies, c’est en ligne. Un lien de modification secret te permet de revenir la modifier.'],
   ['Quelles photos puis-je ajouter ?', 'Jusqu’à 10 photos (JPEG, PNG, ou photos d’iPhone depuis un iPhone). Elles sont allégées dans ton navigateur et leurs données de localisation sont supprimées avant l’envoi.'],
-  ['Et la musique ?', 'Colle un lien YouTube ou Spotify : la chanson se lance quand la personne appuie sur « Écouter ».'],
+  ['Et la musique ?', 'Colle un lien YouTube ou Spotify : la chanson se lance quand la personne appuie sur « Écouter ». YouTube joue le morceau en entier ; Spotify ne joue qu’un extrait de 30 secondes si la personne n’a pas de compte Spotify connecté.'],
   ['Je peux voir le résultat avant de payer ?', 'Oui, l’aperçu se met à jour en direct pendant que tu écris. Tu ne paies que lorsque tu es satisfait(e).'],
   ['Comment se passe le paiement ?', `Par carte bancaire, Apple Pay ou Google Pay via Stripe, une plateforme de paiement sécurisée. ${PRICE_LABEL}, une seule fois, sans abonnement.`],
 ];
@@ -284,7 +284,7 @@ pages['creer.html'] = layout({
     </fieldset>
     <fieldset>
       <legend>La chanson</legend>
-      <div class="field"><label for="f-music">Lien YouTube ou Spotify</label><input id="f-music" type="url" data-field="music" maxlength="300" placeholder="https://www.youtube.com/watch?v=…" inputmode="url"><p class="help" id="music-status" role="status"></p></div>
+      <div class="field"><label for="f-music">Lien YouTube ou Spotify</label><input id="f-music" type="url" data-field="music" maxlength="300" placeholder="https://www.youtube.com/watch?v=…" inputmode="url"><p class="help" id="music-status" role="status"></p><p class="help">Conseil : préfère YouTube, qui joue le morceau en entier. Avec Spotify, la personne n’entend qu’un extrait de 30 secondes si elle n’est pas connectée à son compte Spotify.</p></div>
     </fieldset>
     <fieldset>
       <legend>Le mot de la fin</legend>

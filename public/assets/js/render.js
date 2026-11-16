@@ -132,11 +132,13 @@ function music(content) {
     const iframe = el('iframe', {
       src: m.src, title: 'Musique', loading: 'lazy',
       allow: 'autoplay; encrypted-media; clipboard-write; fullscreen; picture-in-picture',
+      // YouTube exige l'origine du site (erreur 153 sinon) ; on n'envoie que le domaine, jamais l'adresse secrète de la page.
+      referrerpolicy: 'strict-origin-when-cross-origin',
       class: m.provider === 'spotify' ? 'spotify' : 'youtube',
     });
     holder.replaceChildren(iframe);
   });
-  holder.append(btn, el('p', { class: 'hint', text: m.provider === 'youtube' ? 'Lecture via YouTube' : 'Lecture via Spotify' }));
+  holder.append(btn, el('p', { class: 'hint', text: m.provider === 'youtube' ? 'Lecture via YouTube' : 'Lecture via Spotify (extrait de 30 s sans compte Spotify)' }));
   return el('section', { class: 'block music reveal' }, holder);
 }
 
