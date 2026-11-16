@@ -1,0 +1,28 @@
+{
+  "occasion": "saint-valentin",
+  "theme": "rose",
+  "to": "Léa",
+  "from": "Hugo",
+  "title": "Joyeuse Saint-Valentin, Léa",
+  "intro": "J’ai préparé quelque chose rien que pour toi…",
+  "date": "2022-06-18",
+  "dateLabel": "Ensemble depuis",
+  "letter": "Léa,\n\nJe me souviens encore de ce 18 juin, sur la terrasse du petit café de la place. Tu as renversé ton chocolat chaud sur ma veste et tu as ri si fort que tout le monde s’est retourné. Je crois que c’est là que tout a commencé.\n\nDepuis, il y a eu Lisbonne, notre premier appartement trop petit, les dimanches à refaire le monde et les lundis où tu me fais rire alors que je ne veux pas me lever.\n\nMerci d’être toi. Merci d’être là.",
+  "photos": [
+    { "caption": "Lisbonne, notre premier voyage" },
+    { "caption": "La montagne, août 2023" },
+    { "caption": "Nos cafés du dimanche" },
+    { "caption": "Paris by night" },
+    { "caption": "Le jour des clés 🔑" }
+  ],
+  "timeline": [
+    { "when": "Juin 2022", "text": "Le chocolat chaud renversé. Le début de tout." },
+    { "when": "Octobre 2022", "text": "Premier voyage à Lisbonne, et premier « je t’aime »." },
+    { "when": "Mars 2024", "text": "On emménage ensemble (et on monte 4 étages avec un canapé)." },
+    { "when": "Aujourd’hui", "text": "Toujours aussi amoureux." }
+  ],
+  "reasons": ["Ton rire quand tu essaies de rester sérieuse", "La façon dont tu me regardes", "Tes playlists de voiture", "Ta patience avec moi", "Tes câlins du matin", "Ton courage"],
+  "music": "",
+  "finalMessage": "Je t’aime. Aujourd’hui, demain et tous les jours d’après.",
+  "secret": null
+}

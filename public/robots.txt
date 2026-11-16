@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /p/
+Disallow: /api/
+Disallow: /admin
+Disallow: /merci
+Disallow: /voir
+Sitemap: https://unepagepourtoi.fr/sitemap.xml

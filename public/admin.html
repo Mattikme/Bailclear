@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modération</title>
+<meta name="description" content="Modération">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="Modération">
+<meta property="og:description" content="Modération">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://unepagepourtoi.fr/admin">
+<meta property="og:image" content="https://unepagepourtoi.fr/assets/og-surprise.png">
+<meta property="og:locale" content="fr_FR">
+<meta name="theme-color" content="#d63c72">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/site.css">
+
+<script type="module" src="/assets/js/admin.js"></script>
+</head>
+<body>
+<header class="site-header"><div class="wrap">
+  <a class="logo" href="/"><img src="/favicon.svg" alt="" width="28" height="28">Une page pour toi</a>
+  <nav class="nav" aria-label="Navigation principale">
+    <a href="/#occasions">Occasions</a>
+    <a href="/#prix">Prix</a>
+    <a href="/#faq">FAQ</a>
+    <a class="btn small" href="/creer">Créer ma page</a>
+  </nav>
+</div></header>
+<main class="wrap prose">
+  <h1>Signalements</h1>
+  <form id="login" style="display:flex;gap:8px;max-width:520px"><input id="token" type="password" placeholder="Jeton administrateur" autocomplete="off"><button class="btn small">Charger</button></form>
+  <p id="out"></p>
+  <table class="admin-table"><thead><tr><th>Date</th><th>Page</th><th>Motif</th><th>Détails</th><th>Contact</th><th>Actions</th></tr></thead><tbody id="reports"></tbody></table>
+</main>
+<footer class="site-footer"><div class="wrap">
+  <span>© 2026 Une page pour toi — fait en France avec ♥</span>
+  <nav aria-label="Liens légaux">
+    <a href="/mentions-legales">Mentions légales</a>
+    <a href="/cgv">CGV</a>
+    <a href="/confidentialite">Confidentialité</a>
+    <a href="/regles-de-contenu">Règles de contenu &amp; signalement</a>
+  </nav>
+</div></footer>
+</body>
+</html>

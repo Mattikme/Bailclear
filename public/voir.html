@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#fff6f8">
+<title>Quelqu’un t’a préparé une surprise 💌</title>
+<meta property="og:title" content="Quelqu’un t’a préparé une surprise 💌">
+<meta property="og:description" content="Une page rien que pour toi. Ouvre-la quand tu es prêt(e)…">
+<meta property="og:type" content="website">
+<meta property="og:image" content="/assets/og-surprise.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/page.css">
+<script type="module" src="/assets/js/viewer.js"></script>
+</head>
+<body>
+<div class="envelope" id="envelope" hidden>
+  <div class="env-art" aria-hidden="true"></div>
+  <h1 id="env-title"></h1>
+  <p id="env-intro"></p>
+  <form class="secret-form" id="secret-form" hidden>
+    <label for="secret-answer" id="secret-question"></label>
+    <input id="secret-answer" autocomplete="off" autocapitalize="off" required>
+    <div class="secret-error" id="secret-error" role="alert"></div>
+    <button class="btn" type="submit">Ouvrir</button>
+  </form>
+  <button class="btn" id="open-btn" type="button">Ouvrir 💌</button>
+</div>
+
+<main id="page" aria-live="polite">
+  <div class="state"><p>Chargement…</p></div>
+</main>
+
+<footer class="page-footer" id="footer" hidden>
+  <a class="made" href="/?ref=page">Créée avec Une page pour toi — crée la tienne →</a><br>
+  <button class="linklike" id="report-btn" type="button">Signaler un contenu</button>
+</footer>
+
+<dialog id="report-dialog">
+  <form id="report-form">
+    <h2>Signaler cette page</h2>
+    <p style="font-size:14px;margin:0">Ton signalement est transmis à l’éditeur du site, qui l’examine rapidement.</p>
+    <label for="report-reason">Motif</label>
+    <select id="report-reason" required>
+      <option value="vie-privee">Atteinte à ma vie privée / mon image</option>
+      <option value="illicite">Contenu illicite</option>
+      <option value="haine">Harcèlement, haine, menace</option>
+      <option value="enfant">Contenu impliquant un mineur</option>
+      <option value="autre">Autre</option>
+    </select>
+    <label for="report-details">Explication (obligatoire)</label>
+    <textarea id="report-details" rows="4" minlength="10" maxlength="2000" required></textarea>
+    <label for="report-email">Ton e-mail (facultatif, pour te répondre)</label>
+    <input id="report-email" type="email" maxlength="200">
+    <p id="report-status" role="status" style="font-size:14px"></p>
+    <div class="row">
+      <button class="btn secondary" type="button" id="report-cancel">Annuler</button>
+      <button class="btn" type="submit">Envoyer</button>
+    </div>
+  </form>
+</dialog>
+</body>
+</html>

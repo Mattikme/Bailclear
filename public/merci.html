@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ta page est en ligne — Une page pour toi</title>
+<meta name="description" content="Ta page est publiée.">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="Ta page est en ligne — Une page pour toi">
+<meta property="og:description" content="Ta page est publiée.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://unepagepourtoi.fr/merci">
+<meta property="og:image" content="https://unepagepourtoi.fr/assets/og-surprise.png">
+<meta property="og:locale" content="fr_FR">
+<meta name="theme-color" content="#d63c72">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/site.css">
+
+<script src="/assets/vendor/qrcode.js" defer></script><script type="module" src="/assets/js/merci.js"></script>
+</head>
+<body>
+<header class="site-header"><div class="wrap">
+  <a class="logo" href="/"><img src="/favicon.svg" alt="" width="28" height="28">Une page pour toi</a>
+  <nav class="nav" aria-label="Navigation principale">
+    <a href="/#occasions">Occasions</a>
+    <a href="/#prix">Prix</a>
+    <a href="/#faq">FAQ</a>
+    <a class="btn small" href="/creer">Créer ma page</a>
+  </nav>
+</div></header>
+<main class="wrap narrow thanks">
+  <p class="notice" id="status" role="status">Vérification du paiement…</p>
+  <div id="done" hidden>
+    <h1>🎉 Ta page est en ligne !</h1>
+    <p>Voici son lien secret. Garde-le précieusement et offre-le quand tu veux.</p>
+    <div class="share-box"><input id="page-url" type="text" readonly aria-label="Lien de la page"><button class="btn" id="copy-btn" type="button">Copier</button></div>
+    <p style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <a class="btn ghost" id="open-link" href="#" target="_blank" rel="noopener">Voir ma page</a>
+      <button class="btn ghost" id="share-btn" type="button" hidden>Partager</button>
+    </p>
+    <h2>Le QR code</h2>
+    <div class="qr" id="qr"></div>
+    <p style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn" id="print-btn" type="button">Imprimer la carte (A6)</button>
+      <button class="btn ghost" id="download-qr" type="button">Télécharger le QR code</button>
+    </p>
+    <div class="callout" id="edit-box" hidden style="text-align:left;margin-top:30px">
+      <strong>🔑 Ton lien de modification (ne le partage pas !)</strong>
+      <p style="margin:6px 0">Il permet de modifier ou supprimer ta page. Il est enregistré sur cet appareil, mais copie-le ou mets-le en favori pour ne pas le perdre.</p>
+      <a class="edit-link" id="edit-link" href="#"></a>
+    </div>
+    <p style="margin-top:30px;font-size:14px;color:var(--muted)">Un reçu de paiement t’est envoyé par e-mail par Stripe. Une question ? <span class="todo">[À compléter : e-mail de contact]</span></p>
+  </div>
+  <div class="print-card" aria-hidden="true">
+    <p>💌</p>
+    <h2 id="card-to">Pour toi</h2>
+    <p>Quelqu’un t’a préparé une surprise.</p>
+    <div class="qr" id="card-qr"></div>
+    <p>Scanne-moi avec l’appareil photo de ton téléphone</p>
+  </div>
+</main>
+<footer class="site-footer"><div class="wrap">
+  <span>© 2026 Une page pour toi — fait en France avec ♥</span>
+  <nav aria-label="Liens légaux">
+    <a href="/mentions-legales">Mentions légales</a>
+    <a href="/cgv">CGV</a>
+    <a href="/confidentialite">Confidentialité</a>
+    <a href="/regles-de-contenu">Règles de contenu &amp; signalement</a>
+  </nav>
+</div></footer>
+</body>
+</html>
