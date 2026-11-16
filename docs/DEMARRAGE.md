@@ -14,7 +14,7 @@ Compte environ une demi-journée de démarches et 1 à 2 heures de configuration
   - avoir branché Stripe.
   Sinon, le bouton affiche « le paiement n'est pas encore ouvert ».
 - **Changer la date** : modifie `FREE_UNTIL` et `FREE_UNTIL_LABEL` dans `public/assets/js/launch.js`, puis redéploie.
-- **Une page gratuite par personne** : bloquée par appareil (navigateur), et au plus 2 pages gratuites par connexion (adresse IP) et par 24 h. Ce n'est pas infaillible : changer de navigateur et de réseau permet de contourner la limite. Mais c'est suffisant pour une offre de lancement.
+- **Une page gratuite par appareil** (téléphone ou navigateur) : volontairement souple, plusieurs personnes d'une même famille peuvent en profiter depuis leurs propres téléphones. Changer de navigateur permet de contourner la limite ; c'est accepté pour une offre de lancement.
 - **Anti-abus** : 4 pages et 40 photos par minute et par adresse IP au maximum. Le plan gratuit de Cloudflare permet environ 40 à 80 pages par jour.
 
 ## 1. Créer la micro-entreprise (avant la première vente)
