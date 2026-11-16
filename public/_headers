@@ -24,5 +24,17 @@
 /assets/*
   Cache-Control: public, max-age=3600
 
+/assets/js/*
+  ! Cache-Control
+  Cache-Control: no-cache
+
+/assets/css/*
+  ! Cache-Control
+  Cache-Control: no-cache
+
+/assets/demo/*
+  ! Cache-Control
+  Cache-Control: no-cache
+
 https://:project.pages.dev/*
   X-Robots-Tag: noindex

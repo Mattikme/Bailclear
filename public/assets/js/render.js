@@ -7,7 +7,7 @@ const SPOTIFY = /^https:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album
 export function musicEmbed(url) {
   if (!url) return null;
   const y = YT.exec(url);
-  if (y) return { provider: 'youtube', src: `https://www.youtube-nocookie.com/embed/${y[1]}?autoplay=1&rel=0` };
+  if (y) return { provider: 'youtube', src: `https://www.youtube-nocookie.com/embed/${y[1]}?autoplay=1&rel=0&playsinline=1&loop=1&playlist=${y[1]}` };
   const s = SPOTIFY.exec(url);
   if (s) return { provider: 'spotify', src: `https://open.spotify.com/embed/${s[1]}/${s[2]}` };
   return null;
@@ -123,23 +123,30 @@ function reasons(content, occ) {
         el('span', { class: 'back', text: r })))));
 }
 
-function music(content) {
-  const m = musicEmbed(content.music);
-  if (!m) return null;
-  const holder = el('div', { class: 'music-holder' });
-  const btn = el('button', { class: 'btn music-btn', type: 'button', text: '▶ Écouter notre chanson' });
-  btn.addEventListener('click', () => {
-    const iframe = el('iframe', {
-      src: m.src, title: 'Musique', loading: 'lazy',
-      allow: 'autoplay; encrypted-media; clipboard-write; fullscreen; picture-in-picture',
-      // YouTube exige l'origine du site (erreur 153 sinon) ; on n'envoie que le domaine, jamais l'adresse secrète de la page.
-      referrerpolicy: 'strict-origin-when-cross-origin',
-      class: m.provider === 'spotify' ? 'spotify' : 'youtube',
-    });
-    holder.replaceChildren(iframe);
+// Lecteur flottant : lancé à l'ouverture de l'enveloppe, il reste visible pendant la lecture de la page.
+export function playMusic(content) {
+  const m = musicEmbed(content && content.music);
+  if (!m) return false;
+  document.querySelectorAll('.mini-player').forEach((x) => x.remove());
+  const iframe = el('iframe', {
+    src: m.src, title: 'Notre chanson',
+    allow: 'autoplay; encrypted-media; clipboard-write; fullscreen; picture-in-picture',
+    // YouTube exige l'origine du site (erreur 153 sinon) ; on n'envoie que le domaine, jamais l'adresse secrète de la page.
+    referrerpolicy: 'strict-origin-when-cross-origin',
   });
-  holder.append(btn, el('p', { class: 'hint', text: m.provider === 'youtube' ? 'Lecture via YouTube' : 'Lecture via Spotify (extrait de 30 s sans compte Spotify)' }));
-  return el('section', { class: 'block music reveal' }, holder);
+  const box = el('aside', { class: `mini-player ${m.provider}`, 'aria-label': 'Notre chanson' },
+    el('div', { class: 'mp-bar' },
+      el('span', { text: '♪ Notre chanson' }),
+      el('button', { type: 'button', class: 'mp-close', 'aria-label': 'Arrêter la musique', text: '×', onclick: () => box.remove() })),
+    iframe);
+  document.body.append(box);
+  return true;
+}
+
+function music(content) {
+  if (!musicEmbed(content.music)) return null;
+  return el('section', { class: 'block music reveal' },
+    el('button', { class: 'btn music-btn', type: 'button', text: '▶ Écouter notre chanson', onclick: () => playMusic(content) }));
 }
 
 // Construit la page complète dans `root`.

@@ -60,7 +60,8 @@ function serve(request, url) {
   const key = resolveAsset(url.pathname);
   const asset = ASSETS[key || '/404.html'];
   const headers = new Headers({ 'content-type': asset.type, ...SECURITY });
-  headers.set('cache-control', key && key.startsWith('/assets/') ? 'public, max-age=3600' : 'public, max-age=0, must-revalidate');
+  const longCache = key && key.startsWith('/assets/') && /\.(png|jpg|svg|mp4)$/.test(key) && !key.startsWith('/assets/demo/');
+  headers.set('cache-control', longCache ? 'public, max-age=3600' : 'no-cache');
   if (NOINDEX.test(url.pathname) || url.hostname.endsWith('.workers.dev')) headers.set('x-robots-tag', 'noindex, nofollow');
   if (NO_REFERRER.test(url.pathname)) headers.set('referrer-policy', 'no-referrer');
   const status = key ? 200 : 404;
