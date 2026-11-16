@@ -5,7 +5,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "dev": "node scripts/build.mjs && wrangler pages dev public --kv PAGES_KV --port 8788",
-    "test": "node --test tests/",
+    "test": "node --test tests/*.test.mjs",
     "deploy": "node scripts/build.mjs && wrangler pages deploy public"
   },
   "devDependencies": {
