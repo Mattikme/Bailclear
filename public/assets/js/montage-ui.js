@@ -12,11 +12,6 @@ const HTML = `
     <button class="btn" type="button" id="montage-share" hidden>Partager</button>
     <a class="btn" id="montage-download" href="#">Télécharger</a>
   </div>
-  <fieldset class="montage-pace" id="montage-pace">
-    <legend>Rythme</legend>
-    <label><input type="radio" name="pace" value="pose" checked> <span><strong>Posé</strong> · environ 1 min, le temps de tout lire</span></label>
-    <label><input type="radio" name="pace" value="dynamique"> <span><strong>Dynamique</strong> · environ 35 s, style TikTok</span></label>
-  </fieldset>
   <label class="montage-opt" id="montage-opt"><input type="checkbox" id="montage-music" checked> 🎵 Avec une musique douce (composée automatiquement, libre de droits)</label>
   <p class="montage-note">Tu peux aussi la remplacer par ta chanson dans TikTok, Instagram ou Snapchat. Fabriquée sur ton téléphone, rien n’est envoyé.</p>
   <div class="row"><button class="btn" type="button" id="montage-start">Créer la vidéo</button><button class="btn secondary" type="button" id="montage-close">Fermer</button></div>`;
@@ -48,7 +43,6 @@ function reset() {
   q('montage-progress').value = 0;
   q('montage-start').hidden = false;
   q('montage-opt').hidden = false;
-  q('montage-pace').hidden = false;
   q('montage-status').textContent = 'Un petit film avec tes photos, ta lettre et vos souvenirs. Gratuit, à télécharger ou partager.';
 }
 
@@ -57,7 +51,6 @@ async function start() {
   busy = true;
   q('montage-start').hidden = true;
   q('montage-opt').hidden = true;
-  q('montage-pace').hidden = true;
   q('montage-close').disabled = true;
   q('montage-status').textContent = 'Création du montage… garde cet écran ouvert.';
   let lock = null;
@@ -66,7 +59,7 @@ async function start() {
     const { renderMontage } = await import('./montage.js');
     const { blob, ext, withMusic } = await renderMontage(current.content, current.photoUrl, q('montage-canvas'), {
       music: q('montage-music').checked,
-      pace: (dlg.querySelector('input[name="pace"]:checked') || {}).value || 'pose',
+      pace: 'pose',
       onProgress: (x) => { q('montage-progress').value = x; },
     });
     if (url) URL.revokeObjectURL(url);

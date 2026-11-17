@@ -15,7 +15,7 @@ let TR = BEAT * 0.75; // durée des transitions (ajustée selon le rythme choisi
 let POSE = true;
 const KIN = { stagger: 0.06, dur: 0.45 };
 const nWords = (s) => String(s || '').trim().split(/\s+/).filter(Boolean).length;
-const readTime = (s) => (POSE ? nWords(s) / 2.8 + 1.2 : nWords(s) / 4 + 0.5); // secondes pour lire confortablement
+const readTime = (s) => (POSE ? nWords(s) / 2.5 + 1.8 : nWords(s) / 4 + 0.5); // ~150 mots/min + pause // secondes pour lire confortablement
 const SAFE_TOP = 170;
 const SAFE_BOTTOM = H - 260; // l'interface de TikTok/Reels couvre le bas
 const SERIF = '"Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif';
@@ -195,8 +195,8 @@ function buildScenes(content, images, theme, occ) {
   const blur = new Map(imgs.map((im) => [im, blurred(im)]));
   const scenes = [];
   const add = (sec, draw, transition) => scenes.push({ d: sec, draw, transition });
-  const PH = POSE ? 3.2 : 4 * BEAT; // durée d'une photo
-  const TS = POSE ? 2.5 : 2 * BEAT; // durée d'un souvenir
+  const PH = POSE ? 3.6 : 4 * BEAT; // durée d'une photo
+  const TS = POSE ? 3.2 : 2 * BEAT; // durée d'un souvenir
 
   // 0. Accroche : la plus belle photo plein écran + « Pour toi, Léa »
   add(POSE ? 3.4 : 3 * BEAT, (ctx, t) => {
@@ -269,7 +269,7 @@ function buildScenes(content, images, theme, occ) {
     const max = POSE ? 200 : 260;
     const excerpt = content.letter.length > max ? `${content.letter.slice(0, max).replace(/\s+\S*$/, '')}…` : content.letter;
     // posé : ~15 caractères/s (vitesse de lecture) + 3 s pour finir de lire ; dynamique : 6 à 8 temps
-    const d = POSE ? clamp(excerpt.length / 18 + 2.6, 6, 14) : clamp(Math.round(excerpt.length / 38), 6, 8) * BEAT;
+    const d = POSE ? clamp(excerpt.length / 15 + 3.5, 7, 17) : clamp(Math.round(excerpt.length / 38), 6, 8) * BEAT;
     add(d, (ctx, t) => {
       const px = 66; const py = SAFE_TOP + 30; const pw = W - 132; const ph = 800;
       ctx.save();
@@ -281,7 +281,7 @@ function buildScenes(content, images, theme, occ) {
       ctx.fillStyle = accent; ctx.fillRect(px, py, 8, ph);
       setFont(ctx, 35, { font: SERIF, weight: 400 });
       const lines = wrap(ctx, excerpt, pw - 100).slice(0, 14);
-      const per = (d - (POSE ? 2.6 : 1.2)) / Math.max(lines.length, 1);
+      const per = (d - (POSE ? 3.5 : 1.2)) / Math.max(lines.length, 1);
       lines.forEach((l, i) => {
         const p = seg(t, 0.3 + i * per, 0.3 + (i + 1) * per);
         if (!p) return;
@@ -389,7 +389,7 @@ function buildScenes(content, images, theme, occ) {
   // 6. « Ce que j'aime chez toi » : une carte géante par raison, retournée en 3D
   const nR = POSE ? 3 : 4;
   content.reasons.slice(0, nR).forEach((r, i) => {
-    add(POSE ? Math.max(3.6, readTime(r) + 1.4) : 2.5 * BEAT, (ctx, t) => {
+    add(POSE ? Math.max(4.6, readTime(r) + 1.6) : 2.5 * BEAT, (ctx, t) => {
       if (i === 0 || t < 0.6) txt(ctx, occ.reasonsTitle, W / 2, SAFE_TOP + 50, { size: 46, font: SERIF, weight: 700, color: ink });
       txt(ctx, `${i + 1} / ${Math.min(content.reasons.length, nR)}`, W / 2, SAFE_TOP + 110, { size: 26, weight: 700, color: accent });
       const flip = easeInOut(POSE ? seg(t, 0.5, 1.4) : seg(t, 0.25, 0.85));
@@ -419,7 +419,7 @@ function buildScenes(content, images, theme, occ) {
 
   // 7. Le mot de la fin
   if (content.finalMessage) {
-    add(POSE ? Math.max(5, readTime(content.finalMessage) + 2) : 5 * BEAT, (ctx, t) => {
+    add(POSE ? Math.max(5.5, readTime(content.finalMessage) + 2.5) : 5 * BEAT, (ctx, t) => {
       setFont(ctx, 58, { font: SERIF, weight: 600 });
       const lines = wrap(ctx, content.finalMessage, W - 140).slice(0, 7);
       const y0 = H / 2 - 150 - (lines.length - 1) * 36;
