@@ -1,5 +1,5 @@
 import { OCCASIONS, THEMES, getOccasion } from './occasions.js';
-import { musicEmbed, sha256Hex, normalizeAnswer, startFromUrl, formatTime, parseTime } from './render.js';
+import { musicEmbed, sha256Hex, normalizeAnswer, startFromUrl } from './render.js';
 import { idbGet, idbSet, idbDel, listPages, rememberPage } from './storage.js';
 import { isFreeLaunch, FREE_UNTIL_LABEL } from './launch.js';
 
@@ -70,17 +70,19 @@ function bindFields() {
     input.value = state[key] || '';
     input.oninput = () => {
       state[key] = input.value;
-      if (key === 'music') { const t = startFromUrl(input.value); if (t) { state.musicStart = t; $('f-musicStart').value = formatTime(t); } checkMusic(); }
+      if (key === 'music') { const t = startFromUrl(input.value); if (t) { state.musicStart = t; setStartFields(t); } checkMusic(); }
       updateCounters(); changed();
     };
   });
-  const startInput = $('f-musicStart');
-  startInput.value = state.musicStart ? formatTime(state.musicStart) : '';
-  startInput.oninput = () => {
-    const v = parseTime(startInput.value);
-    $('start-help').classList.toggle('error-text', v === null);
-    if (v !== null) { state.musicStart = v; changed(); }
+  setStartFields(state.musicStart);
+  const readStart = () => {
+    const m = Math.min(59, Math.max(0, parseInt($('f-musicMin').value, 10) || 0));
+    const sec = Math.min(59, Math.max(0, parseInt($('f-musicSec').value, 10) || 0));
+    state.musicStart = m * 60 + sec;
+    changed();
   };
+  $('f-musicMin').oninput = readStart;
+  $('f-musicSec').oninput = readStart;
   $('f-question').value = state.secret.question || '';
   $('f-answer').value = state.secret.answer || '';
   $('f-question').oninput = (e) => { state.secret.question = e.target.value; changed(); };
@@ -88,6 +90,11 @@ function bindFields() {
   if (isEdit && state.secret.answerHash) $('f-answer').placeholder = 'Réponse inchangée (laisse vide pour la garder)';
   updateCounters();
   checkMusic();
+}
+function setStartFields(total) {
+  const t = Math.max(0, Math.floor(total || 0));
+  $('f-musicMin').value = t ? String(Math.floor(t / 60)) : '';
+  $('f-musicSec').value = t ? String(t % 60).padStart(2, '0') : '';
 }
 function updateCounters() {
   form.querySelectorAll('[data-count]').forEach((c) => {
@@ -101,7 +108,8 @@ function checkMusic() {
   if (!v) s.textContent = '';
   else s.textContent = musicEmbed(v) ? '✓ Lien reconnu' : 'Lien non reconnu : colle un lien YouTube ou Spotify (morceau, album ou playlist).';
   const spotify = musicEmbed(v) && musicEmbed(v).provider === 'spotify';
-  $('f-musicStart').disabled = Boolean(spotify);
+  $('f-musicMin').disabled = Boolean(spotify);
+  $('f-musicSec').disabled = Boolean(spotify);
   if (spotify) s.textContent += ' — avec Spotify, la musique démarre au début et la personne doit appuyer sur ▶.';
 }
 

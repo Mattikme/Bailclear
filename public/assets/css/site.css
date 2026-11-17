@@ -197,3 +197,15 @@ dialog h2 { margin-top: 0; }
 .send-box textarea { min-height: 120px; }
 .send-btns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
 .send-wa { background: #1f9d55; }
+.time-row { display: flex; align-items: center; gap: 8px; }
+.time-row input { width: 84px; text-align: center; }
+.time-row span { color: var(--muted); font-weight: 600; }
+.price-box .amount .was { font-size: .5em; color: var(--muted); font-weight: 500; margin-right: 12px; text-decoration-thickness: 3px; }
+.price-box .amount .now { color: var(--ok); }
+.price-note s { opacity: .7; }
+.owner-stats { text-align: center; font-size: 13px; color: var(--muted); margin: 0; padding: 0 16px 24px; }
+.stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 12px 0 20px; }
+.stat-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+.stat-label { font-size: 13px; color: var(--muted); }
+.stat-value { font-family: var(--serif); font-size: 40px; font-weight: 700; color: var(--accent); line-height: 1.1; }
+.stat-sub { font-size: 13px; color: var(--muted); }

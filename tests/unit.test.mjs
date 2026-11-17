@@ -151,3 +151,14 @@ test('offre de lancement gratuite jusqu’au 30 novembre inclus (heure de Paris)
   assert.equal(freeLaunch({}, Date.parse('2026-12-01T00:00:00+01:00')), false);
   assert.equal(freeLaunch({ FREE_UNTIL: '2026-12-15T00:00:00+01:00' }, Date.parse('2026-12-05T12:00:00+01:00')), true);
 });
+
+test('compteur de visites : chemins, robots et jour à Paris', async () => {
+  const { cleanPath, isBot, parisDay } = await import('../lib/stats.js');
+  assert.equal(cleanPath('/'), '/');
+  assert.equal(cleanPath('/saint-valentin'), '/saint-valentin');
+  for (const bad of ['/p/abc', '/admin', '/api/hit', '/assets/x', '/a/b', '/UPPER', '/' + 'a'.repeat(41), '', null, '//x']) assert.equal(cleanPath(bad), null, String(bad));
+  assert.equal(isBot('Mozilla/5.0 (compatible; Googlebot/2.1)'), true);
+  assert.equal(isBot('Mozilla/5.0 (Linux; Android 14) Chrome/120 Mobile Safari/537.36'), false);
+  assert.equal(parisDay(Date.parse('2026-11-30T23:30:00Z')), '2026-12-01'); // 00 h 30 à Paris
+  assert.equal(parisDay(Date.parse('2026-11-30T12:00:00Z')), '2026-11-30');
+});

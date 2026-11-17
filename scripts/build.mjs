@@ -41,6 +41,7 @@ ${noindex ? '<meta name="robots" content="noindex">' : `<link rel="canonical" hr
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/site.css">
 <script type="module" src="/assets/js/launch-banner.js"></script>
+<script type="module" src="/assets/js/stats.js"></script>
 ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld)}</script>` : ''}
 ${scripts}
 </head>
@@ -289,7 +290,7 @@ pages['creer.html'] = layout({
     </fieldset>
     <fieldset>
       <legend>La chanson</legend>
-      <div class="field"><label for="f-music">Lien YouTube ou Spotify</label><input id="f-music" type="url" data-field="music" maxlength="300" placeholder="https://www.youtube.com/watch?v=…" inputmode="url"><p class="help" id="music-status" role="status"></p><div class="field"><label for="f-musicStart">Commencer à (min:s)</label><input id="f-musicStart" type="text" inputmode="numeric" maxlength="6" placeholder="0:00" style="max-width:120px"><p class="help" id="start-help">Par exemple <strong>1:05</strong> pour démarrer au refrain. Astuce : sur YouTube, « Partager › Commencer à » puis colle le lien ici, le moment est repris tout seul.</p></div><p class="help">Conseil : préfère YouTube, qui joue le morceau en entier. Avec Spotify, la personne n’entend qu’un extrait de 30 secondes si elle n’est pas connectée à son compte Spotify.</p></div>
+      <div class="field"><label for="f-music">Lien YouTube ou Spotify</label><input id="f-music" type="url" data-field="music" maxlength="300" placeholder="https://www.youtube.com/watch?v=…" inputmode="url"><p class="help" id="music-status" role="status"></p><div class="field"><span class="label" id="ms-label">Commencer à</span><div class="time-row" role="group" aria-labelledby="ms-label"><input id="f-musicMin" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" placeholder="0" aria-label="Minutes"><span>min</span><input id="f-musicSec" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" placeholder="00" aria-label="Secondes"><span>sec</span></div><p class="help" id="start-help">Par exemple <strong>1 min 05</strong> pour démarrer au refrain. Astuce : sur YouTube, « Partager › Commencer à » puis colle le lien ici, le moment est repris tout seul.</p></div><p class="help">Conseil : préfère YouTube, qui joue le morceau en entier. Avec Spotify, la personne n’entend qu’un extrait de 30 secondes si elle n’est pas connectée à son compte Spotify.</p></div>
     </fieldset>
     <fieldset>
       <legend>Le mot de la fin</legend>
@@ -396,7 +397,16 @@ pages['admin.html'] = layout({
   title: 'Modération', description: 'Modération', path: '/admin', noindex: true,
   scripts: '<script type="module" src="/assets/js/admin.js"></script>',
   body: `<main class="wrap prose">
-  <h1>Signalements</h1>
+  <h1>Visiteurs</h1>
+  <p id="stats-out">Connecte-toi ci-dessous pour voir les statistiques.</p>
+  <section id="stats-section" hidden>
+    <div class="stat-cards" id="stat-cards"></div>
+    <h2>30 derniers jours</h2>
+    <table class="admin-table"><thead><tr><th>Jour</th><th>Visiteurs</th><th>Pages vues</th><th>Pages créées</th></tr></thead><tbody id="stat-days"></tbody></table>
+    <h2>Pages les plus vues ce mois-ci</h2>
+    <ul id="stat-top"></ul>
+  </section>
+  <h1 style="margin-top:2em">Signalements</h1>
   <form id="login" style="display:flex;gap:8px;max-width:520px"><input id="token" type="password" placeholder="Jeton administrateur" autocomplete="off"><button class="btn small">Charger</button></form>
   <p id="out"></p>
   <table class="admin-table"><thead><tr><th>Date</th><th>Page</th><th>Motif</th><th>Détails</th><th>Contact</th><th>Actions</th></tr></thead><tbody id="reports"></tbody></table>
@@ -478,7 +488,7 @@ pages['confidentialite.html'] = layout({
 <h2>Personnes figurant sur une Page</h2>
 <p>Si tu apparais sur une Page sans y avoir consenti, utilise le bouton « Signaler un contenu » de la Page ou écris à ${email} : nous traitons ces demandes en priorité.</p>
 <h2>Cookies et stockage local</h2>
-<p>Aucun cookie publicitaire ni outil de mesure d’audience tiers. Ton brouillon et tes liens de modification sont enregistrés uniquement sur ton appareil (stockage local du navigateur), ce qui est strictement nécessaire au service. Stripe dépose ses propres cookies sur sa page de paiement. Les lecteurs YouTube (version « sans cookie ») et Spotify ne sont chargés que si le visiteur clique sur « Écouter » : Google ou Spotify reçoivent alors son adresse IP et peuvent déposer leurs propres traceurs, selon leurs politiques.</p>
+<p>Aucun cookie publicitaire ni outil de mesure d’audience tiers. Les visites sont comptées par un compteur maison, sans cookie : seuls des totaux par jour et par page sont conservés (13 mois maximum), sans adresse IP ni identifiant. Pour ne compter qu’une visite par jour et par appareil, la date de ta dernière visite est mémorisée dans le stockage local de ton navigateur (elle n’est pas envoyée au serveur) ; le comptage est désactivé si ton navigateur envoie « Ne pas suivre » ou « Global Privacy Control ». Ton brouillon et tes liens de modification sont enregistrés uniquement sur ton appareil (stockage local du navigateur), ce qui est strictement nécessaire au service. Stripe dépose ses propres cookies sur sa page de paiement. Les lecteurs YouTube (version « sans cookie ») et Spotify ne sont chargés que si le visiteur clique sur « Écouter » : Google ou Spotify reçoivent alors son adresse IP et peuvent déposer leurs propres traceurs, selon leurs politiques.</p>
 <h2>Sous-traitants</h2>
 <ul>
 <li>Cloudflare, Inc. (hébergement et stockage) — données susceptibles d’être traitées aux États-Unis, encadrées par le Data Privacy Framework et des clauses contractuelles types.</li>

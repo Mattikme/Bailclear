@@ -1,6 +1,7 @@
 import { ID_RE, safeEqual } from '../../../lib/crypto.js';
 import { bearer, error, handle, json, readJson } from '../../../lib/http.js';
 import { getPage, removePage } from '../../../lib/store.js';
+import { summary } from '../../../lib/stats.js';
 
 // Mini-console de modération : /admin (jeton ADMIN_TOKEN à définir dans les variables d'environnement).
 export const onRequest = handle(async ({ request, env, params }) => {
@@ -11,6 +12,9 @@ export const onRequest = handle(async ({ request, env, params }) => {
   const path = (params.path || []).join('/');
   const kv = env.PAGES_KV;
 
+  if (request.method === 'GET' && path === 'stats') {
+    return json({ stats: await summary(env) });
+  }
   if (request.method === 'GET' && path === 'reports') {
     const list = await kv.list({ prefix: 'report:', limit: 200 });
     const reports = [];

@@ -8,6 +8,9 @@ import * as confirm from '../functions/api/confirm.js';
 import * as webhook from '../functions/api/stripe-webhook.js';
 import * as report from '../functions/api/report.js';
 import * as admin from '../functions/api/admin/[[path]].js';
+import * as hit from '../functions/api/hit.js';
+import * as stats from '../functions/api/stats.js';
+export { Stats } from './stats.js';
 
 const ROUTES = [
   [/^\/api\/pages\/?$/, pagesIndex, []],
@@ -17,6 +20,8 @@ const ROUTES = [
   [/^\/api\/confirm$/, confirm, []],
   [/^\/api\/stripe-webhook$/, webhook, []],
   [/^\/api\/report$/, report, []],
+  [/^\/api\/hit$/, hit, []],
+  [/^\/api\/stats$/, stats, []],
   [/^\/api\/admin\/(.+)$/, admin, ['path']],
 ];
 

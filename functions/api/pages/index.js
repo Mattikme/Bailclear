@@ -1,5 +1,6 @@
 import { MAX_BODY_BYTES, PUBLISHED_DAYS, TERMS_VERSION, freeLaunch } from '../../../lib/config.js';
 import { randomId, randomToken, sha256Hex } from '../../../lib/crypto.js';
+import { track } from '../../../lib/stats.js';
 import { handle, json, error, readJson, paymentDisabled, PAYMENT_DISABLED_MSG } from '../../../lib/http.js';
 import { logAction, newDraft, savePage } from '../../../lib/store.js';
 import { validateContent, ValidationError } from '../../../lib/validate.js';
@@ -37,5 +38,6 @@ export const onRequestPost = handle(async ({ request, env }) => {
   }
   await savePage(env, page);
   await logAction(env, request, id, free ? 'create-free' : 'create');
+  await track(env, ['creations']);
   return json({ id, token, expiresAt: page.expiresAt, free }, 201);
 });

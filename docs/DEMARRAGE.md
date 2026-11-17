@@ -17,6 +17,13 @@ Compte environ une demi-journée de démarches et 1 à 2 heures de configuration
 - **Une page gratuite par appareil** (téléphone ou navigateur) : volontairement souple, plusieurs personnes d'une même famille peuvent en profiter depuis leurs propres téléphones. Changer de navigateur permet de contourner la limite ; c'est accepté pour une offre de lancement.
 - **Anti-abus** : 4 pages et 40 photos par minute et par adresse IP au maximum. Le plan gratuit de Cloudflare permet environ 40 à 80 pages par jour.
 
+## 0 bis. Statistiques de visites
+
+- Un compteur maison, **sans cookie**, compte les visiteurs et les pages vues par jour et par mois (aucune donnée personnelle, 13 mois de conservation).
+- **Où le voir** : `https://unepagepourtoi.fr/admin` → colle ton jeton d'administration. Tu y vois les visiteurs du jour et du mois, les 30 derniers jours, les pages les plus vues et le nombre de pages créées.
+- **Sur ton téléphone ou ton ordinateur, après cette première connexion**, une ligne « 📈 Visiteurs : X aujourd'hui · Y ce mois-ci » s'affiche en bas de chaque page, visible **uniquement par toi**, et tes propres visites ne sont plus comptées.
+- Le jeton d'administration est le secret `ADMIN_TOKEN` du Worker (Cloudflare → Workers & Pages → `unepagepourtoi` → Settings → Variables and Secrets).
+
 ## 1. Créer la micro-entreprise (avant la première vente)
 
 1. **Déclaration** sur le guichet unique de l'INPI : https://formalites.entreprises.gouv.fr (gratuit).

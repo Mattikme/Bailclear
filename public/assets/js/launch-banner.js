@@ -1,4 +1,5 @@
-// Bandeau « offre de lancement » sur les pages du site (pas sur les pages offertes).
+// Offre de lancement : bandeau, prix barré et mention « 1 page offerte par personne » sur les pages du site.
+// Tout disparaît automatiquement à la fin de l'offre (le prix normal réapparaît seul).
 import { isFreeLaunch, FREE_UNTIL_LABEL } from './launch.js';
 
 if (isFreeLaunch()) {
@@ -6,11 +7,40 @@ if (isFreeLaunch()) {
   bar.className = 'launch-bar';
   const a = document.createElement('a');
   a.href = '/creer';
-  a.textContent = `🎉 Ouverture du site : la création de pages est gratuite jusqu’au ${FREE_UNTIL_LABEL} ! Crée la tienne →`;
+  a.textContent = `🎁 Ouverture du site : 1 page offerte par personne jusqu’au ${FREE_UNTIL_LABEL} ! Crée la tienne →`;
   bar.append(a);
   document.body.prepend(bar);
+
+  const priceLabel = (document.querySelector('[data-free-note]') || {}).dataset;
+  const price = priceLabel ? priceLabel.freeNote : '';
+
+  // Encart de prix : prix normal barré + « Offert »
+  document.querySelectorAll('.price-box .amount').forEach((el) => {
+    const was = document.createElement('s');
+    was.className = 'was';
+    was.textContent = el.textContent.trim();
+    const now = document.createElement('span');
+    now.className = 'now';
+    now.textContent = 'Offert';
+    el.replaceChildren(was, now);
+  });
+
+  // Lignes « 9,90 € · aperçu gratuit… » : prix barré + « offert »
+  if (price) {
+    document.querySelectorAll('.price-note:not(.free-note)').forEach((el) => {
+      const t = el.firstChild && el.firstChild.nodeType === 3 ? el.firstChild.textContent : '';
+      if (!t.startsWith(price)) return;
+      const was = document.createElement('s');
+      was.textContent = price;
+      const now = document.createElement('strong');
+      now.textContent = ' offert';
+      el.firstChild.textContent = t.slice(price.length);
+      el.prepend(was, now);
+    });
+  }
+
   document.querySelectorAll('[data-free-note]').forEach((el) => {
-    el.textContent = `Offre de lancement : gratuit jusqu’au ${FREE_UNTIL_LABEL}, puis ${el.dataset.freeNote}.`;
+    el.textContent = `🎁 Offre de lancement : 1 page offerte par personne jusqu’au ${FREE_UNTIL_LABEL}, puis ${el.dataset.freeNote} la page.`;
     el.hidden = false;
   });
 }

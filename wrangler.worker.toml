@@ -8,6 +8,14 @@ rules = [
   { type = "Data", globs = ["**/*.png", "**/*.jpg", "**/*.mp4"], fallthrough = false },
 ]
 
+[[durable_objects.bindings]]
+name = "STATS"
+class_name = "Stats"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Stats"]
+
 [[kv_namespaces]]
 binding = "PAGES_KV"
 id = "cb16baada3d8421792cf0bffeda934c4"

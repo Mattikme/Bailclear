@@ -16,6 +16,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/site.css">
 <script type="module" src="/assets/js/launch-banner.js"></script>
+<script type="module" src="/assets/js/stats.js"></script>
 
 <script type="module" src="/assets/js/admin.js"></script>
 </head>
@@ -30,7 +31,16 @@
   </nav>
 </div></header>
 <main class="wrap prose">
-  <h1>Signalements</h1>
+  <h1>Visiteurs</h1>
+  <p id="stats-out">Connecte-toi ci-dessous pour voir les statistiques.</p>
+  <section id="stats-section" hidden>
+    <div class="stat-cards" id="stat-cards"></div>
+    <h2>30 derniers jours</h2>
+    <table class="admin-table"><thead><tr><th>Jour</th><th>Visiteurs</th><th>Pages vues</th><th>Pages créées</th></tr></thead><tbody id="stat-days"></tbody></table>
+    <h2>Pages les plus vues ce mois-ci</h2>
+    <ul id="stat-top"></ul>
+  </section>
+  <h1 style="margin-top:2em">Signalements</h1>
   <form id="login" style="display:flex;gap:8px;max-width:520px"><input id="token" type="password" placeholder="Jeton administrateur" autocomplete="off"><button class="btn small">Charger</button></form>
   <p id="out"></p>
   <table class="admin-table"><thead><tr><th>Date</th><th>Page</th><th>Motif</th><th>Détails</th><th>Contact</th><th>Actions</th></tr></thead><tbody id="reports"></tbody></table>
