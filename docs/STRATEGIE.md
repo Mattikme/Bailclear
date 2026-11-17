@@ -1,5 +1,7 @@
 # Stratégie : pourquoi ce projet, comment le vendre, quand arrêter
 
+> **Mise à jour du 17/11/2026 : prix ramené à 4,90 €** après comparaison avec la concurrence. Ouvella est à 9,99 €, LovePaper à 4,90 € avec des options payantes, YourLovePage à 6,99 $. Une formule « Premium » à 9,90 € viendra quand on aura des fonctions exclusives : message vocal, ouverture programmée, photos illimitées, vidéo HD sans signature, page à vie. Les chiffres ci-dessous, calculés à 9,90 €, sont à diviser par deux environ.
+
 ## 1. Comment l'idée a été choisie
 
 **Recherche menée le 16/11/2026** par 3 recherches parallèles :

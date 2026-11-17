@@ -162,3 +162,11 @@ test('compteur de visites : chemins, robots et jour à Paris', async () => {
   assert.equal(parisDay(Date.parse('2026-11-30T23:30:00Z')), '2026-12-01'); // 00 h 30 à Paris
   assert.equal(parisDay(Date.parse('2026-11-30T12:00:00Z')), '2026-11-30');
 });
+
+test('vidéo : un texte trop long est coupé à la fin d’une phrase', async () => {
+  const { cutAtSentence } = await import('../public/assets/js/montage.js');
+  assert.equal(cutAtSentence('Court.', 100), 'Court.');
+  const t = 'Première phrase complète. Deuxième phrase qui continue encore longtemps sans fin';
+  assert.equal(cutAtSentence(t, 60), 'Première phrase complète.');
+  assert.ok(!cutAtSentence('mots '.repeat(40), 50).endsWith(' '));
+});

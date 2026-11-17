@@ -15,7 +15,7 @@ let TR = BEAT * 0.75; // durée des transitions (ajustée selon le rythme choisi
 let POSE = true;
 const KIN = { stagger: 0.06, dur: 0.45 };
 const nWords = (s) => String(s || '').trim().split(/\s+/).filter(Boolean).length;
-const readTime = (s) => (POSE ? nWords(s) / 2.5 + 1.8 : nWords(s) / 4 + 0.5); // ~150 mots/min + pause // secondes pour lire confortablement
+const readTime = (s) => (POSE ? nWords(s) / 3 + 1.2 : nWords(s) / 4 + 0.5); // ~180 mots/min + une pause // secondes pour lire confortablement
 const SAFE_TOP = 170;
 const SAFE_BOTTOM = H - 260; // l'interface de TikTok/Reels couvre le bas
 const SERIF = '"Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif';
@@ -57,6 +57,31 @@ function wrap(ctx, str, maxWidth) {
     if (line) lines.push(line);
   }
   return lines;
+}
+
+// Taille de police la plus grande (de `size` à `min`) pour que tout le texte tienne en `maxLines` lignes.
+function fit(ctx, text, maxW, maxLines, size, min, o = {}) {
+  let s = size;
+  for (; s > min; s -= 2) {
+    setFont(ctx, s, o);
+    const lines = wrap(ctx, text, maxW);
+    if (lines.length <= maxLines) return { lines, size: s };
+  }
+  setFont(ctx, min, o);
+  return { lines: wrap(ctx, text, maxW), size: min };
+}
+
+// Coupe un texte trop long à la fin d'une phrase (jamais au milieu).
+export function cutAtSentence(text, max) {
+  const t = String(text || '').trim();
+  if (t.length <= max) return t;
+  const part = t.slice(0, max);
+  const re = /[.!?…](?=\s|$)|\n\n/g;
+  let end = -1;
+  let m;
+  while ((m = re.exec(part))) end = m.index + m[0].length;
+  if (end >= max * 0.4) return part.slice(0, end).trim();
+  return `${part.replace(/\s+\S*$/, '').replace(/[,;:\s]+$/, '')}…`;
 }
 
 function rr(ctx, x, y, w, h, r) {
@@ -195,8 +220,8 @@ function buildScenes(content, images, theme, occ) {
   const blur = new Map(imgs.map((im) => [im, blurred(im)]));
   const scenes = [];
   const add = (sec, draw, transition) => scenes.push({ d: sec, draw, transition });
-  const PH = POSE ? 3.6 : 4 * BEAT; // durée d'une photo
-  const TS = POSE ? 3.2 : 2 * BEAT; // durée d'un souvenir
+  const PH = POSE ? 3.4 : 4 * BEAT; // durée d'une photo
+  const TS = POSE ? 2.6 : 2 * BEAT; // durée d'un souvenir
 
   // 0. Accroche : la plus belle photo plein écran + « Pour toi, Léa »
   add(POSE ? 3.4 : 3 * BEAT, (ctx, t) => {
@@ -248,10 +273,11 @@ function buildScenes(content, images, theme, occ) {
   const days = daysSince(content.date);
   add(POSE ? Math.max(content.date && days > 0 ? 6 : 4.5, readTime(`${content.title} ${content.from || ''}`) + (content.date ? 2.5 : 0.8)) : (content.date && days > 0 ? 5 : 4) * BEAT, (ctx, t) => {
     txt(ctx, `${occ.emoji}  ${occ.label.split(' (')[0].toUpperCase()}`, W / 2, 330, { size: 26, weight: 800, color: accent });
-    setFont(ctx, 78, { font: SERIF, weight: 700 });
-    const lines = wrap(ctx, content.title, W - 140).slice(0, 4);
-    kinetic(ctx, lines, W / 2, 440, 92, t, { size: 78, font: SERIF, weight: 700, color: ink, delay: 0.1 });
-    let y = 440 + lines.length * 92 + 10;
+    const tf = fit(ctx, content.title, W - 140, 4, 78, 50, { font: SERIF, weight: 700 });
+    const lines = tf.lines;
+    const lh = Math.round(tf.size * 1.18);
+    kinetic(ctx, lines, W / 2, 440, lh, t, { size: tf.size, font: SERIF, weight: 700, color: ink, delay: 0.1 });
+    let y = 440 + lines.length * lh + 10;
     if (content.from) { kinetic(ctx, [`de la part de ${content.from}`], W / 2, y, 50, t, { size: 36, font: SERIF, weight: 400, italic: true, color: ink, delay: 0.6 }); y += 90; }
     if (content.date && days > 0) {
       const a = easeBack(seg(t, 0.9, 1.5));
@@ -264,35 +290,73 @@ function buildScenes(content, images, theme, occ) {
     }
   }, 'pushUp');
 
-  // 3. La lettre : lignes révélées une à une, la caméra descend doucement
+  // 3. La lettre : écrite en entier, à vitesse de lecture, sur une ou plusieurs feuilles (jamais coupée en pleine phrase)
   if (content.letter) {
-    const max = POSE ? 200 : 260;
-    const excerpt = content.letter.length > max ? `${content.letter.slice(0, max).replace(/\s+\S*$/, '')}…` : content.letter;
-    // posé : ~15 caractères/s (vitesse de lecture) + 3 s pour finir de lire ; dynamique : 6 à 8 temps
-    const d = POSE ? clamp(excerpt.length / 15 + 3.5, 7, 17) : clamp(Math.round(excerpt.length / 38), 6, 8) * BEAT;
-    add(d, (ctx, t) => {
-      const px = 66; const py = SAFE_TOP + 30; const pw = W - 132; const ph = 800;
-      ctx.save();
-      ctx.translate(W / 2, H / 2); ctx.rotate(-0.012 + 0.012 * t / d); ctx.scale(1.03 - 0.03 * t / d, 1.03 - 0.03 * t / d); ctx.translate(-W / 2, -H / 2);
-      ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 44; ctx.shadowOffsetY = 18;
-      rr(ctx, px, py, pw, ph, 10); ctx.fillStyle = '#fffdf8'; ctx.fill(); ctx.restore();
-      ctx.strokeStyle = 'rgba(214, 60, 114, .08)'; ctx.lineWidth = 2;
-      for (let ly = py + 116; ly < py + ph - 40; ly += 46) { ctx.beginPath(); ctx.moveTo(px + 40, ly); ctx.lineTo(px + pw - 40, ly); ctx.stroke(); }
-      ctx.fillStyle = accent; ctx.fillRect(px, py, 8, ph);
-      setFont(ctx, 35, { font: SERIF, weight: 400 });
-      const lines = wrap(ctx, excerpt, pw - 100).slice(0, 14);
-      const per = (d - (POSE ? 3.5 : 1.2)) / Math.max(lines.length, 1);
-      lines.forEach((l, i) => {
-        const p = seg(t, 0.3 + i * per, 0.3 + (i + 1) * per);
-        if (!p) return;
-        const y = py + 92 + i * 46;
-        ctx.save(); ctx.beginPath(); ctx.rect(px + 46, y - 30, (pw - 92) * easeOut(p) + 4, 60); ctx.clip();
-        txt(ctx, l, px + 50, y, { size: 35, font: SERIF, weight: 400, color: '#2b2326', align: 'left' });
+    const px = 66; const py = SAFE_TOP + 30; const pw = W - 132; const ph = 800;
+    const PER_PAGE = 14;
+    const letter = cutAtSentence(content.letter, POSE ? 760 : 300);
+    const mctx = document.createElement('canvas').getContext('2d');
+    setFont(mctx, 35, { font: SERIF, weight: 400 });
+    // Remplit les feuilles paragraphe par paragraphe, et phrase par phrase si un paragraphe déborde :
+    // une feuille ne se termine jamais au milieu d'une phrase.
+    const pages = [];
+    let page = [];
+    const room = () => PER_PAGE - page.length - (page.length ? 1 : 0);
+    const push = (lines, joinBlank) => {
+      if (page.length && joinBlank) page.push('');
+      page.push(...lines);
+    };
+    const flush = () => { if (page.length) pages.push(page); page = []; };
+    for (const para of letter.split(/\n\s*\n/).map((x) => x.replace(/\n/g, ' ').trim()).filter(Boolean)) {
+      const lines = wrap(mctx, para, pw - 100);
+      if (lines.length <= room()) { push(lines, true); continue; }
+      if (lines.length <= PER_PAGE) { flush(); push(lines, false); continue; }
+      let first = true;
+      for (const sentence of para.split(/(?<=[.!?…])\s+/)) {
+        const sl = wrap(mctx, sentence, pw - 100);
+        const gap = first && page.length ? 1 : 0;
+        if (sl.length + gap > PER_PAGE - page.length) flush();
+        if (sl.length > PER_PAGE) { for (let i = 0; i < sl.length; i += PER_PAGE) { flush(); page.push(...sl.slice(i, i + PER_PAGE)); } }
+        else push(sl, first);
+        first = false;
+      }
+    }
+    flush();
+    // la signature tient sur la dernière feuille (une ligne de marge)
+    const last = pages[pages.length - 1];
+    if (content.from && last && last.length >= PER_PAGE) pages.push([last.pop()]);
+    pages.forEach((lines, pi) => {
+      const chars = lines.join(' ').length;
+      const isLast = pi === pages.length - 1;
+      const hold = POSE ? (isLast ? 3.2 : 2) : 1.2;
+      const d = POSE ? Math.max(5, chars / 21 + hold + 0.3) : clamp(Math.round(chars / 38), 5, 8) * BEAT; // ~21 caractères/s
+      add(d, (ctx, t) => {
+        ctx.save();
+        ctx.translate(W / 2, H / 2); ctx.rotate(-0.012 + 0.012 * t / d); ctx.scale(1.03 - 0.03 * t / d, 1.03 - 0.03 * t / d); ctx.translate(-W / 2, -H / 2);
+        ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 44; ctx.shadowOffsetY = 18;
+        rr(ctx, px, py, pw, ph, 10); ctx.fillStyle = '#fffdf8'; ctx.fill(); ctx.restore();
+        ctx.strokeStyle = 'rgba(214, 60, 114, .08)'; ctx.lineWidth = 2;
+        for (let ly = py + 116; ly < py + ph - 40; ly += 46) { ctx.beginPath(); ctx.moveTo(px + 40, ly); ctx.lineTo(px + pw - 40, ly); ctx.stroke(); }
+        ctx.fillStyle = accent; ctx.fillRect(px, py, 8, ph);
+        if (pages.length > 1) txt(ctx, `${pi + 1} / ${pages.length}`, px + pw - 40, py + 40, { size: 22, weight: 700, color: 'rgba(43,35,38,.45)', align: 'right' });
+        // révélation proportionnelle au nombre de caractères de chaque ligne
+        const total = lines.reduce((n, l) => n + Math.max(l.length, 6), 0);
+        const span = d - hold - 0.3;
+        let acc = 0;
+        lines.forEach((l, i) => {
+          const w = Math.max(l.length, 6) / total;
+          const p = seg(t, 0.3 + acc * span, 0.3 + (acc + w) * span);
+          acc += w;
+          if (!p || !l) return;
+          const y = py + 92 + i * 46;
+          ctx.save(); ctx.beginPath(); ctx.rect(px + 46, y - 30, (pw - 92) * easeOut(p) + 4, 60); ctx.clip();
+          txt(ctx, l, px + 50, y, { size: 35, font: SERIF, weight: 400, color: '#2b2326', align: 'left' });
+          ctx.restore();
+        });
+        if (isLast && content.from && t > d - hold) txt(ctx, `— ${content.from}`, px + pw - 50, py + ph - 60, { size: 36, font: SERIF, italic: true, weight: 400, color: '#2b2326', align: 'right' });
         ctx.restore();
-      });
-      if (content.from && t > d - (POSE ? 2.6 : 1.2)) txt(ctx, `— ${content.from}`, px + pw - 50, py + ph - 60, { size: 36, font: SERIF, italic: true, weight: 400, color: '#2b2326', align: 'right' });
-      ctx.restore();
-    }, 'whip');
+      }, pi === 0 ? 'whip' : 'pushUp');
+    });
   }
 
   // 4. Photos : mises en page qui alternent
@@ -300,8 +364,9 @@ function buildScenes(content, images, theme, occ) {
   const capFor = (img) => caps[images.indexOf(img)] || '';
   const captionKinetic = (ctx, c, t, y, color, shadow) => {
     if (!c) return;
-    setFont(ctx, 38, { font: SERIF, italic: true, weight: 500 });
-    kinetic(ctx, wrap(ctx, c, W - 140).slice(0, 2), W / 2, y, 50, t, { size: 38, font: SERIF, italic: true, weight: 500, color, shadow, delay: 0.35 });
+    const f = fit(ctx, c, W - 140, 3, 38, 26, { font: SERIF, italic: true, weight: 500 });
+    const lh = Math.round(f.size * 1.3);
+    kinetic(ctx, f.lines, W / 2, y - (f.lines.length - 1) * lh, lh, t, { size: f.size, font: SERIF, italic: true, weight: 500, color, shadow, delay: 0.35 });
   };
   const layouts = [
     // A. Plein écran, mouvement de caméra
@@ -324,7 +389,11 @@ function buildScenes(content, images, theme, occ) {
       drawCover(ctx, img, fx + 22, fy + 22, fw - 44, fh - 140, 1.04 + 0.04 * t);
       ctx.restore();
       const c = capFor(img);
-      if (c) { setFont(ctx, 30, { font: SERIF, italic: true, weight: 400 }); txt(ctx, wrap(ctx, c, fw - 60)[0], W / 2, fy + fh - 58, { size: 30, font: SERIF, italic: true, weight: 400, color: '#3a3134' }); }
+      if (c) {
+        const f = fit(ctx, c, fw - 60, 2, 30, 20, { font: SERIF, italic: true, weight: 400 });
+        const lh = Math.round(f.size * 1.25);
+        f.lines.forEach((l, j) => txt(ctx, l, W / 2, fy + fh - 60 - ((f.lines.length - 1) * lh) / 2 + j * lh, { size: f.size, font: SERIF, italic: true, weight: 400, color: '#3a3134' }));
+      }
       ctx.restore();
     },
     // C. Photo nette encadrée sur sa version floutée (format « reel »)
@@ -347,13 +416,18 @@ function buildScenes(content, images, theme, occ) {
     ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, h2); ctx.clip(); ctx.translate(-W * (1 - e), 0); drawCover(ctx, a, 0, 0, W, h2, 1.08 + 0.05 * t, -0.3); ctx.restore();
     ctx.save(); ctx.beginPath(); ctx.rect(0, h2 + 12, W, h2); ctx.clip(); ctx.translate(W * (1 - e), 0); drawCover(ctx, b, 0, h2 + 12, W, h2, 1.08 + 0.05 * t, 0.3); ctx.restore();
     ctx.fillStyle = soft; ctx.fillRect(0, h2, W, 12);
-    const c = capFor(a) || capFor(b);
-    if (c) {
-      setFont(ctx, 34, { font: SERIF, italic: true, weight: 600 });
-      const w = Math.min(W - 80, ctx.measureText(c).width + 60);
-      ctx.save(); ctx.globalAlpha *= easeOut(seg(t, 0.5, 0.9)); rr(ctx, (W - w) / 2, H / 2 - 34, w, 68, 34); ctx.fillStyle = '#fff'; ctx.fill();
-      txt(ctx, wrap(ctx, c, W - 140)[0], W / 2, H / 2, { size: 34, font: SERIF, italic: true, weight: 600, color: ink }); ctx.restore();
-    }
+    const pill = (c, cy, delay) => {
+      if (!c) return;
+      const f = fit(ctx, c, W - 140, 2, 32, 22, { font: SERIF, italic: true, weight: 600 });
+      const lh = Math.round(f.size * 1.25);
+      const w = Math.min(W - 60, Math.max(...f.lines.map((l) => ctx.measureText(l).width)) + 56);
+      const h = f.lines.length * lh + 26;
+      ctx.save(); ctx.globalAlpha *= easeOut(seg(t, delay, delay + 0.4)); rr(ctx, (W - w) / 2, cy - h / 2, w, h, 26); ctx.fillStyle = 'rgba(255,255,255,.94)'; ctx.fill();
+      f.lines.forEach((l, j) => txt(ctx, l, W / 2, cy - ((f.lines.length - 1) * lh) / 2 + j * lh, { size: f.size, font: SERIF, italic: true, weight: 600, color: ink }));
+      ctx.restore();
+    };
+    pill(capFor(a), h2 - 70, 0.5);
+    pill(capFor(b), Math.min(SAFE_BOTTOM - 40, H - 120), 0.9);
   };
   const list = imgs.slice(0, 6);
   let li = 0;
@@ -364,32 +438,54 @@ function buildScenes(content, images, theme, occ) {
     k++;
   }
 
-  // 5. Souvenirs : une ligne se dessine et chaque étape apparaît
-  const tl = content.timeline.slice(0, 3);
+  // 5. Souvenirs : chaque étape en entier ; plusieurs écrans si le texte est long
+  const tl = content.timeline.slice(0, 4);
   if (tl.length) {
-    add((POSE ? 1.8 : 2 * BEAT) + tl.length * TS, (ctx, t) => {
-      kinetic(ctx, [occ.timelineTitle], W / 2, SAFE_TOP + 60, 70, t, { size: 60, font: SERIF, weight: 700, color: ink });
-      const x = 130; const y0 = 360; const step = 200;
-      const lineP = easeInOut(seg(t, 0.2, 0.4 + tl.length * TS));
-      ctx.fillStyle = soft; ctx.fillRect(x - 3, y0, 6, (step * tl.length - 60) * lineP);
-      tl.forEach((item, i) => {
-        const p = easeBack(seg(t, 0.4 + i * TS, (POSE ? 1.1 : 0.9) + i * TS));
-        if (!p) return;
-        const y = y0 + i * step;
-        ctx.save(); ctx.globalAlpha *= clamp(p); ctx.translate((1 - p) * 60, 0);
-        ctx.beginPath(); ctx.arc(x, y + 12, Math.max(0.5, 18 * p), 0, Math.PI * 2); ctx.fillStyle = accent; ctx.fill();
-        if (item.when) txt(ctx, item.when.toUpperCase(), x + 50, y + 10, { size: 28, weight: 800, color: accent, align: 'left' });
-        setFont(ctx, 34, { weight: 500 });
-        wrap(ctx, item.text, W - x - 110).slice(0, 2).forEach((l, j) => txt(ctx, l, x + 50, y + 60 + j * 42, { size: 34, weight: 500, color: ink, align: 'left' }));
-        ctx.restore();
-      });
-    }, 'wipe');
+    const x = 130; const top = 340; const bottom = SAFE_BOTTOM - 20;
+    const mctx = document.createElement('canvas').getContext('2d');
+    const items = tl.map((it) => {
+      const f = fit(mctx, it.text, W - x - 110, 6, 34, 26, { weight: 500 });
+      const lh = Math.round(f.size * 1.25);
+      return { ...it, lines: f.lines, size: f.size, lh, h: (it.when ? 52 : 12) + f.lines.length * lh + 46 };
+    });
+    const screens = [];
+    let cur = [];
+    let used = 0;
+    for (const it of items) {
+      if (cur.length && used + it.h > bottom - top) { screens.push(cur); cur = []; used = 0; }
+      cur.push(it); used += it.h;
+    }
+    if (cur.length) screens.push(cur);
+    screens.forEach((group, si) => {
+      const steps = group.map((it) => (POSE ? Math.max(TS, readTime(`${it.when} ${it.text}`)) : TS));
+      const starts = steps.reduce((arr, st, i) => { arr.push(i ? arr[i - 1] + steps[i - 1] : 0.4); return arr; }, []);
+      const d = 0.4 + steps.reduce((n, v) => n + v, 0) + (POSE ? 1.4 : 0.6);
+      add(d, (ctx, t) => {
+        kinetic(ctx, [occ.timelineTitle], W / 2, SAFE_TOP + 60, 70, t, { size: 60, font: SERIF, weight: 700, color: ink });
+        const totalH = group.reduce((n, it) => n + it.h, 0) - 46;
+        const lineP = easeInOut(seg(t, 0.2, starts[starts.length - 1] + 0.8));
+        ctx.fillStyle = soft; ctx.fillRect(x - 3, top, 6, totalH * lineP);
+        let y = top;
+        group.forEach((item, i) => {
+          const p = easeBack(seg(t, starts[i], starts[i] + 0.7));
+          const yy = y;
+          y += item.h;
+          if (!p) return;
+          ctx.save(); ctx.globalAlpha *= clamp(p); ctx.translate((1 - p) * 60, 0);
+          ctx.beginPath(); ctx.arc(x, yy + 12, Math.max(0.5, 18 * p), 0, Math.PI * 2); ctx.fillStyle = accent; ctx.fill();
+          let ty = yy + 10;
+          if (item.when) { txt(ctx, item.when.toUpperCase(), x + 50, ty, { size: 28, weight: 800, color: accent, align: 'left' }); ty += 50; }
+          item.lines.forEach((l, j) => txt(ctx, l, x + 50, ty + j * item.lh, { size: item.size, weight: 500, color: ink, align: 'left' }));
+          ctx.restore();
+        });
+      }, si === 0 ? 'wipe' : 'pushUp');
+    });
   }
 
   // 6. « Ce que j'aime chez toi » : une carte géante par raison, retournée en 3D
   const nR = POSE ? 3 : 4;
   content.reasons.slice(0, nR).forEach((r, i) => {
-    add(POSE ? Math.max(4.6, readTime(r) + 1.6) : 2.5 * BEAT, (ctx, t) => {
+    add(POSE ? Math.max(4.2, readTime(r) + 1.5) : 2.5 * BEAT, (ctx, t) => {
       if (i === 0 || t < 0.6) txt(ctx, occ.reasonsTitle, W / 2, SAFE_TOP + 50, { size: 46, font: SERIF, weight: 700, color: ink });
       txt(ctx, `${i + 1} / ${Math.min(content.reasons.length, nR)}`, W / 2, SAFE_TOP + 110, { size: 26, weight: 700, color: accent });
       const flip = easeInOut(POSE ? seg(t, 0.5, 1.4) : seg(t, 0.25, 0.85));
@@ -407,9 +503,9 @@ function buildScenes(content, images, theme, occ) {
       ctx.shadowColor = 'transparent';
       if (back) {
         txt(ctx, symbol, 0, -ch / 2 + 90, { size: 54, color: accent });
-        setFont(ctx, 44, { font: SERIF, weight: 500 });
-        const lines = wrap(ctx, r, cw - 80).slice(0, 6);
-        lines.forEach((l, j) => txt(ctx, l, 0, (j - (lines.length - 1) / 2) * 56 + 20, { size: 44, font: SERIF, weight: 500, color: '#2b2326' }));
+        const f = fit(ctx, r, cw - 80, 7, 44, 28, { font: SERIF, weight: 500 });
+        const lh = Math.round(f.size * 1.27);
+        f.lines.forEach((l, j) => txt(ctx, l, 0, (j - (f.lines.length - 1) / 2) * lh + 20, { size: f.size, font: SERIF, weight: 500, color: '#2b2326' }));
       } else {
         txt(ctx, symbol, 0, -10, { size: 120, color: '#fff' });
       }
@@ -419,14 +515,15 @@ function buildScenes(content, images, theme, occ) {
 
   // 7. Le mot de la fin
   if (content.finalMessage) {
-    add(POSE ? Math.max(5.5, readTime(content.finalMessage) + 2.5) : 5 * BEAT, (ctx, t) => {
-      setFont(ctx, 58, { font: SERIF, weight: 600 });
-      const lines = wrap(ctx, content.finalMessage, W - 140).slice(0, 7);
-      const y0 = H / 2 - 150 - (lines.length - 1) * 36;
-      kinetic(ctx, lines, W / 2, y0, 72, t, { size: 58, font: SERIF, weight: 600, color: ink, stagger: 0.09, dur: 0.55 });
+    add(POSE ? Math.max(5, readTime(content.finalMessage) + 2) : 5 * BEAT, (ctx, t) => {
+      const f = fit(ctx, content.finalMessage, W - 140, 8, 58, 36, { font: SERIF, weight: 600 });
+      const lines = f.lines;
+      const lh = Math.round(f.size * 1.24);
+      const y0 = Math.max(SAFE_TOP + 40, H / 2 - 150 - ((lines.length - 1) * lh) / 2);
+      kinetic(ctx, lines, W / 2, y0, lh, t, { size: f.size, font: SERIF, weight: 600, color: ink, stagger: 0.09, dur: 0.55 });
       const beat = 1 + 0.14 * Math.pow(Math.max(0, Math.sin((t / BEAT) * Math.PI)), 6);
       const a = easeBack(seg(t, 1.2, 1.8));
-      ctx.save(); ctx.globalAlpha *= clamp(a); ctx.translate(W / 2, y0 + lines.length * 72 + 120); ctx.scale(beat * a, beat * a);
+      ctx.save(); ctx.globalAlpha *= clamp(a); ctx.translate(W / 2, Math.min(SAFE_BOTTOM - 60, y0 + lines.length * lh + 120)); ctx.scale(beat * a, beat * a);
       txt(ctx, '♥', 0, 0, { size: 150, color: accent }); ctx.restore();
     }, 'flash');
   }
