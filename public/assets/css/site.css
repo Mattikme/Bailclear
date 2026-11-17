@@ -209,3 +209,21 @@ dialog h2 { margin-top: 0; }
 .stat-label { font-size: 13px; color: var(--muted); }
 .stat-value { font-family: var(--serif); font-size: 40px; font-weight: 700; color: var(--accent); line-height: 1.1; }
 .stat-sub { font-size: 13px; color: var(--muted); }
+/* Vidéo souvenir (page de confirmation) */
+.video-box { text-align: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin: 26px 0; }
+.video-box h2 { margin: 0 0 4px; }
+dialog.montage { width: min(420px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto; text-align: center; }
+dialog.montage .row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+dialog .btn.secondary { background: var(--line); color: var(--ink); }
+.montage-stage { margin: 10px auto; width: min(260px, 60vw); aspect-ratio: 9 / 16; border-radius: 14px; overflow: hidden; background: #111; }
+.montage-stage canvas, .montage-stage video { width: 100%; height: 100%; display: block; object-fit: cover; }
+dialog.montage progress { width: 100%; height: 8px; accent-color: var(--accent); }
+.montage-note { font-size: 13px; opacity: .7; margin: 12px 0 0; }
+.montage-opt { display: flex; gap: 8px; align-items: flex-start; justify-content: center; font-size: 14px; margin: 10px 0 0; text-align: left; }
+.montage-opt input { margin-top: 3px; accent-color: var(--accent); }
+.montage-pace { border: 0; padding: 0; margin: 10px 0 0; display: flex; flex-direction: column; gap: 6px; text-align: left; font-size: 14px; }
+.montage-pace legend { font-weight: 700; margin-bottom: 4px; }
+.montage-pace label { display: flex; gap: 8px; align-items: flex-start; }
+.montage-pace input { margin-top: 3px; accent-color: var(--accent); }
+.contact-form { max-width: 560px; }
+.contact-form .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }

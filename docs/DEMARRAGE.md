@@ -65,7 +65,7 @@ Puis lance `npm run build`. La commande affiche un avertissement tant qu'une inf
 
 ## 4. Mettre le site en ligne
 
-> **Déjà fait (16/11/2026)** : le site tourne en **Worker Cloudflare** sur https://unepagepourtoi.matthieu-gonthier-660.workers.dev, avec son stockage KV `upt-pages`.
+> **Déjà fait (17/11/2026)** : le site tourne en **Worker Cloudflare** sur https://unepagepourtoi.fr (et www), avec son stockage KV `upt-pages`. L'ancienne adresse `*.workers.dev` est désactivée. Le formulaire `/contact` envoie les messages à l'adresse du secret `CONTACT_TO` (adresse de destination vérifiée dans Email Routing).
 > - **Redéployer** après une modification : `npm run deploy:worker`. Il faut `CLOUDFLARE_API_TOKEN` et `CLOUDFLARE_ACCOUNT_ID` dans le terminal.
 > - **Clés secrètes du Worker** : tableau de bord Cloudflare → Workers & Pages → `unepagepourtoi` → Settings → Variables and Secrets. Tu peux aussi passer par `npx wrangler secret put STRIPE_SECRET_KEY -c wrangler.worker.toml` (même chose pour `STRIPE_WEBHOOK_SECRET`, `ADMIN_TOKEN` et `SITE_URL`).
 > - **Ton domaine** : Settings → Domains & Routes → *Add custom domain* → `unepagepourtoi.fr`.

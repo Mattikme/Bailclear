@@ -10,6 +10,7 @@ import * as report from '../functions/api/report.js';
 import * as admin from '../functions/api/admin/[[path]].js';
 import * as hit from '../functions/api/hit.js';
 import * as stats from '../functions/api/stats.js';
+import * as contact from '../functions/api/contact.js';
 export { Stats } from './stats.js';
 
 const ROUTES = [
@@ -22,6 +23,7 @@ const ROUTES = [
   [/^\/api\/report$/, report, []],
   [/^\/api\/hit$/, hit, []],
   [/^\/api\/stats$/, stats, []],
+  [/^\/api\/contact$/, contact, []],
   [/^\/api\/admin\/(.+)$/, admin, ['path']],
 ];
 

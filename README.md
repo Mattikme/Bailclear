@@ -1,6 +1,6 @@
 # Une page pour toi
 
-En ligne (préversion) : https://unepagepourtoi.matthieu-gonthier-660.workers.dev
+En ligne : https://unepagepourtoi.fr
 
 Site de **pages cadeaux personnalisées** : lettre, photos, frise de souvenirs, cartes à retourner, compteur de jours, musique (YouTube ou Spotify) et question secrète. La page est offerte par lien ou par QR code (une carte A6 est fournie à imprimer). Prix : **9,90 €**, en paiement unique.
 

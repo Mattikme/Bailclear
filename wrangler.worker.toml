@@ -2,11 +2,16 @@
 name = "unepagepourtoi"
 main = "worker/index.js"
 compatibility_date = "2025-09-01"
-workers_dev = true
+workers_dev = false # l'adresse *.workers.dev est coupée : le site n'est servi que sur unepagepourtoi.fr
+preview_urls = false
 
 rules = [
   { type = "Data", globs = ["**/*.png", "**/*.jpg", "**/*.mp4"], fallthrough = false },
 ]
+
+# Formulaire de contact : envoi vers l'adresse de destination vérifiée (secret CONTACT_TO)
+[[send_email]]
+name = "CONTACT_EMAIL"
 
 [[durable_objects.bindings]]
 name = "STATS"

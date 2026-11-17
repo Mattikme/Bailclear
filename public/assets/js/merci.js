@@ -75,13 +75,30 @@ async function main() {
   };
 }
 
+// Vidéo souvenir directement depuis la page de confirmation (gratuite).
+function setupVideo(data) {
+  const box = $('video-box');
+  if (!box) return;
+  box.hidden = false;
+  const v = encodeURIComponent(data.updatedAt || '');
+  const photoUrl = (n) => `/api/photos/${id}/${n}?v=${v}`;
+  $('video-btn').onclick = async () => {
+    const { openMontage } = await import('./montage-ui.js');
+    openMontage(data.content, photoUrl);
+  };
+}
+
 async function setupSend(url, mine) {
   if (sessionId === 'gratuit') $('invoice-note').hidden = true;
   let to = (mine && mine.to) || '';
   let from = '';
   try {
     const res = await fetch(`/api/pages/${encodeURIComponent(id)}`);
-    if (res.ok) { const d = await res.json(); to = d.content.to || to; from = d.content.from || ''; }
+    if (res.ok) {
+      const d = await res.json();
+      to = d.content.to || to; from = d.content.from || '';
+      setupVideo(d);
+    }
   } catch { /* hors ligne */ }
   const sig = from ? `\n— ${from}` : '';
   const TEMPLATES = {

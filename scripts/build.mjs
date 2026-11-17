@@ -59,6 +59,7 @@ ${body}
 <footer class="site-footer"><div class="wrap">
   <span>© ${new Date().getFullYear()} ${SITE_NAME} — fait en France avec ♥</span>
   <nav aria-label="Liens légaux">
+    <a href="/contact">Contact</a>
     <a href="/mentions-legales">Mentions légales</a>
     <a href="/cgv">CGV</a>
     <a href="/confidentialite">Confidentialité</a>
@@ -343,7 +344,7 @@ pages['merci.html'] = layout({
   noindex: true,
   scripts: '<script src="/assets/vendor/qrcode.js" defer></script><script type="module" src="/assets/js/merci.js"></script>',
   body: `<main class="wrap narrow thanks">
-  <p class="notice" id="status" role="status">Vérification du paiement…</p>
+  <p class="notice" id="status" role="status">Un instant…</p>
   <div id="done" hidden>
     <h1>🎉 Ta page est en ligne !</h1>
     <p>Voici son lien secret. Garde-le précieusement et offre-le quand tu veux.</p>
@@ -369,6 +370,11 @@ pages['merci.html'] = layout({
         <button class="btn ghost" id="share-btn" type="button" hidden>Autres applis…</button>
       </div>
       <p class="send-sub">Astuce : sur WhatsApp et Messenger, le lien s’affiche avec un aperçu « Quelqu’un t’a préparé une surprise 💌 », sans rien dévoiler.</p>
+    </section>
+    <section class="video-box" id="video-box" hidden aria-labelledby="video-title">
+      <h2 id="video-title">🎬 La vidéo souvenir</h2>
+      <p class="send-sub">Un petit film de ta page (lettre, photos, souvenirs), à télécharger ou à partager sur TikTok, Instagram, Snapchat… Gratuit.</p>
+      <button class="btn" id="video-btn" type="button">Créer la vidéo</button>
     </section>
     <h2>Le QR code</h2>
     <div class="qr" id="qr"></div>
@@ -478,6 +484,7 @@ pages['confidentialite.html'] = layout({
 <li><strong>Contenu de ta Page</strong> (prénoms, textes, photos, lien musical, question secrète sous forme chiffrée) : pour fournir le service (exécution du contrat). Brouillon envoyé mais non payé : effacé automatiquement après 48 heures. Page payée : ${YEARS} ans, puis effacement automatique. Tu peux la supprimer à tout moment.</li>
 <li><strong>Lien de modification</strong> : nous n’en conservons qu’une empreinte chiffrée (non réversible).</li>
 <li><strong>Paiement</strong> : traité par Stripe, qui nous transmet ton nom, ton e-mail et le statut du paiement (exécution du contrat). Les pièces comptables sont conservées 10 ans (obligation légale).</li>
+<li><strong>Formulaire de contact</strong> (nom facultatif, e-mail, message) : transmis par e-mail à l’éditeur pour te répondre (intérêt légitime), puis conservés le temps de traiter ta demande, 1 an au plus.</li>
 <li><strong>Signalements</strong> (motif, explication, e-mail facultatif) : pour traiter le signalement (obligation légale d’hébergeur), conservés 1 an. En cas de retrait d’une Page, une trace minimale sans contenu est gardée 30 jours.</li>
 <li><strong>Données d’identification des créateurs</strong> (adresse IP, date et type d’opération : création, modification, suppression d’une Page) : conservées 1 an, comme l’impose aux hébergeurs l’article 6 de la loi pour la confiance dans l’économie numérique (obligation légale).</li>
 <li><strong>Preuve de ta commande</strong> (identifiant de la Page, date, version des CGV acceptée, renonciation au droit de rétractation, référence du paiement, sans le contenu) : conservée 5 ans pour pouvoir répondre à une éventuelle réclamation (intérêt légitime), même si la Page est supprimée.</li>
@@ -520,6 +527,27 @@ pages['regles-de-contenu.html'] = layout({
 </main>`,
 });
 
+pages['contact.html'] = layout({
+  title: `Contact — ${SITE_NAME}`,
+  description: 'Une question, une idée, un problème avec ta page ? Écris-nous, on te répond rapidement.',
+  path: '/contact',
+  scripts: '<script type="module" src="/assets/js/contact.js"></script>',
+  body: `<main class="wrap narrow prose">
+<h1>Nous contacter</h1>
+<p>Une question, une idée, un souci avec ta page ? Écris-nous, on te répond rapidement. Pour signaler une page offerte, utilise plutôt le bouton « Signaler un contenu » en bas de la page concernée.</p>
+<form id="contact-form" class="contact-form" novalidate>
+  <div class="field"><label for="c-name">Ton prénom (facultatif)</label><input id="c-name" type="text" maxlength="80" autocomplete="given-name"></div>
+  <div class="field"><label for="c-email">Ton e-mail *</label><input id="c-email" type="email" maxlength="200" autocomplete="email" required></div>
+  <div class="field"><label for="c-message">Ton message *</label><textarea id="c-message" rows="6" maxlength="3000" required></textarea></div>
+  <div class="hp" aria-hidden="true"><label for="c-website">Ne pas remplir</label><input id="c-website" type="text" tabindex="-1" autocomplete="off"></div>
+  <p class="help">Tes coordonnées servent uniquement à te répondre (voir la <a href="/confidentialite">politique de confidentialité</a>).</p>
+  <p id="contact-status" class="notice" role="status" hidden></p>
+  <button class="btn" type="submit" id="contact-send">Envoyer</button>
+</form>
+<p style="margin-top:28px">Tu peux aussi écrire directement à ${email}.</p>
+</main>`,
+});
+
 pages['404.html'] = layout({
   title: `Page introuvable — ${SITE_NAME}`, description: 'Page introuvable.', path: '/404', noindex: true,
   body: `<main class="wrap narrow prose" style="text-align:center"><h1>Oups, cette page n’existe pas</h1><p><a class="btn" href="/">Retour à l’accueil</a></p></main>`,
@@ -527,7 +555,7 @@ pages['404.html'] = layout({
 
 for (const [file, html] of Object.entries(pages)) writeFileSync(join(pub, file), html);
 
-const indexable = ['/', ...OCCASIONS.map((o) => `/${o.id}`), '/mentions-legales', '/cgv', '/confidentialite', '/regles-de-contenu'];
+const indexable = ['/', ...OCCASIONS.map((o) => `/${o.id}`), '/contact', '/mentions-legales', '/cgv', '/confidentialite', '/regles-de-contenu'];
 writeFileSync(join(pub, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${indexable.map((p) => `  <url><loc>${SITE}${p}</loc></url>`).join('\n')}

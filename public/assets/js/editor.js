@@ -352,7 +352,9 @@ function setupPublish() {
     notice('');
     if (!checkReady()) return;
     if (isEdit) return saveEdit();
-    const already = FREE && listPages().find((x) => x.free);
+    let owner = false;
+    try { owner = localStorage.getItem('upt:owner') === '1'; } catch { /* stockage indisponible */ }
+    const already = FREE && !owner && listPages().find((x) => x.free);
     if (already) {
       notice(`Offre de lancement : une page gratuite par personne, et tu as déjà créé la tienne (« ${already.title || 'ta page'} »). Tu peux la modifier autant que tu veux depuis « Tes pages » en haut de cette page. Les pages suivantes seront à 9,90 € à partir du 1er décembre.`, 'error');
       return;
