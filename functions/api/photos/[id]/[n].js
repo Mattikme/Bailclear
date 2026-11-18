@@ -1,7 +1,7 @@
 import { MAX_PHOTO_BYTES } from '../../../../lib/config.js';
 import { ID_RE } from '../../../../lib/crypto.js';
 import { bearer, error, handle, json } from '../../../../lib/http.js';
-import { checkToken, getPage, getPhoto, putPhoto } from '../../../../lib/store.js';
+import { checkToken, getPage, getPhoto, isLocked, putPhoto } from '../../../../lib/store.js';
 import { imageType } from '../../../../lib/validate.js';
 
 function parse(params) {
@@ -16,8 +16,8 @@ export const onRequestGet = handle(async ({ request, env, params }) => {
   if (!p) return error('Photo introuvable.', 404);
   const page = await getPage(env, p.id);
   if (!page || page.status === 'removed' || p.n >= page.photoCount) return error('Photo introuvable.', 404);
-  const owner = page.status !== 'paid' ? await checkToken(page, bearer(request)) : false;
-  if (page.status !== 'paid' && !owner) return error('Photo introuvable.', 404);
+  const owner = page.status !== 'paid' || isLocked(page) ? await checkToken(page, bearer(request)) : false;
+  if ((page.status !== 'paid' || isLocked(page)) && !owner) return error('Photo introuvable.', 404);
   const { value, metadata } = await getPhoto(env, p.id, p.n);
   if (!value) return error('Photo introuvable.', 404);
   return new Response(value, {

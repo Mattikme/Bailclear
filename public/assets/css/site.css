@@ -236,3 +236,11 @@ dialog.montage progress { width: 100%; height: 8px; accent-color: var(--accent);
 .voice-timer { font-variant-numeric: tabular-nums; font-weight: 700; color: #c62828; }
 .voice-preview { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
 .voice-preview audio { width: 100%; max-width: 420px; }
+/* Quiz (éditeur) */
+.quiz-item { border: 1px solid var(--line, #eadfe2); border-radius: 14px; padding: 12px; margin-top: 10px; display: grid; gap: 8px; }
+.quiz-head { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: start; }
+.quiz-answers-edit { display: grid; gap: 6px; padding-left: 4px; }
+.quiz-ans { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: center; }
+.quiz-ans input[type="radio"] { width: 20px; height: 20px; accent-color: var(--accent); margin: 0; }
+.quiz-item .help { margin: 0; }
+.linklike { background: none; border: 0; padding: 4px 0; color: var(--accent); font: inherit; font-size: 14px; cursor: pointer; text-decoration: underline; justify-self: start; }

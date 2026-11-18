@@ -76,13 +76,22 @@ async function main() {
 }
 
 // Vidéo souvenir directement depuis la page de confirmation (gratuite).
-function setupVideo(data) {
+// Avec le jeton du créateur, les photos sont chargées même si la page est encore fermée (ouverture programmée).
+function setupVideo(data, token) {
   const box = $('video-box');
   if (!box) return;
   box.hidden = false;
   const v = encodeURIComponent(data.updatedAt || '');
-  const photoUrl = (n) => `/api/photos/${id}/${n}?v=${v}`;
+  let photoUrl = (n) => `/api/photos/${id}/${n}?v=${v}`;
   $('video-btn').onclick = async () => {
+    if (token && data.content.openAt && !photoUrl.ready) {
+      const urls = [];
+      for (let n = 0; n < (data.content.photos || []).length; n++) {
+        const r = await fetch(`/api/photos/${id}/${n}`, { headers: { authorization: `Bearer ${token}` } });
+        urls.push(r.ok ? URL.createObjectURL(await r.blob()) : '');
+      }
+      photoUrl = Object.assign((n) => urls[n], { ready: true });
+    }
     const { openMontage } = await import('./montage-ui.js');
     openMontage(data.content, photoUrl);
   };
@@ -92,15 +101,22 @@ async function setupSend(url, mine) {
   if (sessionId === 'gratuit') $('invoice-note').hidden = true;
   let to = (mine && mine.to) || '';
   let from = '';
+  let openAt = '';
   try {
-    const res = await fetch(`/api/pages/${encodeURIComponent(id)}`);
+    const token = mine && mine.token;
+    const res = await fetch(`/api/pages/${encodeURIComponent(id)}`, token ? { headers: { authorization: `Bearer ${token}` } } : {});
     if (res.ok) {
       const d = await res.json();
       to = d.content.to || to; from = d.content.from || '';
-      setupVideo(d);
+      openAt = d.content.openAt || d.openAt || '';
+      if (!d.locked) setupVideo(d, token);
     }
   } catch { /* hors ligne */ }
-  const sig = from ? `\n— ${from}` : '';
+  const later = openAt && Date.parse(openAt) > Date.now()
+    ? `\n(Tu peux l’ouvrir dès maintenant… mais elle ne se dévoilera que le ${new Date(openAt).toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })} ⏳)`
+    : '';
+  if (later) { const n = $('openat-note'); if (n) { n.hidden = false; n.textContent = `⏰ Ouverture programmée : la page affiche un compte à rebours jusqu’au ${new Date(openAt).toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}. Tu peux envoyer le lien dès maintenant.`; } }
+  const sig = later + (from ? `\n— ${from}` : '');
   const TEMPLATES = {
     mystere: () => `${to ? `${to}, j’ai` : 'J’ai'} préparé quelque chose rien que pour toi… 💌\nOuvre-le quand tu seras tranquille :\n${url}${sig}`,
     tendre: () => `Pour toi${to ? ` ${to}` : ''} ❤️\nJ’ai mis dans cette page tout ce que je ne te dis pas assez.\n${url}${sig}`,

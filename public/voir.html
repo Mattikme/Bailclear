@@ -19,6 +19,15 @@
   <div class="env-art" aria-hidden="true"></div>
   <h1 id="env-title"></h1>
   <p id="env-intro"></p>
+  <div class="countdown" id="countdown" hidden>
+    <p class="cd-label" id="cd-label"></p>
+    <div class="cd-grid" role="timer" aria-live="off">
+      <div><b id="cd-d">0</b><span>jours</span></div>
+      <div><b id="cd-h">0</b><span>heures</span></div>
+      <div><b id="cd-m">0</b><span>min</span></div>
+      <div><b id="cd-s">0</b><span>sec</span></div>
+    </div>
+  </div>
   <form class="secret-form" id="secret-form" hidden>
     <label for="secret-answer" id="secret-question"></label>
     <input id="secret-answer" autocomplete="off" autocapitalize="off" required>

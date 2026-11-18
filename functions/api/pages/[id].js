@@ -1,7 +1,7 @@
 import { MAX_BODY_BYTES } from '../../../lib/config.js';
 import { ID_RE } from '../../../lib/crypto.js';
 import { bearer, error, handle, json, readJson } from '../../../lib/http.js';
-import { checkToken, deletePage, deletePhotosFrom, getPage, logAction, publicView, savePage } from '../../../lib/store.js';
+import { checkToken, deletePage, deletePhotosFrom, getPage, isLocked, logAction, publicView, savePage } from '../../../lib/store.js';
 import { validateContent, ValidationError } from '../../../lib/validate.js';
 
 async function load(params, env) {
@@ -17,6 +17,10 @@ export const onRequestGet = handle(async ({ request, env, params }) => {
   const owner = await checkToken(page, bearer(request));
   if (owner) return json({ ...publicView(page), owner: true, updatedAt: page.updatedAt });
   if (page.status !== 'paid') return error('Page introuvable.', 404);
+  if (isLocked(page)) {
+    const { occasion, theme, to, from, intro, lang } = page.content;
+    return json({ id: page.id, status: page.status, locked: true, openAt: page.content.openAt, content: { occasion, theme, to, from, intro, lang } });
+  }
   return json({ ...publicView(page), updatedAt: page.updatedAt });
 });
 

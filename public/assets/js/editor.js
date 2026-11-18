@@ -30,7 +30,7 @@ function blankState(occId) {
   return {
     occasion: occ.id, theme: occ.theme, to: '', from: '',
     title: occ.defaults.title, intro: occ.defaults.intro, date: '', dateLabel: occ.defaults.dateLabel,
-    letter: '', photos: [], timeline: [], reasons: [], music: '', musicStart: 0, voice: null, finalMessage: occ.defaults.finalMessage,
+    letter: '', photos: [], timeline: [], reasons: [], music: '', musicStart: 0, voice: null, openAt: '', quiz: [], finalMessage: occ.defaults.finalMessage,
     secret: { question: '', answer: '', answerHash: '' },
   };
 }
@@ -236,6 +236,69 @@ function renderTimeline() {
   attachCounters();
 }
 
+/* ---------- Quiz ---------- */
+function renderQuiz() {
+  const box = $('quiz-list');
+  box.replaceChildren(...state.quiz.map((q, i) => {
+    const row = document.createElement('div'); row.className = 'quiz-item';
+    const qi = document.createElement('input'); qi.type = 'text'; qi.maxLength = LIMITS.quizQuestion; qi.value = q.q; qi.placeholder = 'Où s’est passé notre premier rendez-vous ?';
+    qi.setAttribute('aria-label', `Question ${i + 1}`);
+    qi.oninput = () => { q.q = qi.value; changed(); };
+    const head = document.createElement('div'); head.className = 'quiz-head';
+    head.append(qi, iconBtn('Supprimer la question', '✕', () => { state.quiz.splice(i, 1); renderQuiz(); changed(); }));
+    const answers = document.createElement('div'); answers.className = 'quiz-answers-edit';
+    q.answers.forEach((a, k) => {
+      const line = document.createElement('label'); line.className = 'quiz-ans';
+      const r = document.createElement('input'); r.type = 'radio'; r.name = `quiz-${i}`; r.checked = q.correct === k;
+      r.title = 'Bonne réponse'; r.setAttribute('aria-label', `Réponse ${k + 1} est la bonne`);
+      r.onchange = () => { q.correct = k; changed(); };
+      const t = document.createElement('input'); t.type = 'text'; t.maxLength = LIMITS.quizAnswer; t.value = a; t.placeholder = k === 0 ? 'Au cinéma' : k === 1 ? 'Au restaurant' : 'Autre réponse';
+      t.setAttribute('aria-label', `Réponse ${k + 1} de la question ${i + 1}`);
+      t.oninput = () => { q.answers[k] = t.value; changed(); };
+      line.append(r, t);
+      answers.append(line);
+    });
+    if (q.answers.length < 4) {
+      const more = document.createElement('button'); more.type = 'button'; more.className = 'linklike'; more.textContent = '+ une réponse';
+      more.onclick = () => { q.answers.push(''); renderQuiz(); changed(); };
+      answers.append(more);
+    }
+    const tip = document.createElement('p'); tip.className = 'help'; tip.textContent = 'Coche le rond de la bonne réponse.';
+    row.append(head, answers, tip);
+    return row;
+  }));
+  $('add-quiz').disabled = state.quiz.length >= LIMITS.quiz;
+}
+
+/* ---------- Ouverture programmée ---------- */
+function toLocalInput(iso) {
+  if (!iso) return '';
+  const d = new Date(iso); if (Number.isNaN(d.getTime())) return '';
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function renderOpenAt() {
+  const input = $('f-openAt');
+  input.value = toLocalInput(state.openAt);
+  input.min = toLocalInput(new Date().toISOString());
+  $('openat-clear').hidden = !state.openAt;
+  const s = $('openat-status');
+  if (!state.openAt) { s.textContent = ''; return; }
+  const t = Date.parse(state.openAt);
+  s.textContent = t <= Date.now()
+    ? 'Cette date est passée : la page s’ouvrira tout de suite.'
+    : `La page restera fermée jusqu’au ${new Date(t).toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}.`;
+}
+function setupOpenAt() {
+  $('f-openAt').onchange = (e) => {
+    const t = Date.parse(e.target.value);
+    state.openAt = e.target.value && Number.isFinite(t) ? new Date(t).toISOString() : '';
+    renderOpenAt(); changed();
+  };
+  $('openat-clear').onclick = () => { state.openAt = ''; renderOpenAt(); changed(); };
+  renderOpenAt();
+}
+
 /* ---------- Photos ---------- */
 async function compress(file) {
   let source;
@@ -439,6 +502,8 @@ async function serverContent() {
 function checkReady() {
   if (!state.to.trim()) { notice('Indique le prénom de la personne à qui tu offres la page.', 'error'); $('f-to').focus(); return false; }
   if (!state.title.trim()) { notice('Ajoute un titre.', 'error'); $('f-title').focus(); return false; }
+  const badQuiz = state.quiz.findIndex((q) => (q.q.trim() || q.answers.some((a) => a.trim())) && (!q.q.trim() || q.answers.filter((a) => a.trim()).length < 2 || !(q.answers[q.correct] || '').trim()));
+  if (badQuiz >= 0) { notice(`Quiz, question ${badQuiz + 1} : il faut une question, au moins 2 réponses et la bonne réponse cochée.`, 'error'); $('quiz-fieldset').scrollIntoView({ block: 'center' }); return false; }
   if (state.secret.question.trim() && !state.secret.answer.trim() && !state.secret.answerHash) { notice('Tu as écrit une question secrète sans réponse.', 'error'); $('f-answer').focus(); return false; }
   if (state.music.trim() && !musicEmbed(state.music.trim())) { notice('Le lien musique n’est pas reconnu.', 'error'); $('f-music').focus(); return false; }
   if (!state.letter.trim() && !state.photos.length) { notice('Ajoute au moins une lettre ou une photo : la page serait vide !', 'error'); return false; }
@@ -626,6 +691,7 @@ function renderMyPages() {
 function setupMisc() {
   form.addEventListener('submit', (e) => e.preventDefault());
   $('add-reason').onclick = () => { state.reasons.push(''); renderReasons(); changed(); $('reasons-list').querySelector('.list-item:last-child input').focus(); };
+  $('add-quiz').onclick = () => { state.quiz.push({ q: '', answers: ['', ''], correct: 0 }); renderQuiz(); changed(); $('quiz-list').querySelector('.quiz-item:last-child input').focus(); };
   $('add-timeline').onclick = () => { state.timeline.push({ when: '', text: '' }); renderTimeline(); changed(); $('timeline-list').querySelector('.tl-item:last-child input').focus(); };
   $('preview-toggle').onclick = () => $('preview-pane').classList.add('open');
   $('close-preview').onclick = () => $('preview-pane').classList.remove('open');
@@ -641,7 +707,7 @@ function setupMisc() {
 
 async function init() {
   if (isEdit) await loadEdit(); else await loadDraft();
-  renderOccasions(); bindFields(); renderPhotos(); renderTimeline(); renderReasons();
+  renderOccasions(); bindFields(); renderPhotos(); renderTimeline(); renderReasons(); renderQuiz(); setupOpenAt();
   if (pendingOccasion) switchOccasion(pendingOccasion);
   setupDropzone(); setupVoice(); setupPublish(); setupMisc(); renderMyPages();
   iframe.src = '/voir?preview=1';

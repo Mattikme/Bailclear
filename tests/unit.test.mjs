@@ -170,3 +170,26 @@ test('vidéo : un texte trop long est coupé à la fin d’une phrase', async ()
   assert.equal(cutAtSentence(t, 60), 'Première phrase complète.');
   assert.ok(!cutAtSentence('mots '.repeat(40), 50).endsWith(' '));
 });
+
+test('quiz : réponses vides retirées, bonne réponse suivie, questions incomplètes ignorées', () => {
+  const c = validateContent({ ...base, quiz: [
+    { q: 'Premier rendez-vous ?', answers: ['', 'Cinéma', 'Resto'], correct: 2 },
+    { q: 'Sans réponses', answers: ['A'], correct: 0 },
+    { q: 'Bonne réponse vide', answers: ['A', 'B', ''], correct: 2 },
+    ...Array.from({ length: 6 }, (_, i) => ({ q: `Q${i}`, answers: ['x', 'y'], correct: 1 })),
+  ] });
+  assert.deepEqual(c.quiz[0], { q: 'Premier rendez-vous ?', answers: ['Cinéma', 'Resto'], correct: 1 });
+  assert.equal(c.quiz.length, 3); // 5 premières entrées examinées, 2 invalides
+  assert.throws(() => validateContent({ ...base, quiz: [{ q: 'x'.repeat(101), answers: ['a', 'b'], correct: 0 }] }), ValidationError);
+});
+
+test('ouverture programmée : date valide gardée, absurde ignorée, page verrouillée avant l’heure', async () => {
+  const { isLocked } = await import('../lib/store.js');
+  const soon = new Date(Date.now() + 86400000).toISOString();
+  assert.equal(validateContent({ ...base, openAt: soon }).openAt, soon);
+  assert.equal(validateContent({ ...base, openAt: 'demain' }).openAt, '');
+  assert.equal(validateContent({ ...base, openAt: '2099-01-01T00:00:00Z' }).openAt, '');
+  assert.equal(isLocked({ content: { openAt: soon } }), true);
+  assert.equal(isLocked({ content: { openAt: soon } }, Date.now() + 2 * 86400000), false);
+  assert.equal(isLocked({ content: { openAt: '' } }), false);
+});

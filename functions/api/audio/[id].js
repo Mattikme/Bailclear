@@ -1,6 +1,6 @@
 import { ID_RE } from '../../../lib/crypto.js';
 import { bearer, error, handle, json } from '../../../lib/http.js';
-import { checkToken, deleteAudio, getAudio, getPage, putAudio } from '../../../lib/store.js';
+import { checkToken, deleteAudio, getAudio, getPage, isLocked, putAudio } from '../../../lib/store.js';
 import { audioType, MAX_AUDIO_BYTES } from '../../../lib/validate.js';
 
 // Message vocal d'une page : lecture publique une fois la page publiée, envoi et suppression par le créateur.
@@ -12,7 +12,7 @@ async function load(params, env) {
 export const onRequestGet = handle(async ({ request, env, params }) => {
   const page = await load(params, env);
   if (!page || page.status === 'removed' || !page.content || !page.content.voice) return error('Audio introuvable.', 404);
-  if (page.status !== 'paid' && !(await checkToken(page, bearer(request)))) return error('Audio introuvable.', 404);
+  if ((page.status !== 'paid' || isLocked(page)) && !(await checkToken(page, bearer(request)))) return error('Audio introuvable.', 404);
   const { value, metadata } = await getAudio(env, page.id);
   if (!value) return error('Audio introuvable.', 404);
   const headers = {

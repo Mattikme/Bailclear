@@ -291,6 +291,41 @@ function voice(content, voiceUrl) {
     card, audio);
 }
 
+// Mini-jeu : quiz à choix multiples, une question à la fois, score à la fin.
+function quiz(content) {
+  const qs = Array.isArray(content.quiz) ? content.quiz.filter((q) => q && q.q && q.answers && q.answers.filter(Boolean).length >= 2) : [];
+  if (!qs.length) return null;
+  const box = el('div', { class: 'quiz-card' });
+  let i = 0; let score = 0;
+  const show = () => {
+    if (i >= qs.length) {
+      const msg = score === qs.length ? 'Sans faute ! Tu me connais par cœur 💯' : score >= qs.length / 2 ? 'Pas mal du tout 😉' : 'On a encore des souvenirs à se faire 😄';
+      box.replaceChildren(
+        el('p', { class: 'quiz-score', text: `${score} / ${qs.length}` }),
+        el('p', { class: 'quiz-msg', text: msg }),
+        el('button', { class: 'btn small', type: 'button', text: 'Rejouer', onclick: () => { i = 0; score = 0; show(); } }));
+      if (score === qs.length) burst(document.body, '★', 30);
+      return;
+    }
+    const q = qs[i];
+    const answers = q.answers.filter(Boolean);
+    const next = el('button', { class: 'btn small quiz-next', type: 'button', text: i + 1 < qs.length ? 'Question suivante →' : 'Voir mon score', hidden: true, onclick: () => { i++; show(); } });
+    const fb = el('p', { class: 'quiz-fb', role: 'status' });
+    const btns = answers.map((a, k) => el('button', { class: 'quiz-answer', type: 'button', text: a, onclick: () => {
+      btns.forEach((b, j) => { b.disabled = true; if (j === q.correct) b.classList.add('right'); });
+      if (k === q.correct) { score++; fb.textContent = 'Bonne réponse !'; cardBurst(btns[k], '★', 8); } else { btns[k].classList.add('wrong'); fb.textContent = `Raté… c’était « ${answers[q.correct]} »`; }
+      next.hidden = false;
+      next.focus();
+    } }));
+    box.replaceChildren(
+      el('p', { class: 'quiz-step', text: `Question ${i + 1} / ${qs.length}` }),
+      el('p', { class: 'quiz-q', text: q.q }),
+      el('div', { class: 'quiz-answers' }, btns), fb, next);
+  };
+  show();
+  return el('section', { class: 'block quiz reveal' }, el('h2', { text: '🎮 Le quiz' }), el('p', { class: 'hint', text: 'Est-ce que tu me connais vraiment ?' }), box);
+}
+
 // Construit la page complète dans `root`.
 export function renderPage(root, content, { photoUrl, preview = false, voiceUrl = null } = {}) {
   const occ = getOccasion(content.occasion);
@@ -308,6 +343,7 @@ export function renderPage(root, content, { photoUrl, preview = false, voiceUrl 
     gallery(content, photoUrl),
     timeline(content, occ),
     reasons(content, occ),
+    quiz(content),
     content.finalMessage ? el('section', { class: 'block final reveal words-in' }, el('p', { 'aria-label': content.finalMessage }, words(content.finalMessage, 0)), el('div', { class: 'big-heart', 'aria-hidden': 'true', text: '♥' })) : null,
   ];
   root.replaceChildren(...sections.filter(Boolean));

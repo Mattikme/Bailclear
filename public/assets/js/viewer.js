@@ -52,6 +52,32 @@ function envelope(content, onOpen) {
   }
 }
 
+// Page à ouverture programmée : enveloppe fermée + compte à rebours, puis rechargement à l'heure dite.
+function countdown(content, openAt) {
+  const occ = getOccasion(content.occasion);
+  $('env-title').textContent = content.from ? `${content.from} t’a préparé quelque chose ${occ.emoji}` : `Une surprise pour ${content.to} ${occ.emoji}`;
+  $('env-intro').textContent = content.intro || '';
+  $('open-btn').hidden = true;
+  $('envelope').hidden = false;
+  $('envelope').classList.add('locked');
+  main.replaceChildren();
+  const target = Date.parse(openAt);
+  const when = new Date(target).toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+  $('cd-label').textContent = `Patience… elle s’ouvrira le ${when}`;
+  $('countdown').hidden = false;
+  const tick = () => {
+    const left = Math.max(0, target - Date.now());
+    const s = Math.floor(left / 1000);
+    $('cd-d').textContent = String(Math.floor(s / 86400));
+    $('cd-h').textContent = String(Math.floor((s % 86400) / 3600)).padStart(2, '0');
+    $('cd-m').textContent = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+    $('cd-s').textContent = String(s % 60).padStart(2, '0');
+    if (left <= 0) { clearInterval(timer); setTimeout(() => location.reload(), 1500); }
+  };
+  const timer = setInterval(tick, 1000);
+  tick();
+}
+
 function setupReport(id) {
   const dlg = $('report-dialog');
   $('report-btn').addEventListener('click', () => dlg.showModal());
@@ -85,6 +111,7 @@ async function loadPublished(id) {
   if (res.status === 410) throw Object.assign(new Error('removed'), { code: 410 });
   if (!res.ok) throw Object.assign(new Error('notfound'), { code: 404 });
   const data = await res.json();
+  if (data.locked) return { locked: true, openAt: data.openAt, content: data.content };
   const v = encodeURIComponent(data.updatedAt || '');
   return { content: data.content, photoUrl: (n) => `/api/photos/${id}/${n}?v=${v}`, voiceUrl: data.content.voice ? `/api/audio/${id}?v=${v}` : null };
 }
@@ -124,7 +151,9 @@ async function main_() {
   const id = m ? m[1] : params.get('id');
   if (!id) return showState('Page introuvable', 'Le lien semble incomplet.');
   try {
-    const { content, photoUrl, voiceUrl } = await loadPublished(id);
+    const loaded = await loadPublished(id);
+    if (loaded.locked) { applyTheme(loaded.content.theme); countdown(loaded.content, loaded.openAt); $('footer').hidden = false; setupReport(id); return; }
+    const { content, photoUrl, voiceUrl } = loaded;
     applyTheme(content.theme);
     envelope(content, () => {});
     renderPage(main, content, { photoUrl, voiceUrl });

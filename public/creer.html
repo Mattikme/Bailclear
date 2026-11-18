@@ -112,9 +112,24 @@
       <legend>La chanson</legend>
       <div class="field"><label for="f-music">Lien YouTube ou Spotify</label><input id="f-music" type="url" data-field="music" maxlength="300" placeholder="https://www.youtube.com/watch?v=…" inputmode="url"><p class="help" id="music-status" role="status"></p><div class="field"><span class="label" id="ms-label">Commencer à</span><div class="time-row" role="group" aria-labelledby="ms-label"><input id="f-musicMin" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" placeholder="0" aria-label="Minutes"><span>min</span><input id="f-musicSec" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" placeholder="00" aria-label="Secondes"><span>sec</span></div><p class="help" id="start-help">Par exemple <strong>1 min 05</strong> pour démarrer au refrain. Astuce : sur YouTube, « Partager › Commencer à » puis colle le lien ici, le moment est repris tout seul.</p></div><p class="help">Conseil : préfère YouTube, qui joue le morceau en entier. Avec Spotify, la personne n’entend qu’un extrait de 30 secondes si elle n’est pas connectée à son compte Spotify.</p></div>
     </fieldset>
+    <fieldset id="quiz-fieldset">
+      <legend>🎮 Mini-jeu : le quiz <span class="opt-badge">option</span></legend>
+      <p class="help">Jusqu’à 5 questions sur vous deux. Coche la bonne réponse : la personne joue et découvre son score.</p>
+      <div id="quiz-list"></div>
+      <button type="button" class="btn ghost small add-btn" id="add-quiz">+ Ajouter une question</button>
+    </fieldset>
     <fieldset>
       <legend>Le mot de la fin</legend>
       <div class="field"><label for="f-finalMessage">Message final</label><textarea id="f-finalMessage" data-field="finalMessage" maxlength="250" rows="3"></textarea></div>
+    </fieldset>
+    <fieldset id="openat-fieldset">
+      <legend>⏰ Ouverture programmée <span class="opt-badge">option</span></legend>
+      <p class="help">Envoie le lien quand tu veux : la page reste fermée avec un compte à rebours jusqu’au jour et à l’heure choisis (minuit le jour de son anniversaire, le 24 au soir…).</p>
+      <div class="row2">
+        <div class="field"><label for="f-openAt">S’ouvre le</label><input id="f-openAt" type="datetime-local"></div>
+        <div class="field" style="align-self:end"><button type="button" class="btn ghost small" id="openat-clear" hidden>Retirer la date</button></div>
+      </div>
+      <p class="help" id="openat-status" role="status"></p>
     </fieldset>
     <fieldset>
       <legend>Question secrète <span style="font-size:15px;color:var(--muted)">(facultatif)</span></legend>
