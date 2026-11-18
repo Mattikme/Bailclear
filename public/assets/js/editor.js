@@ -603,6 +603,42 @@ async function uploadPhotos(id, token, progress) {
   }
 }
 
+// Récapitulatif affiché avant la publication, pour vérifier une dernière fois.
+function renderRecap() {
+  const words = state.letter.trim() ? state.letter.trim().split(/\s+/).length : 0;
+  const reasons = state.reasons.filter((r) => r.trim()).length;
+  const memories = state.timeline.filter((x) => x.when.trim() || x.text.trim()).length;
+  const quiz = state.quiz.filter((q) => q.q.trim()).length;
+  const fmtStart = (s) => `${Math.floor(s / 60)} min ${String(s % 60).padStart(2, '0')}`;
+  const rows = [
+    ['Pour', `${state.to.trim()}${state.from.trim() ? `, de la part de ${state.from.trim()}` : ''}`],
+    ['Titre', `« ${state.title.trim()} »`],
+    ['Lettre', words ? `${words} mot${words > 1 ? 's' : ''}` : 'aucune'],
+    ['Photos', String(photoBlobs.length || 'aucune')],
+    memories ? ['Souvenirs', String(memories)] : null,
+    reasons ? ['Cartes', String(reasons)] : null,
+    ['Musique', state.music.trim() ? `oui${state.musicStart ? `, à partir de ${fmtStart(state.musicStart)}` : ''}` : 'non'],
+    state.voice ? ['Message vocal', `${state.voice.duration} s`] : null,
+    quiz ? ['Quiz', `${quiz} question${quiz > 1 ? 's' : ''}`] : null,
+    state.group ? ['Carte de groupe', 'oui (lien d’invitation après la publication)'] : null,
+    state.openAt ? ['S’ouvre le', new Date(state.openAt).toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })] : null,
+    state.lang && state.lang !== 'fr' ? ['Langue', LANGS[state.lang]] : null,
+    state.secret.question.trim() ? ['Question secrète', `« ${state.secret.question.trim()} »`] : null,
+  ].filter(Boolean);
+  $('pub-recap').replaceChildren(...rows.map(([k, v]) => {
+    const li = document.createElement('li');
+    const b = document.createElement('strong'); b.textContent = `${k} : `;
+    li.append(b, v);
+    return li;
+  }));
+  const warn = [];
+  if (!photoBlobs.length) warn.push('pas encore de photo');
+  if (!words) warn.push('pas de lettre');
+  if (state.openAt && Date.parse(state.openAt) <= Date.now()) warn.push('la date d’ouverture est déjà passée');
+  $('pub-warn').hidden = !warn.length;
+  $('pub-warn').textContent = warn.length ? `⚠️ À vérifier : ${warn.join(', ')}.` : '';
+}
+
 function setupPublish() {
   const dlg = $('publish-dialog');
   const confirmBtn = $('publish-confirm');
@@ -623,6 +659,14 @@ function setupPublish() {
   const sync = () => { confirmBtn.disabled = !(terms.checked && (FREE || waiver.checked)); };
   terms.onchange = sync; waiver.onchange = sync; sync();
   $('publish-cancel').onclick = () => dlg.close();
+  $('pub-edit').onclick = () => dlg.close();
+  $('pub-preview').onclick = () => {
+    dlg.close();
+    const pane = $('preview-pane');
+    pane.classList.add('open');
+    pane.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  $('pub-ok').onclick = () => { $('pub-check').hidden = true; $('pub-final').hidden = false; terms.focus(); };
 
   $('publish-btn').onclick = async () => {
     notice('');
@@ -635,6 +679,9 @@ function setupPublish() {
       notice(`Offre de lancement : une page gratuite par personne, et tu as déjà créé la tienne (« ${already.title || 'ta page'} »). Tu peux la modifier autant que tu veux depuis « Tes pages » en haut de cette page. Les pages suivantes seront à 9,90 € à partir du 1er décembre.`, 'error');
       return;
     }
+    renderRecap();
+    $('pub-check').hidden = false;
+    $('pub-final').hidden = true;
     dlg.showModal();
   };
 

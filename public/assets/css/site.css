@@ -256,3 +256,6 @@ dialog.wallpaper .wp-stage { position: relative; aspect-ratio: 1179 / 2556; widt
 .wp-opt { font-weight: 400; align-items: center; }
 .opt-badge.premium { background: linear-gradient(90deg, #f6d27a, #e9a83c); color: #4a3008; }
 .price-line { display: block; font-size: 12px; color: var(--muted); }
+/* Vérification avant publication */
+.pub-recap { list-style: none; padding: 12px 14px; margin: 12px 0 0; background: var(--soft, #fff0f4); border-radius: 14px; display: grid; gap: 4px; font-size: 15px; overflow-wrap: anywhere; }
+.pub-warn { margin: 10px 0 0; font-weight: 600; color: #a5481a; }

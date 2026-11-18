@@ -364,6 +364,19 @@ pages['creer.html'] = layout({
   </div>
 </div></div>
 <dialog id="publish-dialog">
+<div id="pub-check">
+  <h2>Tout est bon ? 👀</h2>
+  <p>Relis bien ta page <strong>dans l’aperçu</strong> avant de publier : prénoms, fautes, photos, musique… Une fois le lien envoyé, la personne découvre la page telle qu’elle est.</p>
+  <ul class="pub-recap" id="pub-recap"></ul>
+  <p class="pub-warn" id="pub-warn" hidden></p>
+  <p class="help" style="margin:10px 0 0">Tu pourras encore corriger ta page après, avec ton lien de modification. Mais si la personne l’a déjà ouverte, elle aura vu la première version : mieux vaut tout vérifier maintenant.</p>
+  <div class="dialog-actions">
+    <button type="button" class="btn ghost" id="pub-edit">Modifier encore</button>
+    <button type="button" class="btn ghost" id="pub-preview">Voir l’aperçu</button>
+    <button type="button" class="btn" id="pub-ok">Oui, tout est bon →</button>
+  </div>
+</div>
+<div id="pub-final" hidden>
   <h2>Publier ta page</h2>
   <p id="free-info" hidden>🎉 <strong>Offre de lancement</strong> : jusqu’au <span></span>, ta page est publiée <strong>gratuitement</strong>, sans paiement. Elle est hébergée ${YEARS} ans et modifiable quand tu veux. Toutes les options, même premium, sont offertes.</p>
   <p class="pay-only" id="pay-info">Ta page sera en ligne <strong>immédiatement après le paiement</strong> de <strong>${PRICE_LABEL}</strong> (TVA non applicable, art. 293 B du CGI), hébergée ${YEARS} ans et modifiable gratuitement.</p>
@@ -375,6 +388,7 @@ pages['creer.html'] = layout({
     <button type="button" class="btn ghost" id="publish-cancel">Revenir à ma page</button>
     <button type="button" class="btn" id="publish-confirm">Payer ${PRICE_LABEL}</button>
   </div>
+</div>
 </dialog>`,
 });
 
