@@ -12,7 +12,9 @@ import * as hit from '../functions/api/hit.js';
 import * as stats from '../functions/api/stats.js';
 import * as contact from '../functions/api/contact.js';
 import * as audio from '../functions/api/audio/[id].js';
+import * as group from '../functions/api/group/[id].js';
 export { Stats } from './stats.js';
+export { Guestbook } from './guestbook.js';
 
 const ROUTES = [
   [/^\/api\/pages\/?$/, pagesIndex, []],
@@ -26,6 +28,7 @@ const ROUTES = [
   [/^\/api\/stats$/, stats, []],
   [/^\/api\/contact$/, contact, []],
   [/^\/api\/audio\/([^/]+)$/, audio, ['id']],
+  [/^\/api\/group\/([^/]+)$/, group, ['id']],
   [/^\/api\/admin\/(.+)$/, admin, ['path']],
 ];
 
@@ -35,8 +38,8 @@ const SECURITY = {
   'permissions-policy': 'camera=(), microphone=(self), geolocation=(), interest-cohort=()',
   'content-security-policy': "default-src 'self'; img-src 'self' data: blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' blob:; frame-src 'self' https://www.youtube-nocookie.com https://open.spotify.com; media-src 'self' blob:; form-action 'self'; base-uri 'self'; frame-ancestors 'self'; object-src 'none'",
 };
-const NOINDEX = /^\/(p\/|voir|merci|admin)/;
-const NO_REFERRER = /^\/(p\/|merci|creer)/;
+const NOINDEX = /^\/(p\/|voir|merci|admin|ecrire)/;
+const NO_REFERRER = /^\/(p\/|merci|creer|ecrire)/;
 
 async function api(request, env, ctx, url) {
   for (const [re, mod, names] of ROUTES) {

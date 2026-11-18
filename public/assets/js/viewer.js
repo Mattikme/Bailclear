@@ -113,7 +113,7 @@ async function loadPublished(id) {
   const data = await res.json();
   if (data.locked) return { locked: true, openAt: data.openAt, content: data.content };
   const v = encodeURIComponent(data.updatedAt || '');
-  return { content: data.content, photoUrl: (n) => `/api/photos/${id}/${n}?v=${v}`, voiceUrl: data.content.voice ? `/api/audio/${id}?v=${v}` : null };
+  return { content: data.content, messages: data.messages || [], photoUrl: (n) => `/api/photos/${id}/${n}?v=${v}`, voiceUrl: data.content.voice ? `/api/audio/${id}?v=${v}` : null };
 }
 
 function setupMontage(content, photoUrl) {
@@ -138,8 +138,8 @@ async function main_() {
   if (params.get('preview') === '1') {
     window.addEventListener('message', (e) => {
       if (e.origin !== location.origin || !e.data || e.data.type !== 'preview') return;
-      const { content, photoUrls, voiceUrl } = e.data;
-      renderPage(main, content, { photoUrl: (n) => photoUrls[n], preview: true, voiceUrl });
+      const { content, photoUrls, voiceUrl, messages } = e.data;
+      renderPage(main, content, { photoUrl: (n) => photoUrls[n], preview: true, voiceUrl, messages });
       $('footer').hidden = false;
       $('report-btn').hidden = true;
     });
@@ -153,10 +153,10 @@ async function main_() {
   try {
     const loaded = await loadPublished(id);
     if (loaded.locked) { applyTheme(loaded.content.theme); countdown(loaded.content, loaded.openAt); $('footer').hidden = false; setupReport(id); return; }
-    const { content, photoUrl, voiceUrl } = loaded;
+    const { content, photoUrl, voiceUrl, messages } = loaded;
     applyTheme(content.theme);
     envelope(content, () => {});
-    renderPage(main, content, { photoUrl, voiceUrl });
+    renderPage(main, content, { photoUrl, voiceUrl, messages });
     setupMontage(content, photoUrl);
     $('footer').hidden = false;
     setupReport(id);

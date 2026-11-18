@@ -291,6 +291,26 @@ function voice(content, voiceUrl) {
     card, audio);
 }
 
+// Carte de groupe : les mots laissés par les proches, en petites cartes inclinées.
+function groupBook(content, messages, preview) {
+  if (!content.group) return null;
+  let list = Array.isArray(messages) ? messages.filter((m) => m && m.text) : [];
+  let sample = false;
+  if (!list.length && preview) {
+    sample = true;
+    list = [{ name: 'Mamie', text: 'Exemple : les mots de tes invités apparaîtront ici 💛' }, { name: 'Julie', text: 'Exemple : chacun écrit le sien depuis le lien d’invitation.' }];
+  }
+  if (!list.length) return null;
+  return el('section', { class: 'block group reveal' },
+    el('h2', { text: '💬 Ils ont aussi un mot pour toi' }),
+    el('p', { class: 'hint', text: sample ? 'Aperçu avec des exemples' : `${list.length} message${list.length > 1 ? 's' : ''}` }),
+    el('div', { class: 'group-grid' }, list.map((m, i) => {
+      const card = el('figure', { class: 'group-card', style: `--r:${((i * 37) % 7) - 3}deg;--i:${i}` },
+        el('blockquote', {}, paragraphs(m.text)), el('figcaption', { text: `— ${m.name}` }));
+      return card;
+    })));
+}
+
 // Mini-jeu : quiz à choix multiples, une question à la fois, score à la fin.
 function quiz(content) {
   const qs = Array.isArray(content.quiz) ? content.quiz.filter((q) => q && q.q && q.answers && q.answers.filter(Boolean).length >= 2) : [];
@@ -327,7 +347,7 @@ function quiz(content) {
 }
 
 // Construit la page complète dans `root`.
-export function renderPage(root, content, { photoUrl, preview = false, voiceUrl = null } = {}) {
+export function renderPage(root, content, { photoUrl, preview = false, voiceUrl = null, messages = null } = {}) {
   const occ = getOccasion(content.occasion);
   applyTheme(content.theme);
   document.title = content.title || 'Une page pour toi';
@@ -343,6 +363,7 @@ export function renderPage(root, content, { photoUrl, preview = false, voiceUrl 
     gallery(content, photoUrl),
     timeline(content, occ),
     reasons(content, occ),
+    groupBook(content, messages, preview),
     quiz(content),
     content.finalMessage ? el('section', { class: 'block final reveal words-in' }, el('p', { 'aria-label': content.finalMessage }, words(content.finalMessage, 0)), el('div', { class: 'big-heart', 'aria-hidden': 'true', text: '♥' })) : null,
   ];

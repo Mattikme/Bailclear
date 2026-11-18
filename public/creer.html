@@ -112,6 +112,17 @@
       <legend>La chanson</legend>
       <div class="field"><label for="f-music">Lien YouTube ou Spotify</label><input id="f-music" type="url" data-field="music" maxlength="300" placeholder="https://www.youtube.com/watch?v=…" inputmode="url"><p class="help" id="music-status" role="status"></p><div class="field"><span class="label" id="ms-label">Commencer à</span><div class="time-row" role="group" aria-labelledby="ms-label"><input id="f-musicMin" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" placeholder="0" aria-label="Minutes"><span>min</span><input id="f-musicSec" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" placeholder="00" aria-label="Secondes"><span>sec</span></div><p class="help" id="start-help">Par exemple <strong>1 min 05</strong> pour démarrer au refrain. Astuce : sur YouTube, « Partager › Commencer à » puis colle le lien ici, le moment est repris tout seul.</p></div><p class="help">Conseil : préfère YouTube, qui joue le morceau en entier. Avec Spotify, la personne n’entend qu’un extrait de 30 secondes si elle n’est pas connectée à son compte Spotify.</p></div>
     </fieldset>
+    <fieldset id="group-fieldset">
+      <legend>👥 Carte de groupe <span class="opt-badge">option</span></legend>
+      <label class="check"><input type="checkbox" id="f-group"><span>Inviter d’autres personnes (famille, amis, collègues) à écrire chacune un mot sur la page</span></label>
+      <p class="help">Après la publication, tu reçois un <strong>lien d’invitation</strong> à partager (groupe WhatsApp, e-mail…). Chacun écrit son mot sans voir la page, et tu peux retirer un message. 50 messages maximum.</p>
+      <div id="group-admin" hidden>
+        <div class="share-box"><input id="group-link" type="text" readonly aria-label="Lien d’invitation"><button class="btn small" id="group-copy" type="button">Copier</button></div>
+        <p class="help"><a id="group-wa" href="#" target="_blank" rel="noopener">Partager sur WhatsApp</a></p>
+        <p class="label" id="group-count"></p>
+        <ul class="group-mod" id="group-list"></ul>
+      </div>
+    </fieldset>
     <fieldset id="quiz-fieldset">
       <legend>🎮 Mini-jeu : le quiz <span class="opt-badge">option</span></legend>
       <p class="help">Jusqu’à 5 questions sur vous deux. Coche la bonne réponse : la personne joue et découvre son score.</p>

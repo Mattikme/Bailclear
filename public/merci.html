@@ -37,6 +37,12 @@
     <p>Voici son lien secret. Garde-le précieusement et offre-le quand tu veux.</p>
     <div class="share-box"><input id="page-url" type="text" readonly aria-label="Lien de la page"><button class="btn" id="copy-btn" type="button">Copier</button></div>
     <p class="notice" id="openat-note" hidden></p>
+    <section class="send-box" id="group-box" hidden aria-labelledby="group-title">
+      <h2 id="group-title">👥 Invite les autres à écrire</h2>
+      <p>Partage ce lien aux proches : chacun ajoute son mot à la page. Tu peux les relire et en retirer depuis ton lien de modification.</p>
+      <div class="share-box"><input id="group-link" type="text" readonly aria-label="Lien d’invitation"><button class="btn" id="group-copy" type="button">Copier</button></div>
+      <p style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn ghost" id="group-wa" href="#" target="_blank" rel="noopener">WhatsApp</a><a class="btn ghost" id="group-mail" href="#">E-mail</a></p>
+    </section>
     <p style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
       <a class="btn ghost" id="open-link" href="#" target="_blank" rel="noopener">Voir ma page</a>
     </p>

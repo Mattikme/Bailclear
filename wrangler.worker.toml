@@ -17,9 +17,17 @@ name = "CONTACT_EMAIL"
 name = "STATS"
 class_name = "Stats"
 
+[[durable_objects.bindings]]
+name = "GUESTBOOK"
+class_name = "Guestbook"
+
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["Stats"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["Guestbook"]
 
 [[kv_namespaces]]
 binding = "PAGES_KV"

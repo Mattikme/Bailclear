@@ -1,4 +1,5 @@
 import { findPage, idbDel } from './storage.js';
+import { inviteLink, inviteText } from './invite.js';
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -97,6 +98,16 @@ function setupVideo(data, token) {
   };
 }
 
+async function setupGroupInvite(content, token) {
+  const link = await inviteLink(id, token);
+  const text = inviteText(content.to, content.from, link);
+  $('group-box').hidden = false;
+  $('group-link').value = link;
+  $('group-wa').href = `https://wa.me/?text=${encodeURIComponent(text)}`;
+  $('group-mail').href = `mailto:?subject=${encodeURIComponent(`Un mot pour ${content.to || 'une surprise'} ?`)}&body=${encodeURIComponent(text)}`;
+  $('group-copy').onclick = async () => { try { await navigator.clipboard.writeText(text); $('group-copy').textContent = 'Copié ✓'; } catch { $('group-link').select(); } };
+}
+
 async function setupSend(url, mine) {
   if (sessionId === 'gratuit') $('invoice-note').hidden = true;
   let to = (mine && mine.to) || '';
@@ -110,6 +121,7 @@ async function setupSend(url, mine) {
       to = d.content.to || to; from = d.content.from || '';
       openAt = d.content.openAt || d.openAt || '';
       if (!d.locked) setupVideo(d, token);
+      if (d.content.group && token) setupGroupInvite(d.content, token);
     }
   } catch { /* hors ligne */ }
   const later = openAt && Date.parse(openAt) > Date.now()

@@ -307,6 +307,17 @@ pages['creer.html'] = layout({
       <legend>La chanson</legend>
       <div class="field"><label for="f-music">Lien YouTube ou Spotify</label><input id="f-music" type="url" data-field="music" maxlength="300" placeholder="https://www.youtube.com/watch?v=…" inputmode="url"><p class="help" id="music-status" role="status"></p><div class="field"><span class="label" id="ms-label">Commencer à</span><div class="time-row" role="group" aria-labelledby="ms-label"><input id="f-musicMin" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" placeholder="0" aria-label="Minutes"><span>min</span><input id="f-musicSec" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" placeholder="00" aria-label="Secondes"><span>sec</span></div><p class="help" id="start-help">Par exemple <strong>1 min 05</strong> pour démarrer au refrain. Astuce : sur YouTube, « Partager › Commencer à » puis colle le lien ici, le moment est repris tout seul.</p></div><p class="help">Conseil : préfère YouTube, qui joue le morceau en entier. Avec Spotify, la personne n’entend qu’un extrait de 30 secondes si elle n’est pas connectée à son compte Spotify.</p></div>
     </fieldset>
+    <fieldset id="group-fieldset">
+      <legend>👥 Carte de groupe <span class="opt-badge">option</span></legend>
+      <label class="check"><input type="checkbox" id="f-group"><span>Inviter d’autres personnes (famille, amis, collègues) à écrire chacune un mot sur la page</span></label>
+      <p class="help">Après la publication, tu reçois un <strong>lien d’invitation</strong> à partager (groupe WhatsApp, e-mail…). Chacun écrit son mot sans voir la page, et tu peux retirer un message. 50 messages maximum.</p>
+      <div id="group-admin" hidden>
+        <div class="share-box"><input id="group-link" type="text" readonly aria-label="Lien d’invitation"><button class="btn small" id="group-copy" type="button">Copier</button></div>
+        <p class="help"><a id="group-wa" href="#" target="_blank" rel="noopener">Partager sur WhatsApp</a></p>
+        <p class="label" id="group-count"></p>
+        <ul class="group-mod" id="group-list"></ul>
+      </div>
+    </fieldset>
     <fieldset id="quiz-fieldset">
       <legend>🎮 Mini-jeu : le quiz <span class="opt-badge">option</span></legend>
       <p class="help">Jusqu’à 5 questions sur vous deux. Coche la bonne réponse : la personne joue et découvre son score.</p>
@@ -379,6 +390,12 @@ pages['merci.html'] = layout({
     <p>Voici son lien secret. Garde-le précieusement et offre-le quand tu veux.</p>
     <div class="share-box"><input id="page-url" type="text" readonly aria-label="Lien de la page"><button class="btn" id="copy-btn" type="button">Copier</button></div>
     <p class="notice" id="openat-note" hidden></p>
+    <section class="send-box" id="group-box" hidden aria-labelledby="group-title">
+      <h2 id="group-title">👥 Invite les autres à écrire</h2>
+      <p>Partage ce lien aux proches : chacun ajoute son mot à la page. Tu peux les relire et en retirer depuis ton lien de modification.</p>
+      <div class="share-box"><input id="group-link" type="text" readonly aria-label="Lien d’invitation"><button class="btn" id="group-copy" type="button">Copier</button></div>
+      <p style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn ghost" id="group-wa" href="#" target="_blank" rel="noopener">WhatsApp</a><a class="btn ghost" id="group-mail" href="#">E-mail</a></p>
+    </section>
     <p style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
       <a class="btn ghost" id="open-link" href="#" target="_blank" rel="noopener">Voir ma page</a>
     </p>
@@ -512,6 +529,8 @@ pages['confidentialite.html'] = layout({
 <h2>Ce que nous collectons, pourquoi, combien de temps</h2>
 <ul>
 <li><strong>Contenu de ta Page</strong> (prénoms, textes, photos, lien musical, question secrète sous forme chiffrée) : pour fournir le service (exécution du contrat). Brouillon envoyé mais non payé : effacé automatiquement après 48 heures. Page payée : ${YEARS} ans, puis effacement automatique. Tu peux la supprimer à tout moment.</li>
+<li><strong>Message vocal</strong> (option) : enregistré pour être écouté sur la Page, conservé et supprimé avec elle.</li>
+<li><strong>Mots des invités d’une carte de groupe</strong> (prénom et message saisis par chaque invité) : affichés sur la Page, conservés et supprimés avec elle. Le créateur de la Page peut retirer un message à tout moment ; un invité peut demander le retrait du sien via le formulaire de contact.</li>
 <li><strong>Lien de modification</strong> : nous n’en conservons qu’une empreinte chiffrée (non réversible).</li>
 <li><strong>Paiement</strong> : traité par Stripe, qui nous transmet ton nom, ton e-mail et le statut du paiement (exécution du contrat). Les pièces comptables sont conservées 10 ans (obligation légale).</li>
 <li><strong>Formulaire de contact</strong> (nom facultatif, e-mail, message) : transmis par e-mail à l’éditeur pour te répondre (intérêt légitime), puis conservés le temps de traiter ta demande, 1 an au plus.</li>
@@ -575,6 +594,33 @@ pages['contact.html'] = layout({
   <button class="btn" type="submit" id="contact-send">Envoyer</button>
 </form>
 <p style="margin-top:28px">Tu peux aussi écrire directement à ${email}.</p>
+</main>`,
+});
+
+pages['ecrire.html'] = layout({
+  title: `Écris un mot — ${SITE_NAME}`,
+  description: 'Laisse ton message dans une page cadeau collective.',
+  path: '/ecrire', noindex: true,
+  scripts: '<script type="module" src="/assets/js/ecrire.js"></script>',
+  body: `<main class="wrap narrow prose">
+<p class="notice" id="g-status" role="status">Un instant…</p>
+<div id="g-box" hidden>
+  <h1 id="g-title"></h1>
+  <p id="g-intro"></p>
+  <form id="g-form" class="contact-form" novalidate>
+    <div class="field"><label for="g-name">Ton prénom *</label><input id="g-name" type="text" maxlength="40" autocomplete="given-name" required></div>
+    <div class="field"><label for="g-text">Ton message *</label><textarea id="g-text" rows="5" maxlength="300" required></textarea><div class="counter-hint" id="g-count">0 / 300</div></div>
+    <div class="hp" aria-hidden="true"><label for="g-website">Ne pas remplir</label><input id="g-website" type="text" tabindex="-1" autocomplete="off"></div>
+    <p class="help">Ton prénom et ton message apparaîtront sur la page offerte. La personne qui a créé la page peut retirer un message. Respecte les <a href="/regles-de-contenu" target="_blank">règles de contenu</a>.</p>
+    <p id="g-err" class="notice error" role="alert" hidden></p>
+    <button class="btn" type="submit" id="g-send">Ajouter mon mot 💌</button>
+  </form>
+</div>
+<div id="g-done" hidden style="text-align:center">
+  <h1>Merci ! 💛</h1>
+  <p id="g-done-text"></p>
+  <p><a class="btn ghost" href="/?ref=groupe">Créer ma propre page</a></p>
+</div>
 </main>`,
 });
 

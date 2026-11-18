@@ -3,6 +3,7 @@ import { ID_RE } from '../../../lib/crypto.js';
 import { bearer, error, handle, json, readJson } from '../../../lib/http.js';
 import { checkToken, deletePage, deletePhotosFrom, getPage, isLocked, logAction, publicView, savePage } from '../../../lib/store.js';
 import { validateContent, ValidationError } from '../../../lib/validate.js';
+import { listMessages } from '../../../lib/group.js';
 
 async function load(params, env) {
   const id = String(params.id || '');
@@ -15,13 +16,14 @@ export const onRequestGet = handle(async ({ request, env, params }) => {
   if (!page) return error('Page introuvable.', 404);
   if (page.status === 'removed') return error('Cette page a été retirée.', 410);
   const owner = await checkToken(page, bearer(request));
-  if (owner) return json({ ...publicView(page), owner: true, updatedAt: page.updatedAt });
+  const messages = async () => (page.content.group ? (await listMessages(env, page.id)).map(({ name, text }) => ({ name, text })) : []);
+  if (owner) return json({ ...publicView(page), owner: true, messages: await messages(), updatedAt: page.updatedAt });
   if (page.status !== 'paid') return error('Page introuvable.', 404);
   if (isLocked(page)) {
     const { occasion, theme, to, from, intro, lang } = page.content;
     return json({ id: page.id, status: page.status, locked: true, openAt: page.content.openAt, content: { occasion, theme, to, from, intro, lang } });
   }
-  return json({ ...publicView(page), updatedAt: page.updatedAt });
+  return json({ ...publicView(page), messages: await messages(), updatedAt: page.updatedAt });
 });
 
 export const onRequestPut = handle(async ({ request, env, params }) => {

@@ -3,6 +3,7 @@ import { musicEmbed, sha256Hex, normalizeAnswer, startFromUrl } from './render.j
 import { idbGet, idbSet, idbDel, listPages, rememberPage } from './storage.js';
 import { isFreeLaunch, FREE_UNTIL_LABEL } from './launch.js';
 import { LIMITS } from './limits.js';
+import { inviteLink, inviteText } from './invite.js';
 
 const FREE = isFreeLaunch();
 
@@ -24,13 +25,14 @@ let voiceUrl = null;
 let voiceDirty = false;
 let serverHadVoice = false;
 let pendingOccasion = null;
+let groupMessages = [];
 
 function blankState(occId) {
   const occ = getOccasion(occId);
   return {
     occasion: occ.id, theme: occ.theme, to: '', from: '',
     title: occ.defaults.title, intro: occ.defaults.intro, date: '', dateLabel: occ.defaults.dateLabel,
-    letter: '', photos: [], timeline: [], reasons: [], music: '', musicStart: 0, voice: null, openAt: '', quiz: [], finalMessage: occ.defaults.finalMessage,
+    letter: '', photos: [], timeline: [], reasons: [], music: '', musicStart: 0, voice: null, openAt: '', quiz: [], group: false, finalMessage: occ.defaults.finalMessage,
     secret: { question: '', answer: '', answerHash: '' },
   };
 }
@@ -48,7 +50,7 @@ function pushPreview() {
   previewTimer = setTimeout(() => {
     if (!previewReady) return;
     const content = { ...state, secret: null };
-    iframe.contentWindow.postMessage({ type: 'preview', content, photoUrls, voiceUrl }, location.origin);
+    iframe.contentWindow.postMessage({ type: 'preview', content, photoUrls, voiceUrl, messages: groupMessages.map(({ name, text }) => ({ name, text })) }, location.origin);
   }, 200);
 }
 
@@ -268,6 +270,42 @@ function renderQuiz() {
     return row;
   }));
   $('add-quiz').disabled = state.quiz.length >= LIMITS.quiz;
+}
+
+/* ---------- Carte de groupe ---------- */
+function renderGroupList() {
+  $('group-count').textContent = groupMessages.length ? `${groupMessages.length} message${groupMessages.length > 1 ? 's' : ''} reçu${groupMessages.length > 1 ? 's' : ''} :` : 'Aucun message pour l’instant. Partage le lien !';
+  $('group-list').replaceChildren(...groupMessages.map((m) => {
+    const li = document.createElement('li');
+    const t = document.createElement('div');
+    const b = document.createElement('strong'); b.textContent = m.name;
+    t.append(b, document.createTextNode(` : ${m.text}`));
+    li.append(t, iconBtn(`Retirer le message de ${m.name}`, '✕', async () => {
+      if (!confirm(`Retirer le message de ${m.name} ?`)) return;
+      try {
+        await api(`/api/group/${editId}?m=${m.id}`, { method: 'DELETE' }, editToken);
+        groupMessages = groupMessages.filter((x) => x.id !== m.id);
+        renderGroupList(); pushPreview();
+      } catch (e) { notice(e.message, 'error'); }
+    }));
+    return li;
+  }));
+}
+async function setupGroup() {
+  const box = $('f-group');
+  box.checked = Boolean(state.group);
+  box.onchange = () => { state.group = box.checked; $('group-admin').hidden = !(box.checked && isEdit && serverStatus === 'paid'); changed(); };
+  if (!isEdit) return;
+  try {
+    const link = await inviteLink(editId, editToken);
+    $('group-link').value = link;
+    $('group-wa').href = `https://wa.me/?text=${encodeURIComponent(inviteText(state.to, state.from, link))}`;
+    $('group-copy').onclick = async () => { try { await navigator.clipboard.writeText(link); $('group-copy').textContent = 'Copié ✓'; } catch { $('group-link').select(); } };
+    const d = await api(`/api/group/${editId}`, { cache: 'no-store' }, editToken);
+    groupMessages = d.messages || [];
+    renderGroupList(); pushPreview();
+  } catch { /* carte de groupe indisponible */ }
+  $('group-admin').hidden = !(state.group && serverStatus === 'paid');
 }
 
 /* ---------- Ouverture programmée ---------- */
@@ -707,7 +745,7 @@ function setupMisc() {
 
 async function init() {
   if (isEdit) await loadEdit(); else await loadDraft();
-  renderOccasions(); bindFields(); renderPhotos(); renderTimeline(); renderReasons(); renderQuiz(); setupOpenAt();
+  renderOccasions(); bindFields(); renderPhotos(); renderTimeline(); renderReasons(); renderQuiz(); setupOpenAt(); setupGroup();
   if (pendingOccasion) switchOccasion(pendingOccasion);
   setupDropzone(); setupVoice(); setupPublish(); setupMisc(); renderMyPages();
   iframe.src = '/voir?preview=1';
