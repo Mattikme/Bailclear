@@ -36,8 +36,25 @@ async function loadStats() {
   }
 }
 
+const STATUS = { paid: 'en ligne', draft: 'brouillon (non publiée)', removed: 'retirée' };
+async function loadPages() {
+  try {
+    const { pages, total } = await api('pages');
+    $('pages-section').hidden = false;
+    $('pages-out').textContent = total ? `${total} page${total > 1 ? 's' : ''} au total${total > pages.length ? ` (les ${pages.length} plus récentes affichées)` : ''}.` : 'Aucune page pour l’instant.';
+    $('pages').replaceChildren(...pages.map((p) => {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      if (p.status !== 'removed') { const a = document.createElement('a'); a.href = `/p/${p.id}`; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Ouvrir'; td.append(a); }
+      tr.append(cell(p.createdAt ? new Date(p.createdAt).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : '—'), cell(p.title || '—'), cell(p.occasion || '—'), cell(`${STATUS[p.status] || p.status}${p.free ? ', gratuite' : ''}`), td);
+      return tr;
+    }));
+  } catch (e) { $('pages-out').textContent = `Erreur : ${e.message}`; }
+}
+
 async function load() {
   loadStats();
+  loadPages();
   $('out').textContent = 'Chargement…';
   try {
     const { reports, more } = await api('reports');

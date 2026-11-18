@@ -29,10 +29,10 @@ function layout({ title, description, path, body, scripts = '', noindex = false,
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(title)}</title>
+<title>${esc(title.replace(' — ', ' | '))}</title>
 <meta name="description" content="${esc(description)}">
 ${noindex ? '<meta name="robots" content="noindex">' : `<link rel="canonical" href="${SITE}${path}">`}
-<meta property="og:title" content="${esc(title)}">
+<meta property="og:title" content="${esc(title.replace(' — ', ' | '))}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:type" content="${ogType}">
 <meta property="og:site_name" content="${SITE_NAME}">
@@ -57,7 +57,7 @@ ${scripts}
   <nav class="nav" aria-label="Navigation principale">
     <a href="/#occasions">Occasions</a>
     <a href="/#prix">Prix</a>
-    <a class="nav-ideas" href="/idees">💡 Idées<span class="hide-xs"> cadeaux</span></a>
+    <a class="nav-ideas" href="/idees">Idées<span class="hide-xs"> cadeaux</span></a>
     <a href="/#faq">FAQ</a>
     <a class="btn small" href="/creer">Créer ma page</a>
   </nav>
@@ -68,7 +68,7 @@ ${body}
     ${OCCASIONS.map((o) => `<a href="/${o.id}">${esc(o.label.replace(/ \(.*\)$/, ''))}</a>`).join('\n    ')}
     <a href="/idees">Idées et modèles de textes</a>
   </nav>
-  <span>© ${new Date().getFullYear()} ${SITE_NAME} — fait en France avec ♥</span>
+  <span>© ${new Date().getFullYear()} ${SITE_NAME}. Fait en France.</span>
   <nav aria-label="Liens légaux">
     <a href="/contact">Contact</a>
     <a href="/mentions-legales">Mentions légales</a>
@@ -100,19 +100,19 @@ function faqLd(items) {
   return { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: items.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) };
 }
 
-const occasionGrid = `<div class="occasions">${OCCASIONS.map((o) => `<a class="occasion-link" href="/${o.id}"><span aria-hidden="true">${o.emoji}</span>${esc(o.label)}</a>`).join('')}</div>`;
+const occasionGrid = `<div class="occasions">${OCCASIONS.map((o) => `<a class="occasion-link" href="/${o.id}">${esc(o.label)}</a>`).join('')}</div>`;
 
 const priceBox = `<div class="price-box">
   <div class="amount">${PRICE_LABEL}</div>
   <div>une seule fois, sans abonnement</div>
   <ul>
     <li>Ta page en ligne ${YEARS} ans</li>
-    <li>Lien privé + QR code + carte à imprimer</li>
+    <li>Lien privé, QR code et carte à imprimer</li>
     <li>Modifications illimitées</li>
     <li>Sans publicité, sans compte</li>
   </ul><br>
   <a class="btn" href="/creer">Créer ma page</a>
-  <p class="price-note">Aperçu gratuit avant de payer · satisfait(e) ou remboursé(e) 14 jours.<br>TVA non applicable, art. 293 B du CGI.</p>
+  <p class="price-note">Aperçu gratuit avant de payer. Satisfait ou remboursé pendant 14 jours.<br>TVA non applicable, art. 293 B du CGI.</p>
   <p class="price-note free-note" data-free-note="${PRICE_LABEL}" hidden></p>
 </div>`;
 
@@ -125,7 +125,7 @@ const steps = `<div class="grid3">
 const howVideo = `<div class="how">
   <figure class="how-video">
     <div class="phone video-phone"><video data-autoplay src="/assets/video/demo-creation.mp4" poster="/assets/video/demo-poster.jpg" muted loop playsinline preload="none" aria-label="Démonstration : création d’une page puis ouverture par la personne qui la reçoit"></video></div>
-    <figcaption>Démo réelle, sans montage : 36 secondes</figcaption>
+    <figcaption>La création d’une page, en 36 secondes</figcaption>
   </figure>
   <div class="how-steps">${steps}</div>
 </div>`;
@@ -140,7 +140,7 @@ const features = `<ul class="features">
   <li>Votre chanson (YouTube ou Spotify)</li>
   <li>Une question secrète facultative pour ouvrir la page</li>
   <li>8 thèmes de couleurs</li>
-  <li>Parfait sur téléphone</li>
+  <li>Pensée d’abord pour le téléphone</li>
 </ul>`;
 
 const ORG_LD = { '@context': 'https://schema.org', '@type': 'Organization', '@id': `${SITE}/#org`, name: SITE_NAME, url: `${SITE}/`, logo: `${SITE}/apple-touch-icon.png`, email: cfg.contactEmail || undefined };
@@ -184,7 +184,7 @@ function shopLinks(query) {
 const affActive = Boolean(AFF.amazonTag || AFF.awinPublisherId);
 const AFF_NOTE = `Ces liens mènent vers des boutiques en ligne.${affActive ? ' Ce sont des liens affiliés : si tu achètes après avoir cliqué, nous touchons une petite commission, sans aucun surcoût pour toi.' : ''}${AFF.amazonTag ? ' En tant que Partenaire Amazon, nous réalisons un bénéfice sur les achats remplissant les conditions requises.' : ''} Les prix et disponibilités sont à vérifier sur le site du marchand.`;
 function giftGrid(items) {
-  return `<p class="aff-note">ℹ️ ${esc(AFF_NOTE)}</p>
+  return `<p class="aff-note">${esc(AFF_NOTE)}</p>
 <div class="gift-grid">${items.map((g) => `<div class="gift-card">
   <div class="gift-pic" aria-hidden="true">${g.emoji}</div>
   <div class="gift-body"><span class="gift-budget">${esc(g.budget)}</span><h3>${esc(g.name)}</h3><p>${esc(g.why)}</p>
@@ -195,18 +195,18 @@ function giftGrid(items) {
 // Cartes de guides réutilisées sur l'accueil, les pages occasions et /idees.
 function guideCard(g) {
   const o = OCCASIONS.find((x) => x.id === g.occasion);
-  return `<a class="guide-card" href="/idees/${g.slug}"><span class="guide-emoji" aria-hidden="true">${g.emoji}</span><span class="guide-tag">${g.kind === 'cadeaux' ? '🎁 Idées cadeaux' : '✍️ Textes'} · ${esc(o.label.replace(/ \(.*\)$/, ''))}</span><strong>${esc(g.title)}</strong><span class="guide-desc">${esc(g.description)}</span><span class="guide-more">Lire le guide →</span></a>`;
+  return `<a class="guide-card" href="/idees/${g.slug}"><span class="guide-tag">${g.kind === 'cadeaux' ? 'Idées cadeaux' : 'Textes et messages'} · ${esc(o.label.replace(/ \(.*\)$/, ''))}</span><strong>${esc(g.title)}</strong><span class="guide-desc">${esc(g.description)}</span><span class="guide-more">Lire l’article</span></a>`;
 }
-function inspiration({ title = '💡 En manque d’inspiration ?', sub = 'Tu ne sais pas quoi offrir, ou pas quoi écrire ? Nos guides gratuits sont là pour t’aider.', list = GUIDES.slice(0, 3) } = {}) {
+function inspiration({ title = 'Besoin d’idées ?', sub = 'Pour choisir un cadeau ou trouver les bons mots : nos guides, avec des exemples concrets.', list = GUIDES.slice(0, 3) } = {}) {
   return `<section class="section inspiration"><div class="wrap">
   <h2>${title}</h2>
   <p class="sub">${sub}</p>
   <div class="insp-doors">
-    <a class="insp-door" href="/idees#cadeaux"><span aria-hidden="true">🎁</span><strong>Je ne sais pas quoi offrir</strong><em>Idées cadeaux par occasion et par budget</em></a>
-    <a class="insp-door" href="/idees#textes"><span aria-hidden="true">✍️</span><strong>Je ne sais pas quoi écrire</strong><em>Lettres, messages et textes à reprendre</em></a>
+    <a class="insp-door" href="/idees#cadeaux"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg></span><strong>Je ne sais pas quoi offrir</strong><em>Idées cadeaux par occasion et par budget</em></a>
+    <a class="insp-door" href="/idees#textes"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span><strong>Je ne sais pas quoi écrire</strong><em>Lettres, messages et textes à reprendre</em></a>
   </div>
   <div class="guide-grid">${list.map(guideCard).join('')}</div>
-  <p style="text-align:center;margin-top:20px"><a class="btn ghost" href="/idees">Voir toutes nos idées →</a></p>
+  <p style="text-align:center;margin-top:20px"><a class="btn ghost" href="/idees">Toutes les idées</a></p>
 </div></section>`;
 }
 
@@ -235,12 +235,12 @@ for (const g of GUIDES) {
 ${crumbsHtml(crumbs)}
 <article>
 <h1>${esc(g.h1)}</h1>
-<p class="meta">Mis à jour le ${frDate(g.date)} · ${occ.emoji} ${esc(occ.label)}</p>
+<p class="meta">Mis à jour le ${frDate(g.date)}, rubrique ${esc(occ.label.replace(/ \(.*\)$/, ''))}</p>
 <p class="lead">${esc(g.intro)}</p>
 ${g.sections.map(guideSection).join('\n')}
 </article>
 <aside class="cta-box">
-  <p class="cta-title">${occ.emoji} Mets tes mots dans une page qui s’ouvre comme une enveloppe</p>
+  <p class="cta-title">Mets tes mots dans une page qui s’ouvre comme une enveloppe</p>
   <p>Lettre, photos, souvenirs, votre chanson et même un message vocal : une page secrète à offrir par lien ou QR code, prête en 10 minutes.</p>
   <p><a class="btn" href="/creer?occasion=${occ.id}">${esc(occ.cta || 'Créer ma page')}</a> <a class="btn ghost" href="/p/demo" target="_blank" rel="noopener">Voir un exemple</a></p>
 </aside>
@@ -261,19 +261,19 @@ ${crumbsHtml([['Accueil', '/'], ['Idées', '/idees']])}
 <h1>Idées de textes et de cadeaux</h1>
 <p class="lead">Trouver les bons mots n’est pas toujours facile. Nos guides gratuits te donnent des méthodes simples et des exemples à adapter, pour une lettre, une carte ou une page cadeau.</p>
 <div class="insp-doors">
-  <a class="insp-door" href="#cadeaux"><span aria-hidden="true">🎁</span><strong>Je ne sais pas quoi offrir</strong><em>Idées cadeaux par occasion et par budget</em></a>
-  <a class="insp-door" href="#textes"><span aria-hidden="true">✍️</span><strong>Je ne sais pas quoi écrire</strong><em>Lettres, messages et textes à reprendre</em></a>
+  <a class="insp-door" href="#cadeaux"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg></span><strong>Je ne sais pas quoi offrir</strong><em>Idées cadeaux par occasion et par budget</em></a>
+  <a class="insp-door" href="#textes"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span><strong>Je ne sais pas quoi écrire</strong><em>Lettres, messages et textes à reprendre</em></a>
 </div>
-<h2 id="cadeaux">🎁 Idées cadeaux</h2>
+<h2 id="cadeaux">Idées cadeaux</h2>
 <div class="guide-grid">${GUIDES.filter((g) => g.kind === 'cadeaux').map(guideCard).join('')}</div>
-<h2 id="textes">✍️ Textes et messages</h2>
+<h2 id="textes">Textes et messages</h2>
 <div class="guide-grid">${GUIDES.filter((g) => g.kind === 'textes').map(guideCard).join('')}</div>
-<div class="cta-box"><p class="cta-title">💌 Et si ton cadeau, c’était tes mots ?</p><p>Réunis ta lettre, vos photos, vos souvenirs et votre chanson sur une page qui s’ouvre comme une enveloppe.</p><p><a class="btn" href="/creer">Créer ma page</a></p></div>
+<div class="cta-box"><p class="cta-title">Et si ton cadeau, c’était tes mots ?</p><p>Réunis ta lettre, vos photos, vos souvenirs et votre chanson sur une page qui s’ouvre comme une enveloppe.</p><p><a class="btn" href="/creer">Créer ma page</a></p></div>
 </main>`,
 });
 
 pages['index.html'] = layout({
-  title: `${SITE_NAME} — page cadeau personnalisée avec photos, lettre et musique`,
+  title: `Page cadeau personnalisée avec photos, lettre et musique — ${SITE_NAME}`,
   description: `Crée une page web unique pour la personne que tu aimes : lettre, photos, souvenirs et chanson, à offrir par lien ou QR code. Saint-Valentin, anniversaire, fête des mères… ${PRICE_LABEL}.`,
   path: '/',
   jsonld: [faqLd(generalFaq), ORG_LD, SITE_LD, productLd(`Page cadeau personnalisée — ${SITE_NAME}`, 'Page web personnalisée à offrir : lettre, photos, souvenirs, musique, message vocal. Par lien ou QR code.', '/')],
@@ -285,15 +285,14 @@ pages['index.html'] = layout({
     <h1>Offre une page rien qu’à elle. Ou à lui.</h1>
     <p class="lead">Ta lettre, vos photos, vos souvenirs et votre chanson, réunis sur une page secrète qui s’ouvre comme une enveloppe. À offrir par lien ou par QR code.</p>
     <div class="cta"><a class="btn" href="/creer">Créer ma page</a><a class="btn ghost" href="/p/demo" target="_blank" rel="noopener">Voir un exemple</a></div>
-    <p class="price-note">${PRICE_LABEL} · aperçu gratuit · prête en 10 minutes · satisfait ou remboursé 14 jours</p>
-    <p class="price-note free-note" data-free-note="${PRICE_LABEL}" hidden></p>
+    <p class="price-note">${PRICE_LABEL}, aperçu gratuit avant de payer, satisfait ou remboursé pendant 14 jours.</p>
   </div>
   <div class="phone"><iframe src="/p/demo" title="Exemple de page" loading="lazy"></iframe></div>
 </section>
 ${inspiration({ list: [...GUIDES.filter((g) => g.kind === 'cadeaux'), ...GUIDES.filter((g) => g.kind === 'textes')].slice(0, 3) })}
 <section class="section"><div class="wrap">
   <h2>Comment ça marche</h2>
-  <p class="sub">Pas besoin d’être doué(e) en informatique : si tu sais écrire un message, tu sais créer ta page.</p>
+  <p class="sub">Si tu sais écrire un message, tu sais créer ta page.</p>
   ${howVideo}
 </div></section>
 <section class="section" id="occasions"><div class="wrap">
@@ -328,18 +327,17 @@ for (const o of OCCASIONS) {
     body: `<main>
 <section class="wrap hero">
   <div>
-    <p class="eyebrow" style="color:var(--accent);font-weight:600;margin:0 0 8px">${o.emoji} ${esc(o.label)}</p>
+    <p class="eyebrow" style="color:var(--accent);font-weight:600;margin:0 0 8px">${esc(o.label)}</p>
     <h1>${esc(o.h1)}</h1>
     <p class="lead">${esc(o.lead)}</p>
     <div class="cta"><a class="btn" href="/creer?occasion=${o.id}">${esc(o.cta || 'Créer ma page')}</a><a class="btn ghost" href="/p/demo" target="_blank" rel="noopener">Voir un exemple</a></div>
-    <p class="price-note">${PRICE_LABEL} · aperçu gratuit avant de payer · en ligne immédiatement</p>
-    <p class="price-note free-note" data-free-note="${PRICE_LABEL}" hidden></p>
+    <p class="price-note">${PRICE_LABEL}, aperçu gratuit avant de payer, en ligne immédiatement.</p>
   </div>
   <div class="phone"><iframe src="/p/demo" title="Exemple de page" loading="lazy"></iframe></div>
 </section>
-${inspiration({ title: `💡 Pas encore d’idée pour ${FOR_OCC[o.id] || 'ton cadeau'} ?`, list: [...GUIDES.filter((g) => g.occasion === o.id), ...GUIDES.filter((g) => g.occasion !== o.id && g.kind === 'cadeaux')].slice(0, 3) })}
+${inspiration({ title: `Des idées pour ${FOR_OCC[o.id] || 'ton cadeau'}`, list: [...GUIDES.filter((g) => g.occasion === o.id), ...GUIDES.filter((g) => g.occasion !== o.id && g.kind === 'cadeaux')].slice(0, 3) })}
 <section class="section"><div class="wrap narrow">
-  ${WHEN[o.id] ? `<p class="when-note">📅 ${esc(WHEN[o.id])}</p>` : ''}
+  ${WHEN[o.id] ? `<p class="when-note">${esc(WHEN[o.id])}</p>` : ''}
   <h2>Nos conseils pour une page réussie</h2>
   <ul>${o.tips.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
   <h2 style="margin-top:40px">Des idées pour commencer ta lettre</h2>
@@ -377,7 +375,7 @@ pages['creer.html'] = layout({
       <legend>L’occasion</legend>
       <div class="chips" id="occasion-chips"></div>
       <div class="field"><span class="label">Couleurs</span><div class="swatches" id="theme-swatches"></div></div>
-      <div class="field"><label for="f-lang">🌍 Langue de la page <span class="opt-badge">option</span></label><select id="f-lang"></select><p class="help">Pour offrir la page à quelqu’un qui ne parle pas français : les boutons et titres de la page s’affichent dans cette langue. Tes textes restent tels que tu les écris.</p></div>
+      <div class="field"><label for="f-lang">Langue de la page <span class="opt-badge">option</span></label><select id="f-lang"></select><p class="help">Pour offrir la page à quelqu’un qui ne parle pas français : les boutons et titres de la page s’affichent dans cette langue. Tes textes restent tels que tu les écris.</p></div>
     </fieldset>
     <fieldset>
       <legend>Pour qui ?</legend>
@@ -409,7 +407,7 @@ pages['creer.html'] = layout({
       </div>
     </fieldset>
     <fieldset id="voice-fieldset">
-      <legend>🎙️ Message vocal <span class="opt-badge premium" data-premium>premium</span></legend>
+      <legend>Message vocal <span class="opt-badge premium" data-premium>premium</span></legend>
       <p class="help">Enregistre quelques mots avec ta voix (2 minutes maximum). C’est souvent ce qui touche le plus.</p>
       <div class="voice-rec">
         <button type="button" class="btn" id="voice-rec">● Enregistrer</button>
@@ -451,7 +449,7 @@ pages['creer.html'] = layout({
       <div class="field"><label for="f-music">Lien YouTube ou Spotify</label><input id="f-music" type="url" data-field="music" maxlength="300" placeholder="https://www.youtube.com/watch?v=…" inputmode="url"><p class="help" id="music-status" role="status"></p><div class="field"><span class="label" id="ms-label">Commencer à</span><div class="time-row" role="group" aria-labelledby="ms-label"><input id="f-musicMin" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" placeholder="0" aria-label="Minutes"><span>min</span><input id="f-musicSec" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" placeholder="00" aria-label="Secondes"><span>sec</span></div><p class="help" id="start-help">Par exemple <strong>1 min 05</strong> pour démarrer au refrain. Astuce : sur YouTube, « Partager › Commencer à » puis colle le lien ici, le moment est repris tout seul.</p></div><p class="help">Conseil : préfère YouTube, qui joue le morceau en entier. Avec Spotify, la personne n’entend qu’un extrait de 30 secondes si elle n’est pas connectée à son compte Spotify.</p></div>
     </fieldset>
     <fieldset id="group-fieldset">
-      <legend>👥 Carte de groupe <span class="opt-badge premium" data-premium>premium</span></legend>
+      <legend>Carte de groupe <span class="opt-badge premium" data-premium>premium</span></legend>
       <label class="check"><input type="checkbox" id="f-group"><span>Inviter d’autres personnes (famille, amis, collègues) à écrire chacune un mot sur la page</span></label>
       <p class="help">Après la publication, tu reçois un <strong>lien d’invitation</strong> à partager (groupe WhatsApp, e-mail…). Chacun écrit son mot sans voir la page, et tu peux retirer un message. 50 messages maximum.</p>
       <div id="group-admin" hidden>
@@ -462,7 +460,7 @@ pages['creer.html'] = layout({
       </div>
     </fieldset>
     <fieldset id="quiz-fieldset">
-      <legend>🎮 Mini-jeu : le quiz <span class="opt-badge">option</span></legend>
+      <legend>Mini-jeu : le quiz <span class="opt-badge">option</span></legend>
       <p class="help">Jusqu’à 5 questions sur vous deux. Coche la bonne réponse : la personne joue et découvre son score.</p>
       <div id="quiz-list"></div>
       <button type="button" class="btn ghost small add-btn" id="add-quiz">+ Ajouter une question</button>
@@ -472,7 +470,7 @@ pages['creer.html'] = layout({
       <div class="field"><label for="f-finalMessage">Message final</label><textarea id="f-finalMessage" data-field="finalMessage" maxlength="250" rows="3"></textarea></div>
     </fieldset>
     <fieldset id="openat-fieldset">
-      <legend>⏰ Ouverture programmée <span class="opt-badge premium" data-premium>premium</span></legend>
+      <legend>Ouverture programmée <span class="opt-badge premium" data-premium>premium</span></legend>
       <p class="help">Envoie le lien quand tu veux : la page reste fermée avec un compte à rebours jusqu’au jour et à l’heure choisis (minuit le jour de son anniversaire, le 24 au soir…).</p>
       <div class="row2">
         <div class="field"><label for="f-openAt">S’ouvre le</label><input id="f-openAt" type="datetime-local"></div>
@@ -507,7 +505,7 @@ pages['creer.html'] = layout({
 </div></div>
 <dialog id="publish-dialog">
 <div id="pub-check">
-  <h2>Tout est bon ? 👀</h2>
+  <h2>Avant de publier</h2>
   <p>Relis bien ta page <strong>dans l’aperçu</strong> avant de publier : prénoms, fautes, photos, musique… Une fois le lien envoyé, la personne découvre la page telle qu’elle est.</p>
   <ul class="pub-recap" id="pub-recap"></ul>
   <p class="pub-warn" id="pub-warn" hidden></p>
@@ -515,16 +513,16 @@ pages['creer.html'] = layout({
   <div class="dialog-actions">
     <button type="button" class="btn ghost" id="pub-edit">Modifier encore</button>
     <button type="button" class="btn ghost" id="pub-preview">Voir l’aperçu</button>
-    <button type="button" class="btn" id="pub-ok">Oui, tout est bon →</button>
+    <button type="button" class="btn" id="pub-ok">Tout est bon, continuer</button>
   </div>
 </div>
 <div id="pub-final" hidden>
   <h2>Publier ta page</h2>
-  <p id="free-info" hidden>🎉 <strong>Offre de lancement</strong> : jusqu’au <span></span>, ta page est publiée <strong>gratuitement</strong>, sans paiement. Elle est hébergée ${YEARS} ans et modifiable quand tu veux. Toutes les options, même premium, sont offertes.</p>
+  <p id="free-info" hidden><strong>Offre de lancement</strong> : jusqu’au <span></span>, ta page est publiée <strong>gratuitement</strong>, sans paiement. Elle est hébergée ${YEARS} ans et modifiable quand tu veux. Toutes les options, même premium, sont offertes.</p>
   <p class="pay-only" id="pay-info">Ta page sera en ligne <strong>immédiatement après le paiement</strong> de <strong>${PRICE_LABEL}</strong> (TVA non applicable, art. 293 B du CGI), hébergée ${YEARS} ans et modifiable gratuitement.</p>
   <label class="check"><input type="checkbox" id="c-terms"><span>J’ai lu et j’accepte les <a href="/cgv" target="_blank">conditions générales</a> et les <a href="/regles-de-contenu" target="_blank">règles de contenu</a>, et je confirme avoir le droit de publier ces photos et textes.</span></label>
   <label class="check"><input type="checkbox" id="c-waiver"><span>Je demande la mise en ligne immédiate de ma page et je reconnais <strong>perdre mon droit de rétractation</strong> dès qu’elle est fournie (art. L221-28 13° du Code de la consommation).</span></label>
-  <p class="pay-only" style="font-size:14px;margin:0">🔒 Paiement sécurisé par Stripe : carte bancaire, Apple Pay, Google Pay. Ta page reste modifiable gratuitement après le paiement, et tu es <strong>satisfait(e) ou remboursé(e) pendant 14 jours</strong>.</p>
+  <p class="pay-only" style="font-size:14px;margin:0">Paiement sécurisé par Stripe : carte bancaire, Apple Pay, Google Pay. Ta page reste modifiable gratuitement après le paiement, et tu es <strong>satisfait ou remboursé pendant 14 jours</strong>.</p>
   <p class="progress" id="publish-progress" role="status"></p>
   <div class="dialog-actions">
     <button type="button" class="btn ghost" id="publish-cancel">Revenir à ma page</button>
@@ -543,12 +541,12 @@ pages['merci.html'] = layout({
   body: `<main class="wrap narrow thanks">
   <p class="notice" id="status" role="status">Un instant…</p>
   <div id="done" hidden>
-    <h1>🎉 Ta page est en ligne !</h1>
+    <h1>Ta page est en ligne</h1>
     <p>Voici son lien secret. Garde-le précieusement et offre-le quand tu veux.</p>
     <div class="share-box"><input id="page-url" type="text" readonly aria-label="Lien de la page"><button class="btn" id="copy-btn" type="button">Copier</button></div>
     <p class="notice" id="openat-note" hidden></p>
     <section class="send-box" id="group-box" hidden aria-labelledby="group-title">
-      <h2 id="group-title">👥 Invite les autres à écrire</h2>
+      <h2 id="group-title">Inviter les proches à écrire</h2>
       <p>Partage ce lien aux proches : chacun ajoute son mot à la page. Tu peux les relire et en retirer depuis ton lien de modification.</p>
       <div class="share-box"><input id="group-link" type="text" readonly aria-label="Lien d’invitation"><button class="btn" id="group-copy" type="button">Copier</button></div>
       <p style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn ghost" id="group-wa" href="#" target="_blank" rel="noopener">WhatsApp</a><a class="btn ghost" id="group-mail" href="#">E-mail</a></p>
@@ -557,7 +555,7 @@ pages['merci.html'] = layout({
       <a class="btn ghost" id="open-link" href="#" target="_blank" rel="noopener">Voir ma page</a>
     </p>
     <section class="send-box" aria-labelledby="send-title">
-      <h2 id="send-title">💌 Envoie-la</h2>
+      <h2 id="send-title">Envoyer la page</h2>
       <p class="send-sub">Choisis un message (tu peux le modifier), puis envoie-le comme tu veux.</p>
       <div class="chips" id="msg-styles" role="group" aria-label="Style du message">
         <button type="button" class="chip" data-style="mystere" aria-pressed="true">🤫 Mystérieux</button>
@@ -576,10 +574,10 @@ pages['merci.html'] = layout({
       <p class="send-sub">Astuce : sur WhatsApp et Messenger, le lien s’affiche avec un aperçu « Quelqu’un t’a préparé une surprise 💌 », sans rien dévoiler.</p>
     </section>
     <section class="video-box" id="video-box" hidden aria-labelledby="video-title">
-      <h2 id="video-title">🎬 La vidéo souvenir</h2>
+      <h2 id="video-title">La vidéo souvenir</h2>
       <p class="send-sub">Un petit film de ta page (lettre, photos, souvenirs), à télécharger ou à partager sur TikTok, Instagram, Snapchat… Gratuit.</p>
       <button class="btn" id="video-btn" type="button">Créer la vidéo</button>
-      <button class="btn ghost" id="wallpaper-btn" type="button" hidden>📱 Créer un fond d’écran</button>
+      <button class="btn ghost" id="wallpaper-btn" type="button" hidden>Créer un fond d’écran</button>
     </section>
     <h2>Le QR code</h2>
     <div class="qr" id="qr"></div>
@@ -605,7 +603,7 @@ pages['merci.html'] = layout({
 });
 
 pages['admin.html'] = layout({
-  title: 'Modération', description: 'Modération', path: '/admin', noindex: true,
+  title: 'Console', description: 'Console du site', path: '/admin', noindex: true,
   scripts: '<script type="module" src="/assets/js/admin.js"></script>',
   body: `<main class="wrap prose">
   <h1>Visiteurs</h1>
@@ -616,6 +614,11 @@ pages['admin.html'] = layout({
     <table class="admin-table"><thead><tr><th>Jour</th><th>Visiteurs</th><th>Pages vues</th><th>Pages créées</th></tr></thead><tbody id="stat-days"></tbody></table>
     <h2>Pages les plus vues ce mois-ci</h2>
     <ul id="stat-top"></ul>
+  </section>
+  <section id="pages-section" hidden>
+    <h1 style="margin-top:2em">Pages créées</h1>
+    <p id="pages-out"></p>
+    <table class="admin-table"><thead><tr><th>Créée le</th><th>Titre</th><th>Occasion</th><th>Statut</th><th></th></tr></thead><tbody id="pages"></tbody></table>
   </section>
   <h1 style="margin-top:2em">Signalements</h1>
   <form id="login" style="display:flex;gap:8px;max-width:520px"><input id="token" type="password" placeholder="Jeton administrateur" autocomplete="off"><button class="btn small">Charger</button></form>
@@ -773,11 +776,11 @@ pages['ecrire.html'] = layout({
     <div class="hp" aria-hidden="true"><label for="g-website">Ne pas remplir</label><input id="g-website" type="text" tabindex="-1" autocomplete="off"></div>
     <p class="help">Ton prénom et ton message apparaîtront sur la page offerte. La personne qui a créé la page peut retirer un message. Respecte les <a href="/regles-de-contenu" target="_blank">règles de contenu</a>.</p>
     <p id="g-err" class="notice error" role="alert" hidden></p>
-    <button class="btn" type="submit" id="g-send">Ajouter mon mot 💌</button>
+    <button class="btn" type="submit" id="g-send">Ajouter mon mot</button>
   </form>
 </div>
 <div id="g-done" hidden style="text-align:center">
-  <h1>Merci ! 💛</h1>
+  <h1>Merci</h1>
   <p id="g-done-text"></p>
   <p><a class="btn ghost" href="/?ref=groupe">Créer ma propre page</a></p>
 </div>

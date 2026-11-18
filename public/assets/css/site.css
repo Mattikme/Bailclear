@@ -293,7 +293,7 @@ dialog.wallpaper .wp-stage { position: relative; aspect-ratio: 1179 / 2556; widt
 .gift-links a { font-size: 14px; font-weight: 600; text-decoration: none; border: 1.5px solid var(--accent); color: var(--accent); border-radius: 999px; padding: 5px 12px; }
 .gift-links a:hover { background: var(--accent); color: #fff; }
 /* Mise en avant des idées */
-.nav a.nav-ideas { display: inline-flex !important; font-weight: 700; color: var(--accent); background: var(--soft); border-radius: 999px; padding: 6px 12px; white-space: nowrap; font-size: 14px; }
+.nav a.nav-ideas { display: inline-block !important; font-weight: 700; color: var(--accent); background: var(--soft); border-radius: 999px; padding: 6px 12px; white-space: nowrap; font-size: 14px; }
 .inspiration { background: linear-gradient(180deg, var(--soft), transparent); }
 .insp-doors { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 20px 0; }
 .insp-door { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 14px; align-items: center; padding: 18px 20px; border-radius: 20px; background: var(--surface); border: 2px solid var(--accent); color: var(--ink); text-decoration: none; box-shadow: 0 10px 24px -18px rgba(0,0,0,.4); transition: transform .15s; }
@@ -317,3 +317,4 @@ dialog.wallpaper .wp-stage { position: relative; aspect-ratio: 1179 / 2556; widt
   .nav a.nav-ideas { padding: 6px 10px; font-size: 13px; }
 }
 @media (max-width: 360px) { .logo img + * , .logo { font-size: 0 !important; } .logo img { width: 30px; height: 30px; } }
+.insp-door span { color: var(--accent); display: grid; place-items: center; width: 52px; height: 52px; border-radius: 14px; background: var(--soft); }

@@ -10,7 +10,7 @@ export const GUIDES = [
     date: '2026-11-18',
     title: 'Comment écrire une lettre d’amour : conseils et 12 exemples',
     description: 'Écrire une lettre d’amour sans être écrivain : la méthode en 5 étapes, les erreurs à éviter et 12 exemples de phrases à reprendre pour la Saint-Valentin ou un anniversaire.',
-    h1: 'Comment écrire une lettre d’amour (même si tu n’es pas doué·e pour écrire)',
+    h1: 'Comment écrire une lettre d’amour',
     intro: 'Une lettre d’amour n’a pas besoin d’être longue ni parfaite. Ce qui touche, c’est qu’elle soit vraie et précise. Voici une méthode simple en 5 étapes, puis des exemples de phrases pour te lancer.',
     sections: [
       { h2: 'La méthode en 5 étapes', list: [
@@ -27,11 +27,11 @@ export const GUIDES = [
         'Attendre l’inspiration : écris un premier jet en 10 minutes, puis relis le lendemain.',
       ] },
       { h2: '12 exemples de phrases pour commencer ou finir ta lettre', quotes: [
-        'Je me souviens encore de la première fois que je t’ai vu·e, et je crois que tout a commencé là.',
+        'Je me souviens encore de la première fois que je t’ai vu, et je crois que tout a commencé là.',
         'Il y a des jours où je me demande comment j’ai eu autant de chance.',
         'Avec toi, même les dimanches pluvieux sont devenus mes préférés.',
-        'Tu ne le sais peut-être pas, mais tu me rends meilleur·e chaque jour.',
-        'J’aime ta façon de rire quand tu essaies de rester sérieux·se.',
+        'Tu ne le sais peut-être pas, mais tu me rends meilleur chaque jour.',
+        'J’aime ta façon de rire quand tu essaies de garder ton sérieux.',
         'Mon endroit préféré au monde, c’est à côté de toi.',
         'Je ne te le dis pas assez, alors je l’écris : merci d’être toi.',
         'Cette année avec toi, c’était mon plus beau voyage.',
@@ -62,10 +62,10 @@ export const GUIDES = [
         'Le café que tu me prépares sans que je demande.', 'Tes messages au milieu de la journée.', 'Ta main dans la mienne au cinéma.', 'La couverture que tu remontes sur moi.', 'Tes câlins du matin.', 'Ta façon de chanter faux sous la douche.', 'Les petits mots que tu laisses sur le frigo.', 'Le dernier carré de chocolat que tu me laisses.', 'Ta façon de m’attendre pour regarder la suite de la série.', 'Ton « fais attention à toi » avant chaque départ.',
       ] },
       { h2: 'Ce que tu m’apportes', list: [
-        'Tu me fais rire comme personne.', 'Avec toi, je me sens chez moi partout.', 'Tu crois en moi plus que moi.', 'Tu m’as appris à prendre mon temps.', 'Tu me donnes envie d’être meilleur·e.', 'Tu rends les dimanches parfaits.', 'Tu me rassures sans rien dire.', 'Tu me fais découvrir des choses que je n’aurais jamais essayées.', 'Tu acceptes mes défauts.', 'Tu es mon ou ma meilleur·e ami·e.',
+        'Tu me fais rire comme personne.', 'Avec toi, je me sens chez moi partout.', 'Tu crois en moi plus que moi.', 'Tu m’as appris à prendre mon temps.', 'Tu me donnes envie de m’améliorer.', 'Tu rends les dimanches parfaits.', 'Tu me rassures sans rien dire.', 'Tu me fais découvrir des choses que je n’aurais jamais essayées.', 'Tu acceptes mes défauts.', 'Tu es aussi mon meilleur ami.',
       ] },
       { h2: 'Nos souvenirs', list: [
-        'Notre premier rendez-vous un peu raté.', 'Ce voyage où tout est allé de travers et où on a tant ri.', 'La première fois que tu m’as présenté·e à tes parents.', 'Notre chanson, qui passe toujours au bon moment.', 'Nos fous rires en voiture.', 'La nuit où on a refait le monde jusqu’à 4 h.', 'Notre premier appartement, et ses cartons.', 'Ce plat raté qu’on a fini par manger quand même.', 'Les week-ends sans réveil.', 'Toutes les fois où tu étais là au bon moment.',
+        'Notre premier rendez-vous un peu raté.', 'Ce voyage où tout est allé de travers et où on a tant ri.', 'La première fois que tu m’as présenté à tes parents.', 'Notre chanson, qui passe toujours au bon moment.', 'Nos fous rires en voiture.', 'La nuit où on a refait le monde jusqu’à 4 h.', 'Notre premier appartement, et ses cartons.', 'Ce plat raté qu’on a fini par manger quand même.', 'Les week-ends sans réveil.', 'Toutes les fois où tu étais là au bon moment.',
       ] },
       { h2: 'Pour la suite', list: [
         'Parce que j’ai encore mille choses à vivre avec toi.', 'Parce que je veux voyager partout avec toi.', 'Parce que j’ai hâte de vieillir à tes côtés.', 'Parce que chaque jour avec toi est une bonne journée.', 'Parce que c’est toi, tout simplement.', 'Parce que tu me donnes envie de construire.', 'Parce que tu es la première personne à qui je veux tout raconter.', 'Parce que tu tiens tes promesses.', 'Parce que je ne m’ennuie jamais avec toi.', 'Parce que je t’aime un peu plus chaque année.',
@@ -106,7 +106,7 @@ export const GUIDES = [
       { h2: 'Les idées de dernière minute', p: [
         'Le 14 février au soir, il reste des options : une réservation dans un restaurant qui accepte encore, un bouquet du marché, ou un cadeau numérique prêt immédiatement. Une page cadeau se crée en 10 minutes depuis le téléphone et peut être envoyée à minuit pile.',
       ] },
-      { h2: 'Le conseil qui change tout', p: [
+      { h2: 'Un dernier conseil', p: [
         'Quel que soit le cadeau, ajoute quelques lignes écrites. C’est souvent ce que l’on garde le plus longtemps, bien après les fleurs.',
       ] },
     ],
@@ -119,16 +119,16 @@ export const GUIDES = [
     title: 'Texte pour la fête des mères : 25 messages pour maman (2027)',
     description: 'Des textes et messages pour souhaiter une bonne fête à ta maman le 30 mai 2027 : touchants, drôles ou courts, à écrire sur une carte ou une page cadeau.',
     h1: 'Textes et messages pour la fête des mères',
-    intro: 'En France, la fête des mères 2027 aura lieu le dimanche 30 mai. Voici des messages à reprendre ou à adapter, du plus court au plus émouvant. Le secret : ajouter un souvenir qui n’appartient qu’à vous.',
+    intro: 'En France, la fête des mères 2027 aura lieu le dimanche 30 mai. Voici des messages à reprendre ou à adapter, du plus court au plus émouvant. Pense à ajouter un souvenir qui n’appartient qu’à vous deux.',
     sections: [
       { h2: 'Messages courts', quotes: [
         'Bonne fête à la meilleure maman du monde. Merci pour tout.', 'Maman, tu es mon premier amour et mon plus grand exemple.', 'Merci d’avoir toujours cru en moi. Je t’aime.', 'Une maman comme toi, ça ne se remplace pas. Bonne fête !', 'Pour toutes les fois où je ne t’ai pas dit merci : merci.',
       ] },
       { h2: 'Messages touchants', quotes: [
-        'Maman, je ne te l’ai pas assez dit : tout ce que je suis, je te le dois en partie.', 'Je repense aux goûters après l’école, à tes histoires du soir, à ta main sur mon front quand j’étais malade. Merci pour cette enfance.', 'En grandissant, je comprends un peu plus chaque année tout ce que tu as fait pour nous.', 'Tu as toujours été là, sans jamais rien demander en retour. Aujourd’hui, c’est à moi de te dire combien je t’aime.', 'Si je suis courageux·se, patient·e et généreux·se, c’est parce que je t’ai regardée faire.',
+        'Maman, je ne te l’ai pas assez dit : tout ce que je suis, je te le dois en partie.', 'Je repense aux goûters après l’école, à tes histoires du soir, à ta main sur mon front quand j’étais malade. Merci pour cette enfance.', 'En grandissant, je comprends un peu plus chaque année tout ce que tu as fait pour nous.', 'Tu as toujours été là, sans jamais rien demander en retour. Aujourd’hui, c’est à moi de te dire combien je t’aime.', 'Si j’ai appris le courage, la patience et la générosité, c’est en te regardant faire.',
       ] },
       { h2: 'Messages drôles', quotes: [
-        'Merci de ne pas m’avoir vendu·e pendant mon adolescence. Bonne fête maman !', 'Bonne fête à celle qui savait toujours quand je mentais. Comment tu faisais ?', 'Tu avais raison pour le manteau. Et pour tout le reste aussi.', 'Maman, la preuve que tu es la meilleure : je suis là, et je suis plutôt réussi·e.',
+        'Merci de m’avoir supporté pendant mon adolescence. Bonne fête maman !', 'Bonne fête à celle qui savait toujours quand je mentais. Comment tu faisais ?', 'Tu avais raison pour le manteau. Et pour tout le reste aussi.', 'Maman, la preuve que tu es la meilleure : je suis là, et je ne m’en sors pas si mal.',
       ] },
       { h2: 'Idées pour « Merci maman, pour… »', list: [
         'les crêpes du dimanche', 'tes conseils (même ceux que je n’ai pas suivis)', 'les trajets en voiture à refaire le monde', 'ta patience infinie', 'avoir toujours une place pour moi à table',
@@ -148,7 +148,7 @@ export const GUIDES = [
     h1: 'Idées cadeau originales pour la fête des mères',
     intro: 'La fête des mères 2027 a lieu le dimanche 30 mai. Le cadeau qui fait le plus plaisir à une maman, c’est souvent celui qui lui rappelle combien elle compte : un souvenir, un mot, un moment partagé. Voici nos idées, du fait-maison au plus gâté.',
     sections: [
-      { h2: 'Le cadeau qui la fera pleurer (de joie)', p: [
+      { h2: 'Un cadeau de toute la famille', p: [
         'Réunis un mot de chaque enfant et petit-enfant, des photos de famille, une frise de vos souvenirs et sa chanson préférée sur une page qui s’ouvre comme une enveloppe. Avec la carte de groupe, chacun écrit son message depuis son téléphone, même à distance.',
       ] },
       { h2: 'Notre sélection de cadeaux', gifts: [
@@ -181,10 +181,10 @@ export const GUIDES = [
         'Il y a un an, je ne savais pas encore que tu allais devenir ma personne préférée.', '365 jours, et je ne me lasse toujours pas de toi.', 'Notre première année, c’était le début de la plus belle histoire que je connaisse.',
       ] },
       { h2: 'Pour 2 à 5 ans', quotes: [
-        'On a déménagé, voyagé, ri, parfois pleuré… et je recommencerais tout avec toi.', 'Plus le temps passe, plus je suis sûr·e de mon choix.', 'Merci pour ces années où tu as rendu l’ordinaire extraordinaire.',
+        'On a déménagé, voyagé, ri, parfois pleuré… et je recommencerais tout avec toi.', 'Plus le temps passe, plus je suis sûr de mon choix.', 'Merci pour ces années où tu as rendu l’ordinaire extraordinaire.',
       ] },
       { h2: 'Pour 10 ans et plus', quotes: [
-        'Dix ans, et tu me fais toujours le même effet qu’au premier jour.', 'On a grandi ensemble, et je t’aime encore plus qu’au début.', 'Notre histoire est mon plus beau souvenir, et je suis impatient·e d’écrire la suite.',
+        'Dix ans, et tu me fais toujours le même effet qu’au premier jour.', 'On a grandi ensemble, et je t’aime encore plus qu’au début.', 'Notre histoire est mon plus beau souvenir, et j’ai hâte d’écrire la suite.',
       ] },
       { h2: 'Idées pour fêter l’anniversaire', list: [
         'Retourner sur le lieu de votre premier rendez-vous.', 'Refaire la photo de votre première photo ensemble.', 'Créer une frise de vos moments clés, année après année.', 'Afficher un compteur : « ensemble depuis 1 826 jours ».', 'Offrir une page souvenir qui réunit lettre, photos et votre chanson.',
@@ -205,7 +205,7 @@ export const GUIDES = [
         'Joyeux anniversaire à la personne qui connaît tous mes secrets et ne les utilise (presque) jamais contre moi.', 'Encore une année de fous rires, de conseils douteux et de soirées trop longues. Vivement la suivante !', 'Tu es la famille que j’ai choisie. Joyeux anniversaire.',
       ] },
       { h2: 'Pour une sœur ou un frère', quotes: [
-        'Joyeux anniversaire à mon premier ou ma première coloc, rival·e et complice.', 'On s’est disputé la salle de bain pendant des années, mais je ne t’échangerais pour rien au monde.', 'Merci d’avoir été mon modèle (et mon cobaye).',
+        'Joyeux anniversaire à mon tout premier colocataire, rival et complice.', 'On s’est disputé la salle de bain pendant des années, mais je ne t’échangerais pour rien au monde.', 'Merci d’avoir été mon modèle (et mon cobaye).',
       ] },
       { h2: 'Pour un collègue', quotes: [
         'Joyeux anniversaire ! Merci de rendre les lundis plus supportables.', 'Toute l’équipe te souhaite une très belle année, au bureau et surtout en dehors.',
@@ -223,10 +223,10 @@ export const GUIDES = [
     emoji: '🎄', kind: 'cadeaux',
     occasion: 'noel',
     date: '2026-11-18',
-    title: 'Cadeau de Noël de dernière minute : 15 idées qui ne font pas « oubli »',
+    title: 'Cadeau de Noël de dernière minute : 15 idées simples',
     description: '15 idées de cadeaux de Noël de dernière minute, personnelles et faciles : à faire soi-même, à offrir le 24 au soir ou à envoyer par message.',
-    h1: 'Cadeau de Noël de dernière minute : 15 idées qui ont l’air préparées',
-    intro: 'Le 24 décembre approche et il te manque un cadeau ? Pas de panique : voici des idées rapides qui montrent que tu as pensé à la personne, et non que tu as couru à la dernière boutique ouverte.',
+    h1: 'Cadeau de Noël de dernière minute : 15 idées',
+    intro: 'Le 24 décembre approche et il te manque un cadeau ? Voici des idées rapides qui montrent que tu as pensé à la personne, et non que tu as couru à la dernière boutique ouverte.',
     sections: [
       { h2: 'Des cadeaux livrés vite', p: ['Pour les commandes de dernière minute, vérifie la date de livraison indiquée avant d’acheter, ou choisis le retrait en magasin.'], gifts: [
       { emoji: '🎧', name: 'Des écouteurs sans fil', why: 'Le cadeau utile qui plaît presque toujours.', query: 'écouteurs sans fil', budget: 'Moyen budget' },

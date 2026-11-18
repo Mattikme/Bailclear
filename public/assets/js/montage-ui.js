@@ -1,7 +1,7 @@
 // Fenêtre « vidéo souvenir » partagée par la page offerte (/p/…) et la page de confirmation (/merci).
 // La fenêtre est créée à la volée ; la vidéo est fabriquée sur l'appareil (montage.js).
 const HTML = `
-  <h2 id="montage-title">🎬 Ta vidéo souvenir</h2>
+  <h2 id="montage-title">Ta vidéo souvenir</h2>
   <p id="montage-status" role="status">Préparation…</p>
   <div class="montage-stage">
     <canvas id="montage-canvas" aria-hidden="true"></canvas>
@@ -13,10 +13,10 @@ const HTML = `
     <a class="btn" id="montage-download" href="#">Télécharger</a>
   </div>
   <div class="montage-last" id="montage-last-box">
-    <label for="montage-last">✍️ Un dernier mot pour finir la vidéo <span>(facultatif)</span></label>
+    <label for="montage-last">Un dernier mot pour finir la vidéo <span>(facultatif)</span></label>
     <input id="montage-last" type="text" maxlength="120" placeholder="Je t’aime, aujourd’hui et pour toujours">
   </div>
-  <label class="montage-opt" id="montage-opt"><input type="checkbox" id="montage-music" checked> 🎵 Avec une musique douce (composée automatiquement, libre de droits)</label>
+  <label class="montage-opt" id="montage-opt"><input type="checkbox" id="montage-music" checked> Avec une musique douce (composée automatiquement, libre de droits)</label>
   <p class="montage-note">Tu peux aussi la remplacer par ta chanson dans TikTok, Instagram ou Snapchat. Fabriquée sur ton téléphone, rien n’est envoyé.</p>
   <div class="row"><button class="btn" type="button" id="montage-start">Créer la vidéo</button><button class="btn secondary" type="button" id="montage-close">Fermer</button></div>`;
 

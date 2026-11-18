@@ -19,7 +19,11 @@ async function ownerLine() {
     const p = document.createElement('p');
     p.className = 'owner-stats';
     const n = (x) => Number(x || 0).toLocaleString('fr-FR');
-    p.textContent = `📈 Visiteurs : ${n(d.today.visitors)} aujourd’hui · ${n(d.month.visitors)} ce mois-ci · ${n(d.month.creations)} pages créées ce mois-ci (visible uniquement par toi)`;
+    p.textContent = `Visible par toi seul : ${n(d.today.visitors)} visiteurs aujourd’hui, ${n(d.month.visitors)} ce mois-ci, ${n(d.month.creations)} pages créées ce mois-ci. `;
+    const a = document.createElement('a');
+    a.href = '/admin';
+    a.textContent = 'Voir le détail et la liste des pages';
+    p.append(a);
     foot.after(p);
   } catch { /* hors ligne */ }
 }

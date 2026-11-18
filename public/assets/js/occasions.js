@@ -14,7 +14,7 @@ export const THEMES = {
 export const OCCASIONS = [
   {
     id: 'saint-valentin', cta: 'Créer ma page de Saint-Valentin', label: 'Saint-Valentin', emoji: '💘', theme: 'rose',
-    seoTitle: 'Page d’amour personnalisée pour la Saint-Valentin — cadeau en ligne',
+    seoTitle: 'Cadeau Saint-Valentin personnalisé : une page d’amour avec vos photos',
     h1: 'Une page d’amour rien que pour elle (ou lui) pour la Saint-Valentin',
     lead: 'Vos photos, votre histoire, une lettre et votre chanson réunies sur une page secrète à offrir par lien ou QR code. Prête en 10 minutes, même le 14 février au soir.',
     defaults: { title: 'Joyeuse Saint-Valentin', intro: 'J’ai préparé quelque chose rien que pour toi…', dateLabel: 'Ensemble depuis', finalMessage: 'Je t’aime. Aujourd’hui, demain et tous les jours d’après.' },

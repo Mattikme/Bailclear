@@ -24,6 +24,26 @@ export const onRequest = handle(async ({ request, env, params }) => {
     }
     return json({ reports, more: !list.list_complete });
   }
+  if (request.method === 'GET' && path === 'pages') {
+    // Dernières pages créées (sans le contenu) : date, statut, occasion, titre.
+    const items = [];
+    let cursor;
+    do {
+      const list = await kv.list({ prefix: 'page:', limit: 1000, cursor });
+      for (const k of list.keys) {
+        let m = k.metadata;
+        if (!m || !m.createdAt) {
+          const p = await kv.get(k.name, { type: 'json' });
+          if (!p) continue;
+          m = { createdAt: p.createdAt || p.removedAt, status: p.status, free: Boolean(p.free), occasion: (p.content && p.content.occasion) || '', title: String((p.content && p.content.title) || '').slice(0, 60) };
+        }
+        items.push({ id: k.name.slice(5), ...m });
+      }
+      cursor = list.list_complete ? null : list.cursor;
+    } while (cursor && items.length < 5000);
+    items.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+    return json({ total: items.length, pages: items.slice(0, 100) });
+  }
   if (request.method === 'GET' && path === 'page') {
     const id = new URL(request.url).searchParams.get('id') || '';
     if (!ID_RE.test(id)) return error('Identifiant invalide.', 400);

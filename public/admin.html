@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Modération</title>
-<meta name="description" content="Modération">
+<title>Console</title>
+<meta name="description" content="Console du site">
 <meta name="robots" content="noindex">
-<meta property="og:title" content="Modération">
-<meta property="og:description" content="Modération">
+<meta property="og:title" content="Console">
+<meta property="og:description" content="Console du site">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Une page pour toi">
 <meta name="twitter:card" content="summary_large_image">
@@ -31,7 +31,7 @@
   <nav class="nav" aria-label="Navigation principale">
     <a href="/#occasions">Occasions</a>
     <a href="/#prix">Prix</a>
-    <a class="nav-ideas" href="/idees">💡 Idées<span class="hide-xs"> cadeaux</span></a>
+    <a class="nav-ideas" href="/idees">Idées<span class="hide-xs"> cadeaux</span></a>
     <a href="/#faq">FAQ</a>
     <a class="btn small" href="/creer">Créer ma page</a>
   </nav>
@@ -45,6 +45,11 @@
     <table class="admin-table"><thead><tr><th>Jour</th><th>Visiteurs</th><th>Pages vues</th><th>Pages créées</th></tr></thead><tbody id="stat-days"></tbody></table>
     <h2>Pages les plus vues ce mois-ci</h2>
     <ul id="stat-top"></ul>
+  </section>
+  <section id="pages-section" hidden>
+    <h1 style="margin-top:2em">Pages créées</h1>
+    <p id="pages-out"></p>
+    <table class="admin-table"><thead><tr><th>Créée le</th><th>Titre</th><th>Occasion</th><th>Statut</th><th></th></tr></thead><tbody id="pages"></tbody></table>
   </section>
   <h1 style="margin-top:2em">Signalements</h1>
   <form id="login" style="display:flex;gap:8px;max-width:520px"><input id="token" type="password" placeholder="Jeton administrateur" autocomplete="off"><button class="btn small">Charger</button></form>
@@ -64,7 +69,7 @@
     <a href="/remerciements">Merci</a>
     <a href="/idees">Idées et modèles de textes</a>
   </nav>
-  <span>© 2026 Une page pour toi — fait en France avec ♥</span>
+  <span>© 2026 Une page pour toi. Fait en France.</span>
   <nav aria-label="Liens légaux">
     <a href="/contact">Contact</a>
     <a href="/mentions-legales">Mentions légales</a>

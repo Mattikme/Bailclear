@@ -2,7 +2,7 @@
 import { STYLES, loadImages, renderWallpaper, toJpeg } from './wallpaper.js';
 
 const HTML = `
-  <h2 id="wp-title">📱 Ton fond d'écran</h2>
+  <h2 id="wp-title">Ton fond d’écran</h2>
   <p id="wp-status" role="status">Choisis un style : l’heure de ton téléphone restera bien lisible en haut.</p>
   <div class="chips wp-styles" id="wp-styles"></div>
   <div class="montage-stage wp-stage"><canvas id="wp-canvas" role="img" aria-label="Aperçu du fond d'écran"></canvas><div class="wp-clock" aria-hidden="true"><span>9:41</span><small>mardi 24 décembre</small></div></div>

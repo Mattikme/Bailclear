@@ -7,7 +7,7 @@ if (isFreeLaunch()) {
   bar.className = 'launch-bar';
   const a = document.createElement('a');
   a.href = '/creer';
-  a.textContent = `🎁 Ouverture du site : 1 page offerte par personne jusqu’au ${FREE_UNTIL_LABEL} ! Crée la tienne →`;
+  a.textContent = `Offre de lancement : une page offerte par personne jusqu’au ${FREE_UNTIL_LABEL}. Créer ma page`;
   bar.append(a);
   document.body.prepend(bar);
 
@@ -40,7 +40,7 @@ if (isFreeLaunch()) {
   }
 
   document.querySelectorAll('[data-free-note]').forEach((el) => {
-    el.textContent = `🎁 Offre de lancement : 1 page offerte par personne jusqu’au ${FREE_UNTIL_LABEL}, puis ${el.dataset.freeNote} la page.`;
+    el.textContent = `Offre de lancement : une page offerte par personne jusqu’au ${FREE_UNTIL_LABEL}, puis ${el.dataset.freeNote} la page.`;
     el.hidden = false;
   });
 }
