@@ -86,7 +86,7 @@ async function loadPublished(id) {
   if (!res.ok) throw Object.assign(new Error('notfound'), { code: 404 });
   const data = await res.json();
   const v = encodeURIComponent(data.updatedAt || '');
-  return { content: data.content, photoUrl: (n) => `/api/photos/${id}/${n}?v=${v}` };
+  return { content: data.content, photoUrl: (n) => `/api/photos/${id}/${n}?v=${v}`, voiceUrl: data.content.voice ? `/api/audio/${id}?v=${v}` : null };
 }
 
 function setupMontage(content, photoUrl) {
@@ -111,8 +111,8 @@ async function main_() {
   if (params.get('preview') === '1') {
     window.addEventListener('message', (e) => {
       if (e.origin !== location.origin || !e.data || e.data.type !== 'preview') return;
-      const { content, photoUrls } = e.data;
-      renderPage(main, content, { photoUrl: (n) => photoUrls[n], preview: true });
+      const { content, photoUrls, voiceUrl } = e.data;
+      renderPage(main, content, { photoUrl: (n) => photoUrls[n], preview: true, voiceUrl });
       $('footer').hidden = false;
       $('report-btn').hidden = true;
     });
@@ -124,10 +124,10 @@ async function main_() {
   const id = m ? m[1] : params.get('id');
   if (!id) return showState('Page introuvable', 'Le lien semble incomplet.');
   try {
-    const { content, photoUrl } = await loadPublished(id);
+    const { content, photoUrl, voiceUrl } = await loadPublished(id);
     applyTheme(content.theme);
     envelope(content, () => {});
-    renderPage(main, content, { photoUrl });
+    renderPage(main, content, { photoUrl, voiceUrl });
     setupMontage(content, photoUrl);
     $('footer').hidden = false;
     setupReport(id);

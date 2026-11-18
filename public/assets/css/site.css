@@ -227,3 +227,12 @@ dialog.montage progress { width: 100%; height: 8px; accent-color: var(--accent);
 .montage-pace input { margin-top: 3px; accent-color: var(--accent); }
 .contact-form { max-width: 560px; }
 .contact-form .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.counter-hint.full { color: var(--accent); font-weight: 700; }
+.opt-badge { font-family: var(--sans); font-size: 12px; font-weight: 700; color: var(--accent); background: var(--soft); border-radius: 999px; padding: 2px 8px; vertical-align: middle; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.voice-rec { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.voice-rec .btn.recording { background: #c62828; animation: recpulse 1.2s ease-in-out infinite; }
+@keyframes recpulse { 50% { box-shadow: 0 0 0 8px rgba(198,40,40,.18); } }
+.voice-timer { font-variant-numeric: tabular-nums; font-weight: 700; color: #c62828; }
+.voice-preview { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
+.voice-preview audio { width: 100%; max-width: 420px; }

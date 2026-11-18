@@ -239,32 +239,46 @@ pages['creer.html'] = layout({
     <fieldset>
       <legend>Pour qui ?</legend>
       <div class="row2">
-        <div class="field"><label for="f-to">Son prénom *</label><input id="f-to" type="text" data-field="to" maxlength="60" placeholder="Léa" required></div>
-        <div class="field"><label for="f-from">De la part de</label><input id="f-from" type="text" data-field="from" maxlength="60" placeholder="Hugo"></div>
+        <div class="field"><label for="f-to">Son prénom *</label><input id="f-to" type="text" data-field="to" maxlength="40" placeholder="Léa" required></div>
+        <div class="field"><label for="f-from">De la part de</label><input id="f-from" type="text" data-field="from" maxlength="40" placeholder="Hugo"></div>
       </div>
     </fieldset>
     <fieldset>
       <legend>L’ouverture</legend>
-      <div class="field"><label for="f-intro">Message sur l’enveloppe</label><input id="f-intro" type="text" data-field="intro" maxlength="160"></div>
-      <div class="field"><label for="f-title">Titre de la page *</label><input id="f-title" type="text" data-field="title" maxlength="120" required></div>
+      <div class="field"><label for="f-intro">Message sur l’enveloppe</label><input id="f-intro" type="text" data-field="intro" maxlength="100"></div>
+      <div class="field"><label for="f-title">Titre de la page *</label><input id="f-title" type="text" data-field="title" maxlength="70" required></div>
     </fieldset>
     <fieldset>
       <legend>Une date qui compte</legend>
       <div class="row2">
         <div class="field"><label for="f-date">Date</label><input id="f-date" type="date" data-field="date"></div>
-        <div class="field"><label for="f-dateLabel">Libellé</label><input id="f-dateLabel" type="text" data-field="dateLabel" maxlength="40" placeholder="Ensemble depuis"></div>
+        <div class="field"><label for="f-dateLabel">Libellé</label><input id="f-dateLabel" type="text" data-field="dateLabel" maxlength="30" placeholder="Ensemble depuis"></div>
       </div>
       <p class="help">Facultatif. La page affiche le nombre de jours écoulés depuis cette date.</p>
     </fieldset>
     <fieldset>
       <legend>Ta lettre</legend>
       <div class="field">
-        <label for="f-letter" class="label">Écris avec ton cœur (les retours à la ligne sont conservés)</label>
-        <textarea id="f-letter" class="letter-input" data-field="letter" maxlength="5000"></textarea>
-        <div class="counter-hint" data-count="f-letter"></div>
+        <label for="f-letter" class="label">Écris avec ton cœur : 200 mots maximum, les retours à la ligne sont conservés</label>
+        <textarea id="f-letter" class="letter-input" data-field="letter" maxlength="1200"></textarea>
         <div class="help">Besoin d’un coup de pouce ? Clique sur une idée :</div>
         <div class="ideas" id="letter-ideas"></div>
       </div>
+    </fieldset>
+    <fieldset id="voice-fieldset">
+      <legend>🎙️ Message vocal <span class="opt-badge">option</span></legend>
+      <p class="help">Enregistre quelques mots avec ta voix (2 minutes maximum). C’est souvent ce qui touche le plus.</p>
+      <div class="voice-rec">
+        <button type="button" class="btn" id="voice-rec">● Enregistrer</button>
+        <label class="btn ghost" for="voice-file">Importer un fichier audio</label>
+        <input id="voice-file" class="sr-only" type="file" accept="audio/*">
+        <span class="voice-timer" id="voice-timer" hidden>0:00</span>
+      </div>
+      <div class="voice-preview" id="voice-preview" hidden>
+        <audio id="voice-audio" controls preload="metadata"></audio>
+        <button type="button" class="btn ghost small" id="voice-del">Supprimer le message</button>
+      </div>
+      <p class="help" id="voice-status" role="status"></p>
     </fieldset>
     <fieldset>
       <legend>Photos <span id="photo-count" style="font-size:15px;color:var(--muted)"></span></legend>
@@ -295,14 +309,14 @@ pages['creer.html'] = layout({
     </fieldset>
     <fieldset>
       <legend>Le mot de la fin</legend>
-      <div class="field"><label for="f-finalMessage">Message final</label><textarea id="f-finalMessage" data-field="finalMessage" maxlength="600" rows="3"></textarea></div>
+      <div class="field"><label for="f-finalMessage">Message final</label><textarea id="f-finalMessage" data-field="finalMessage" maxlength="250" rows="3"></textarea></div>
     </fieldset>
     <fieldset>
       <legend>Question secrète <span style="font-size:15px;color:var(--muted)">(facultatif)</span></legend>
       <p class="help">La page ne s’ouvre qu’avec la bonne réponse (majuscules et accents ignorés). C’est un jeu, pas une protection forte.</p>
       <div class="row2">
-        <div class="field"><label for="f-question">Question</label><input id="f-question" type="text" maxlength="140" placeholder="Où s’est-on rencontrés ?"></div>
-        <div class="field"><label for="f-answer">Réponse</label><input id="f-answer" type="text" maxlength="100" autocomplete="off" placeholder="au café de la place"></div>
+        <div class="field"><label for="f-question">Question</label><input id="f-question" type="text" maxlength="100" placeholder="Où s’est-on rencontrés ?"></div>
+        <div class="field"><label for="f-answer">Réponse</label><input id="f-answer" type="text" maxlength="60" autocomplete="off" placeholder="au café de la place"></div>
       </div>
     </fieldset>
     <p style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn ghost small" id="reset-btn" hidden>Recommencer à zéro</button><button type="button" class="btn ghost small" id="delete-btn" hidden>Supprimer ma page</button></p>

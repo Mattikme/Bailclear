@@ -180,6 +180,7 @@ function reasons(content, occ) {
 }
 
 const YT_ORIGIN = 'https://www.youtube-nocookie.com';
+let currentMusic = null;
 
 // Bandeau musique fixé en haut de la page. Le lecteur est préchargé (sans son) dès l'affichage,
 // puis play() le lance au moment du clic sur « Ouvrir » : le démarrage est quasi immédiat.
@@ -190,6 +191,7 @@ export function mountMusic(content) {
   const existing = document.querySelector('.music-bar');
   if (existing && existing.dataset.key === key) return existing._ctrl;
   if (existing) existing.remove();
+  currentMusic = null;
   if (!m) return null;
 
   const common = {
@@ -203,7 +205,7 @@ export function mountMusic(content) {
   if (m.provider === 'spotify') {
     const iframe = el('iframe', { ...common, src: `https://open.spotify.com/embed/${m.kind}/${m.id}?theme=0` });
     bar = el('div', { class: 'music-bar spotify', 'aria-label': 'Notre chanson' }, iframe);
-    ctrl = { play() {} }; // Spotify ne permet pas de lancer la lecture à distance.
+    ctrl = { play() {}, pause() {}, resume() {} }; // Spotify ne se pilote pas à distance.
   } else {
     const params = new URLSearchParams({ enablejsapi: '1', rel: '0', playsinline: '1', loop: '1', playlist: m.id, origin: location.origin });
     if (start) params.set('start', String(start));
@@ -237,7 +239,10 @@ export function mountMusic(content) {
       if (state === 2) { bar.classList.remove('playing'); status.textContent = 'En pause'; }
     };
     window.addEventListener('message', onMsg);
+    let wasPlaying = false;
     ctrl = {
+      pause() { wasPlaying = bar.classList.contains('playing'); post({ event: 'command', func: 'pauseVideo', args: [] }); },
+      resume() { if (wasPlaying) playNow(); },
       play() {
         wanted = true;
         if (ready) playNow();
@@ -247,13 +252,47 @@ export function mountMusic(content) {
   }
   bar.dataset.key = key;
   bar._ctrl = ctrl;
+  currentMusic = ctrl;
   const main = document.querySelector('main');
   if (main && main.parentNode) main.parentNode.insertBefore(bar, main); else document.body.prepend(bar);
   return ctrl;
 }
 
+// Message vocal : lecteur maison (la musique se met en pause pendant l'écoute).
+function voice(content, voiceUrl) {
+  if (!content.voice || !voiceUrl) return null;
+  const fmt = (x) => { const v = Math.max(0, Math.round(x || 0)); return `${Math.floor(v / 60)}:${String(v % 60).padStart(2, '0')}`; };
+  const audio = el('audio', { src: voiceUrl, preload: 'metadata' });
+  const icon = el('span', { class: 'voice-icon', 'aria-hidden': 'true', text: '▶' });
+  const btn = el('button', { class: 'voice-btn', type: 'button', 'aria-label': 'Écouter le message vocal' }, icon);
+  const fill = el('i');
+  const bar = el('div', { class: 'voice-progress' }, fill);
+  const time = el('span', { class: 'voice-time', text: fmt(content.voice.duration) });
+  const waves = el('div', { class: 'voice-wave', 'aria-hidden': 'true' }, Array.from({ length: 24 }, (_, i) => {
+    const b = el('i');
+    b.style.height = `${30 + Math.round(60 * Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.6)))}%`;
+    b.style.animationDelay = `${(i % 6) * 0.12}s`;
+    return b;
+  }));
+  const card = el('div', { class: 'voice-card' }, btn, el('div', { class: 'voice-main' }, waves, bar), time);
+  btn.addEventListener('click', () => {
+    if (audio.paused) { if (currentMusic) currentMusic.pause(); audio.play().catch(() => {}); } else audio.pause();
+  });
+  audio.addEventListener('play', () => { card.classList.add('playing'); icon.textContent = '❚❚'; btn.setAttribute('aria-label', 'Mettre en pause'); });
+  audio.addEventListener('pause', () => { card.classList.remove('playing'); icon.textContent = '▶'; btn.setAttribute('aria-label', 'Écouter le message vocal'); });
+  audio.addEventListener('ended', () => { fill.style.width = '0%'; time.textContent = fmt(content.voice.duration); if (currentMusic) currentMusic.resume(); });
+  audio.addEventListener('timeupdate', () => {
+    const d = audio.duration && Number.isFinite(audio.duration) ? audio.duration : content.voice.duration;
+    fill.style.width = `${Math.min(100, (audio.currentTime / d) * 100)}%`;
+    time.textContent = fmt(d - audio.currentTime);
+  });
+  return el('section', { class: 'block voice reveal' },
+    el('h2', { text: `🎙️ ${content.from ? `${content.from} a un message pour toi` : 'Un message pour toi'}` }),
+    card, audio);
+}
+
 // Construit la page complète dans `root`.
-export function renderPage(root, content, { photoUrl, preview = false } = {}) {
+export function renderPage(root, content, { photoUrl, preview = false, voiceUrl = null } = {}) {
   const occ = getOccasion(content.occasion);
   applyTheme(content.theme);
   document.title = content.title || 'Une page pour toi';
@@ -265,6 +304,7 @@ export function renderPage(root, content, { photoUrl, preview = false } = {}) {
       content.from ? el('p', { class: 'from', text: `de la part de ${content.from}` }) : null,
       counter(content)),
     content.letter ? el('section', { class: 'block letter reveal unfold' }, paragraphs(content.letter), content.from ? el('p', { class: 'signature', text: `— ${content.from}` }) : null) : null,
+    voice(content, voiceUrl),
     gallery(content, photoUrl),
     timeline(content, occ),
     reasons(content, occ),

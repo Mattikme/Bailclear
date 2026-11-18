@@ -2,6 +2,7 @@ import { OCCASIONS, THEMES, getOccasion } from './occasions.js';
 import { musicEmbed, sha256Hex, normalizeAnswer, startFromUrl } from './render.js';
 import { idbGet, idbSet, idbDel, listPages, rememberPage } from './storage.js';
 import { isFreeLaunch, FREE_UNTIL_LABEL } from './launch.js';
+import { LIMITS } from './limits.js';
 
 const FREE = isFreeLaunch();
 
@@ -18,6 +19,10 @@ let photoBlobs = [];
 let photoUrls = [];
 let serverStatus = null;
 let dirty = false;
+let voiceBlob = null;
+let voiceUrl = null;
+let voiceDirty = false;
+let serverHadVoice = false;
 let pendingOccasion = null;
 
 function blankState(occId) {
@@ -25,7 +30,7 @@ function blankState(occId) {
   return {
     occasion: occ.id, theme: occ.theme, to: '', from: '',
     title: occ.defaults.title, intro: occ.defaults.intro, date: '', dateLabel: occ.defaults.dateLabel,
-    letter: '', photos: [], timeline: [], reasons: [], music: '', musicStart: 0, finalMessage: occ.defaults.finalMessage,
+    letter: '', photos: [], timeline: [], reasons: [], music: '', musicStart: 0, voice: null, finalMessage: occ.defaults.finalMessage,
     secret: { question: '', answer: '', answerHash: '' },
   };
 }
@@ -43,7 +48,7 @@ function pushPreview() {
   previewTimer = setTimeout(() => {
     if (!previewReady) return;
     const content = { ...state, secret: null };
-    iframe.contentWindow.postMessage({ type: 'preview', content, photoUrls }, location.origin);
+    iframe.contentWindow.postMessage({ type: 'preview', content, photoUrls, voiceUrl }, location.origin);
   }, 200);
 }
 
@@ -56,7 +61,7 @@ function changed() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
     try {
-      await idbSet('draft', { state, photos: photoBlobs, savedAt: Date.now() });
+      await idbSet('draft', { state, photos: photoBlobs, voice: voiceBlob, savedAt: Date.now() });
       setStatus('Brouillon enregistré sur cet appareil');
     } catch { setStatus('Brouillon non enregistré (stockage indisponible)'); }
   }, 400);
@@ -90,12 +95,34 @@ function bindFields() {
   if (isEdit && state.secret.answerHash) $('f-answer').placeholder = 'Réponse inchangée (laisse vide pour la garder)';
   updateCounters();
   checkMusic();
+  attachCounters();
 }
 function setStartFields(total) {
   const t = Math.max(0, Math.floor(total || 0));
   $('f-musicMin').value = t ? String(Math.floor(t / 60)) : '';
   $('f-musicSec').value = t ? String(t % 60).padStart(2, '0') : '';
 }
+// Compteur « 45 / 90 » sous un champ, visible à partir de 60 % de la limite (toujours visible pour la lettre).
+function counterFor(input) {
+  if (!input || input.dataset.counted) return;
+  input.dataset.counted = '1';
+  const c = document.createElement('div');
+  c.className = 'counter-hint';
+  input.after(c);
+  const upd = () => {
+    const max = input.maxLength;
+    const n = input.value.length;
+    c.textContent = `${n} / ${max}`;
+    c.hidden = input.id !== 'f-letter' && n < max * 0.6;
+    c.classList.toggle('full', n >= max);
+  };
+  input.addEventListener('input', upd);
+  upd();
+}
+function attachCounters() {
+  form.querySelectorAll('input[type="text"], textarea').forEach((el) => { if (el.maxLength > 0 && el.id !== 'f-answer') counterFor(el); });
+}
+
 function updateCounters() {
   form.querySelectorAll('[data-count]').forEach((c) => {
     const input = $(c.dataset.count);
@@ -160,7 +187,7 @@ function renderIdeas() {
     state.letter = ta.value; updateCounters(); changed(); ta.focus();
   })));
   $('reason-ideas').replaceChildren(...occ.reasonIdeas.map((t) => mk(t, () => {
-    if (state.reasons.length >= 20) return;
+    if (state.reasons.length >= LIMITS.reasons) return;
     state.reasons.push(t); renderReasons(); changed();
   })));
 }
@@ -178,21 +205,22 @@ function renderReasons() {
   const box = $('reasons-list');
   box.replaceChildren(...state.reasons.map((r, i) => {
     const row = document.createElement('div'); row.className = 'list-item';
-    const input = document.createElement('input'); input.type = 'text'; input.maxLength = 140; input.value = r;
+    const input = document.createElement('input'); input.type = 'text'; input.maxLength = LIMITS.reason; input.value = r;
     input.setAttribute('aria-label', `Élément ${i + 1}`);
     input.oninput = () => { state.reasons[i] = input.value; changed(); };
     row.append(input, iconBtn('Supprimer', '✕', () => { state.reasons.splice(i, 1); renderReasons(); changed(); }));
     return row;
   }));
-  $('add-reason').disabled = state.reasons.length >= 20;
+  $('add-reason').disabled = state.reasons.length >= LIMITS.reasons;
+  attachCounters();
 }
 function renderTimeline() {
   const box = $('timeline-list');
   box.replaceChildren(...state.timeline.map((t, i) => {
     const row = document.createElement('div'); row.className = 'tl-item';
-    const when = document.createElement('input'); when.type = 'text'; when.maxLength = 40; when.placeholder = 'Juin 2022'; when.value = t.when;
+    const when = document.createElement('input'); when.type = 'text'; when.maxLength = LIMITS.when; when.placeholder = 'Juin 2022'; when.value = t.when;
     when.setAttribute('aria-label', `Date du souvenir ${i + 1}`);
-    const text = document.createElement('textarea'); text.maxLength = 300; text.rows = 2; text.placeholder = 'Ce qui s’est passé…'; text.value = t.text;
+    const text = document.createElement('textarea'); text.maxLength = LIMITS.timelineText; text.rows = 2; text.placeholder = 'Ce qui s’est passé…'; text.value = t.text;
     text.setAttribute('aria-label', `Texte du souvenir ${i + 1}`);
     when.oninput = () => { state.timeline[i].when = when.value; changed(); };
     text.oninput = () => { state.timeline[i].text = text.value; changed(); };
@@ -204,7 +232,8 @@ function renderTimeline() {
     row.append(when, text, btns);
     return row;
   }));
-  $('add-timeline').disabled = state.timeline.length >= 12;
+  $('add-timeline').disabled = state.timeline.length >= LIMITS.timeline;
+  attachCounters();
 }
 
 /* ---------- Photos ---------- */
@@ -259,7 +288,7 @@ function renderPhotos() {
   box.replaceChildren(...state.photos.map((p, i) => {
     const row = document.createElement('div'); row.className = 'photo-item';
     const img = document.createElement('img'); img.src = photoUrls[i]; img.alt = '';
-    const cap = document.createElement('input'); cap.type = 'text'; cap.maxLength = 140; cap.placeholder = 'Légende (facultatif)'; cap.value = p.caption;
+    const cap = document.createElement('input'); cap.type = 'text'; cap.maxLength = LIMITS.caption; cap.placeholder = 'Légende (facultatif)'; cap.value = p.caption;
     cap.setAttribute('aria-label', `Légende de la photo ${i + 1}`);
     cap.oninput = () => { state.photos[i].caption = cap.value; changed(); };
     const btns = document.createElement('div'); btns.className = 'icon-btns';
@@ -275,6 +304,7 @@ function renderPhotos() {
   }));
   $('photo-count').textContent = `${state.photos.length} / ${MAX_PHOTOS}`;
   $('photo-input').disabled = state.photos.length >= MAX_PHOTOS;
+  attachCounters();
 }
 
 function setupDropzone() {
@@ -283,6 +313,106 @@ function setupDropzone() {
   dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('drag'); });
   dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
   dz.addEventListener('drop', (e) => { e.preventDefault(); dz.classList.remove('drag'); addFiles(e.dataTransfer.files); });
+}
+
+/* ---------- Message vocal ---------- */
+const MAX_VOICE = 120; // secondes
+const MAX_VOICE_BYTES = 3 * 1024 * 1024;
+const fmtSec = (x) => { const v = Math.max(0, Math.round(x || 0)); return `${Math.floor(v / 60)}:${String(v % 60).padStart(2, '0')}`; };
+function voiceStatus(t, err = false) { const s = $('voice-status'); s.textContent = t; s.classList.toggle('error-text', err); }
+
+function setVoiceBlob(blob, duration, markDirty = true) {
+  if (voiceUrl) URL.revokeObjectURL(voiceUrl);
+  voiceBlob = blob;
+  voiceUrl = blob ? URL.createObjectURL(blob) : null;
+  state.voice = blob ? { duration: Math.max(1, Math.min(MAX_VOICE, Math.round(duration))) } : null;
+  if (markDirty) voiceDirty = true;
+  renderVoice();
+}
+function renderVoice() {
+  const has = Boolean(voiceBlob);
+  $('voice-preview').hidden = !has;
+  if (has) { $('voice-audio').src = voiceUrl; voiceStatus(`Message vocal de ${fmtSec(state.voice.duration)} prêt. Il apparaît sous la lettre.`); }
+  $('voice-rec').textContent = has ? '● Réenregistrer' : '● Enregistrer';
+}
+function audioDuration(blob) {
+  return new Promise((resolve) => {
+    const a = new Audio();
+    a.preload = 'metadata';
+    a.onloadedmetadata = () => {
+      if (Number.isFinite(a.duration)) return resolve(a.duration);
+      // WebM enregistré : la durée n'est connue qu'après un saut à la fin
+      a.currentTime = 1e7;
+      a.ontimeupdate = () => { a.ontimeupdate = null; resolve(a.duration); };
+    };
+    a.onerror = () => resolve(0);
+    a.src = URL.createObjectURL(blob);
+  });
+}
+
+function setupVoice() {
+  let rec = null;
+  let stream = null;
+  let timer = null;
+  let t0 = 0;
+  const stop = () => { if (rec && rec.state !== 'inactive') rec.stop(); };
+  $('voice-rec').onclick = async () => {
+    if (rec && rec.state === 'recording') return stop();
+    if (!navigator.mediaDevices || !window.MediaRecorder) { voiceStatus('Ton navigateur ne permet pas d’enregistrer ici : importe plutôt un fichier audio (mémo vocal).', true); return; }
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+    } catch {
+      voiceStatus('Micro refusé : autorise le micro pour ce site dans ton navigateur, ou importe un mémo vocal.', true);
+      return;
+    }
+    const type = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'].find((t) => MediaRecorder.isTypeSupported(t)) || '';
+    rec = new MediaRecorder(stream, type ? { mimeType: type, audioBitsPerSecond: 64000 } : undefined);
+    const chunks = [];
+    rec.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+    rec.onstop = () => {
+      clearInterval(timer);
+      stream.getTracks().forEach((tr) => tr.stop());
+      $('voice-rec').classList.remove('recording');
+      $('voice-timer').hidden = true;
+      const secs = (Date.now() - t0) / 1000;
+      const blob = new Blob(chunks, { type: (rec.mimeType || type || 'audio/webm').split(';')[0] });
+      rec = null;
+      if (secs < 1 || !blob.size) { voiceStatus('Enregistrement trop court, réessaie.', true); renderVoice(); return; }
+      if (blob.size > MAX_VOICE_BYTES) { voiceStatus('Enregistrement trop lourd, fais plus court.', true); renderVoice(); return; }
+      setVoiceBlob(blob, secs);
+      changed();
+    };
+    rec.start(250);
+    t0 = Date.now();
+    $('voice-rec').textContent = '■ Arrêter';
+    $('voice-rec').classList.add('recording');
+    $('voice-timer').hidden = false;
+    $('voice-timer').textContent = '0:00';
+    voiceStatus(`Enregistrement en cours… (${fmtSec(MAX_VOICE)} maximum)`);
+    timer = setInterval(() => {
+      const s = (Date.now() - t0) / 1000;
+      $('voice-timer').textContent = fmtSec(s);
+      if (s >= MAX_VOICE) stop();
+    }, 250);
+  };
+  $('voice-file').onchange = async (e) => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    if (!f.type.startsWith('audio/') && !/\.(m4a|mp3|wav|ogg|webm|aac)$/i.test(f.name)) { voiceStatus('Ce fichier n’est pas un audio.', true); return; }
+    if (f.size > MAX_VOICE_BYTES) { voiceStatus('Fichier trop lourd (3 Mo maximum, soit environ 2 minutes).', true); return; }
+    const d = await audioDuration(f);
+    if (!d) { voiceStatus('Impossible de lire ce fichier audio. Essaie un mémo vocal en .m4a ou .mp3.', true); return; }
+    if (d > MAX_VOICE + 1) { voiceStatus(`Ce message dure ${fmtSec(d)} : 2 minutes maximum.`, true); return; }
+    setVoiceBlob(f, d);
+    changed();
+  };
+  $('voice-del').onclick = () => { setVoiceBlob(null, 0); voiceStatus('Message vocal supprimé.'); changed(); };
+  renderVoice();
+}
+
+async function uploadVoice(id, token) {
+  await api(`/api/audio/${id}`, { method: 'PUT', headers: { 'content-type': voiceBlob.type || 'audio/mp4' }, body: voiceBlob }, token);
 }
 
 /* ---------- Envoi ---------- */
@@ -375,6 +505,7 @@ function setupPublish() {
       const { id, token } = created;
       rememberPage({ id, token, title: state.title, to: state.to, createdAt: Date.now(), free: Boolean(created.free) });
       await uploadPhotos(id, token, progress);
+      if (voiceBlob) { progress('Envoi du message vocal…'); await uploadVoice(id, token); }
       if (created.free) { dirty = false; location.href = `/merci?id=${id}&session_id=gratuit`; return; }
       progress('Redirection vers le paiement sécurisé…');
       const { url } = await api('/api/checkout', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id }) }, token);
@@ -397,6 +528,9 @@ async function saveEdit() {
     setStatus('Enregistrement…');
     await api(`/api/pages/${editId}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ content: await serverContent() }) }, editToken);
     await uploadPhotos(editId, editToken, setStatus);
+    if (voiceBlob && voiceDirty) { setStatus('Envoi du message vocal…'); await uploadVoice(editId, editToken); }
+    if (!voiceBlob && serverHadVoice) { await api(`/api/audio/${editId}`, { method: 'DELETE' }, editToken); serverHadVoice = false; }
+    voiceDirty = false;
     dirty = false;
     setStatus('Modifications enregistrées ✓');
     notice(serverStatus === 'paid' ? 'Modifications enregistrées. Elles peuvent mettre quelques minutes à apparaître sur la page.' : 'Modifications enregistrées.', 'ok');
@@ -428,6 +562,10 @@ async function loadEdit() {
       photoBlobs.push(blob); photoUrls.push(URL.createObjectURL(blob));
     }
     state.photos = state.photos.slice(0, photoBlobs.length);
+    if (c.voice) {
+      const res = await fetch(`/api/audio/${editId}`, { headers: { authorization: `Bearer ${editToken}` }, cache: 'no-store' });
+      if (res.ok) { setVoiceBlob(await res.blob(), c.voice.duration, false); serverHadVoice = true; } else state.voice = null;
+    }
     setStatus('Page chargée');
   } catch (e) {
     notice(e.message, 'error');
@@ -457,6 +595,7 @@ async function loadDraft() {
     if (d && d.state) {
       state = { ...blankState(d.state.occasion), ...d.state };
       photoBlobs = d.photos || [];
+      if (d.voice && d.state.voice) setVoiceBlob(d.voice, d.state.voice.duration, false); else state.voice = null;
       photoUrls = photoBlobs.map((b) => URL.createObjectURL(b));
       state.photos = state.photos.slice(0, photoBlobs.length);
       setStatus('Brouillon retrouvé sur cet appareil');
@@ -504,7 +643,7 @@ async function init() {
   if (isEdit) await loadEdit(); else await loadDraft();
   renderOccasions(); bindFields(); renderPhotos(); renderTimeline(); renderReasons();
   if (pendingOccasion) switchOccasion(pendingOccasion);
-  setupDropzone(); setupPublish(); setupMisc(); renderMyPages();
+  setupDropzone(); setupVoice(); setupPublish(); setupMisc(); renderMyPages();
   iframe.src = '/voir?preview=1';
   dirty = false;
 }

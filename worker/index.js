@@ -11,6 +11,7 @@ import * as admin from '../functions/api/admin/[[path]].js';
 import * as hit from '../functions/api/hit.js';
 import * as stats from '../functions/api/stats.js';
 import * as contact from '../functions/api/contact.js';
+import * as audio from '../functions/api/audio/[id].js';
 export { Stats } from './stats.js';
 
 const ROUTES = [
@@ -24,14 +25,15 @@ const ROUTES = [
   [/^\/api\/hit$/, hit, []],
   [/^\/api\/stats$/, stats, []],
   [/^\/api\/contact$/, contact, []],
+  [/^\/api\/audio\/([^/]+)$/, audio, ['id']],
   [/^\/api\/admin\/(.+)$/, admin, ['path']],
 ];
 
 const SECURITY = {
   'x-content-type-options': 'nosniff',
   'referrer-policy': 'strict-origin-when-cross-origin',
-  'permissions-policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
-  'content-security-policy': "default-src 'self'; img-src 'self' data: blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-src 'self' https://www.youtube-nocookie.com https://open.spotify.com; media-src 'self' blob:; form-action 'self'; base-uri 'self'; frame-ancestors 'self'; object-src 'none'",
+  'permissions-policy': 'camera=(), microphone=(self), geolocation=(), interest-cohort=()',
+  'content-security-policy': "default-src 'self'; img-src 'self' data: blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' blob:; frame-src 'self' https://www.youtube-nocookie.com https://open.spotify.com; media-src 'self' blob:; form-action 'self'; base-uri 'self'; frame-ancestors 'self'; object-src 'none'",
 };
 const NOINDEX = /^\/(p\/|voir|merci|admin)/;
 const NO_REFERRER = /^\/(p\/|merci|creer)/;
