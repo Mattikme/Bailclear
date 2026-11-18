@@ -422,6 +422,7 @@ pages['merci.html'] = layout({
       <h2 id="video-title">🎬 La vidéo souvenir</h2>
       <p class="send-sub">Un petit film de ta page (lettre, photos, souvenirs), à télécharger ou à partager sur TikTok, Instagram, Snapchat… Gratuit.</p>
       <button class="btn" id="video-btn" type="button">Créer la vidéo</button>
+      <button class="btn ghost" id="wallpaper-btn" type="button" hidden>📱 Créer un fond d’écran</button>
     </section>
     <h2>Le QR code</h2>
     <div class="qr" id="qr"></div>

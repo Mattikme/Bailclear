@@ -126,6 +126,16 @@ function setupMontage(content, photoUrl) {
   p.className = 'hint';
   p.textContent = 'Un petit film de cette page, gratuit, à télécharger ou à partager sur TikTok, Instagram, Snapchat…';
   block.append(btn, p);
+  if (content.photos && content.photos.length) {
+    const wp = document.createElement('button');
+    wp.type = 'button'; wp.className = 'btn secondary';
+    wp.textContent = '📱 Créer un fond d’écran';
+    wp.addEventListener('click', async () => { const { openWallpaper } = await import('./wallpaper-ui.js'); openWallpaper(content, photoUrl); });
+    const p2 = document.createElement('p');
+    p2.className = 'hint';
+    p2.textContent = 'Vos photos en fond d’écran de téléphone, l’heure reste lisible.';
+    block.append(wp, p2);
+  }
   main.append(block);
   btn.addEventListener('click', async () => {
     const { openMontage } = await import('./montage-ui.js');

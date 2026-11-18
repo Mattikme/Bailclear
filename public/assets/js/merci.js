@@ -84,7 +84,7 @@ function setupVideo(data, token) {
   box.hidden = false;
   const v = encodeURIComponent(data.updatedAt || '');
   let photoUrl = (n) => `/api/photos/${id}/${n}?v=${v}`;
-  $('video-btn').onclick = async () => {
+  const ensurePhotos = async () => {
     if (token && data.content.openAt && !photoUrl.ready) {
       const urls = [];
       for (let n = 0; n < (data.content.photos || []).length; n++) {
@@ -93,9 +93,20 @@ function setupVideo(data, token) {
       }
       photoUrl = Object.assign((n) => urls[n], { ready: true });
     }
+  };
+  $('video-btn').onclick = async () => {
+    await ensurePhotos();
     const { openMontage } = await import('./montage-ui.js');
     openMontage(data.content, photoUrl);
   };
+  if ((data.content.photos || []).length) {
+    $('wallpaper-btn').hidden = false;
+    $('wallpaper-btn').onclick = async () => {
+      await ensurePhotos();
+      const { openWallpaper } = await import('./wallpaper-ui.js');
+      openWallpaper(data.content, photoUrl);
+    };
+  }
 }
 
 async function setupGroupInvite(content, token) {
