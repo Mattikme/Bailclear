@@ -57,7 +57,7 @@ ${scripts}
   <nav class="nav" aria-label="Navigation principale">
     <a href="/#occasions">Occasions</a>
     <a href="/#prix">Prix</a>
-    <a href="/idees">Idées</a>
+    <a class="nav-ideas" href="/idees">💡 Idées<span class="hide-xs"> cadeaux</span></a>
     <a href="/#faq">FAQ</a>
     <a class="btn small" href="/creer">Créer ma page</a>
   </nav>
@@ -160,6 +160,8 @@ function crumbsHtml(items) {
 }
 const frDate = (iso) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
+const FOR_OCC = { 'saint-valentin': 'la Saint-Valentin', 'anniversaire-de-couple': 'votre anniversaire de couple', anniversaire: 'son anniversaire', 'fete-des-meres': 'la fête des mères', 'fete-des-peres': 'la fête des pères', 'fete-des-grands-meres': 'la fête des grands-mères', noel: 'Noël', demande: 'ta demande', remerciements: 'dire merci' };
+
 // Dates des prochaines fêtes (à mettre à jour chaque année).
 const WHEN = {
   'saint-valentin': 'La Saint-Valentin 2027 tombe le dimanche 14 février.',
@@ -188,6 +190,24 @@ function giftGrid(items) {
   <div class="gift-body"><span class="gift-budget">${esc(g.budget)}</span><h3>${esc(g.name)}</h3><p>${esc(g.why)}</p>
   <div class="gift-links">${shopLinks(g.query).map((l) => `<a href="${esc(l.url)}" target="_blank" rel="${l.aff ? 'sponsored ' : ''}nofollow noopener">Voir sur ${l.name}</a>`).join('')}</div></div>
 </div>`).join('')}</div>`;
+}
+
+// Cartes de guides réutilisées sur l'accueil, les pages occasions et /idees.
+function guideCard(g) {
+  const o = OCCASIONS.find((x) => x.id === g.occasion);
+  return `<a class="guide-card" href="/idees/${g.slug}"><span class="guide-emoji" aria-hidden="true">${g.emoji}</span><span class="guide-tag">${g.kind === 'cadeaux' ? '🎁 Idées cadeaux' : '✍️ Textes'} · ${esc(o.label.replace(/ \(.*\)$/, ''))}</span><strong>${esc(g.title)}</strong><span class="guide-desc">${esc(g.description)}</span><span class="guide-more">Lire le guide →</span></a>`;
+}
+function inspiration({ title = '💡 En manque d’inspiration ?', sub = 'Tu ne sais pas quoi offrir, ou pas quoi écrire ? Nos guides gratuits sont là pour t’aider.', list = GUIDES.slice(0, 3) } = {}) {
+  return `<section class="section inspiration"><div class="wrap">
+  <h2>${title}</h2>
+  <p class="sub">${sub}</p>
+  <div class="insp-doors">
+    <a class="insp-door" href="/idees#cadeaux"><span aria-hidden="true">🎁</span><strong>Je ne sais pas quoi offrir</strong><em>Idées cadeaux par occasion et par budget</em></a>
+    <a class="insp-door" href="/idees#textes"><span aria-hidden="true">✍️</span><strong>Je ne sais pas quoi écrire</strong><em>Lettres, messages et textes à reprendre</em></a>
+  </div>
+  <div class="guide-grid">${list.map(guideCard).join('')}</div>
+  <p style="text-align:center;margin-top:20px"><a class="btn ghost" href="/idees">Voir toutes nos idées →</a></p>
+</div></section>`;
 }
 
 function guideSection(sec) {
@@ -240,7 +260,15 @@ pages['idees.html'] = layout({
 ${crumbsHtml([['Accueil', '/'], ['Idées', '/idees']])}
 <h1>Idées de textes et de cadeaux</h1>
 <p class="lead">Trouver les bons mots n’est pas toujours facile. Nos guides gratuits te donnent des méthodes simples et des exemples à adapter, pour une lettre, une carte ou une page cadeau.</p>
-<div class="guide-list">${GUIDES.map((g) => { const o = OCCASIONS.find((x) => x.id === g.occasion); return `<a class="guide-card" href="/idees/${g.slug}"><span class="guide-tag">${o.emoji} ${esc(o.label)}</span><strong>${esc(g.title)}</strong><span>${esc(g.description)}</span></a>`; }).join('\n')}</div>
+<div class="insp-doors">
+  <a class="insp-door" href="#cadeaux"><span aria-hidden="true">🎁</span><strong>Je ne sais pas quoi offrir</strong><em>Idées cadeaux par occasion et par budget</em></a>
+  <a class="insp-door" href="#textes"><span aria-hidden="true">✍️</span><strong>Je ne sais pas quoi écrire</strong><em>Lettres, messages et textes à reprendre</em></a>
+</div>
+<h2 id="cadeaux">🎁 Idées cadeaux</h2>
+<div class="guide-grid">${GUIDES.filter((g) => g.kind === 'cadeaux').map(guideCard).join('')}</div>
+<h2 id="textes">✍️ Textes et messages</h2>
+<div class="guide-grid">${GUIDES.filter((g) => g.kind === 'textes').map(guideCard).join('')}</div>
+<div class="cta-box"><p class="cta-title">💌 Et si ton cadeau, c’était tes mots ?</p><p>Réunis ta lettre, vos photos, vos souvenirs et votre chanson sur une page qui s’ouvre comme une enveloppe.</p><p><a class="btn" href="/creer">Créer ma page</a></p></div>
 </main>`,
 });
 
@@ -262,6 +290,7 @@ pages['index.html'] = layout({
   </div>
   <div class="phone"><iframe src="/p/demo" title="Exemple de page" loading="lazy"></iframe></div>
 </section>
+${inspiration({ list: [...GUIDES.filter((g) => g.kind === 'cadeaux'), ...GUIDES.filter((g) => g.kind === 'textes')].slice(0, 3) })}
 <section class="section"><div class="wrap">
   <h2>Comment ça marche</h2>
   <p class="sub">Pas besoin d’être doué(e) en informatique : si tu sais écrire un message, tu sais créer ta page.</p>
@@ -308,6 +337,7 @@ for (const o of OCCASIONS) {
   </div>
   <div class="phone"><iframe src="/p/demo" title="Exemple de page" loading="lazy"></iframe></div>
 </section>
+${inspiration({ title: `💡 Pas encore d’idée pour ${FOR_OCC[o.id] || 'ton cadeau'} ?`, list: [...GUIDES.filter((g) => g.occasion === o.id), ...GUIDES.filter((g) => g.occasion !== o.id && g.kind === 'cadeaux')].slice(0, 3) })}
 <section class="section"><div class="wrap narrow">
   ${WHEN[o.id] ? `<p class="when-note">📅 ${esc(WHEN[o.id])}</p>` : ''}
   <h2>Nos conseils pour une page réussie</h2>

@@ -5,6 +5,7 @@
 export const GUIDES = [
   {
     slug: 'lettre-d-amour',
+    emoji: '💌', kind: 'textes',
     occasion: 'saint-valentin',
     date: '2026-11-18',
     title: 'Comment écrire une lettre d’amour : conseils et 12 exemples',
@@ -46,6 +47,7 @@ export const GUIDES = [
   },
   {
     slug: 'raisons-pour-lesquelles-je-t-aime',
+    emoji: '💞', kind: 'textes',
     occasion: 'saint-valentin',
     date: '2026-11-18',
     title: '50 raisons pour lesquelles je t’aime : idées pour ton couple',
@@ -75,6 +77,7 @@ export const GUIDES = [
   },
   {
     slug: 'idees-cadeau-saint-valentin',
+    emoji: '🎁', kind: 'cadeaux',
     occasion: 'saint-valentin',
     date: '2026-11-18',
     title: 'Idées cadeau Saint-Valentin originales et pas chères (2027)',
@@ -110,6 +113,7 @@ export const GUIDES = [
   },
   {
     slug: 'texte-fete-des-meres',
+    emoji: '💐', kind: 'textes',
     occasion: 'fete-des-meres',
     date: '2026-11-18',
     title: 'Texte pour la fête des mères : 25 messages pour maman (2027)',
@@ -136,6 +140,7 @@ export const GUIDES = [
   },
   {
     slug: 'idees-cadeau-fete-des-meres',
+    emoji: '🌸', kind: 'cadeaux',
     occasion: 'fete-des-meres',
     date: '2026-11-18',
     title: 'Idées cadeau fête des mères originales (2027) : 15 idées pour maman',
@@ -164,6 +169,7 @@ export const GUIDES = [
   },
   {
     slug: 'texte-anniversaire-de-couple',
+    emoji: '🥂', kind: 'textes',
     occasion: 'anniversaire-de-couple',
     date: '2026-11-18',
     title: 'Texte d’anniversaire de couple : messages pour 1 an, 5 ans, 10 ans…',
@@ -187,6 +193,7 @@ export const GUIDES = [
   },
   {
     slug: 'message-anniversaire',
+    emoji: '🎂', kind: 'textes',
     occasion: 'anniversaire',
     date: '2026-11-18',
     title: 'Message d’anniversaire original : 30 idées pour un ami, ta sœur, ton frère…',
@@ -213,6 +220,7 @@ export const GUIDES = [
   },
   {
     slug: 'cadeau-noel-derniere-minute',
+    emoji: '🎄', kind: 'cadeaux',
     occasion: 'noel',
     date: '2026-11-18',
     title: 'Cadeau de Noël de dernière minute : 15 idées qui ne font pas « oubli »',
