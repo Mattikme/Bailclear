@@ -1,0 +1,45 @@
+# Déploiement en Worker Cloudflare (site + API dans un seul Worker) : npm run deploy:worker
+name = "unepagepourtoi"
+main = "worker/index.js"
+compatibility_date = "2025-09-01"
+workers_dev = false # l'adresse *.workers.dev est coupée : le site n'est servi que sur unepagepourtoi.fr
+preview_urls = false
+
+rules = [
+  { type = "Data", globs = ["**/*.png", "**/*.jpg", "**/*.mp4"], fallthrough = false },
+]
+
+# Formulaire de contact : envoi vers l'adresse de destination vérifiée (secret CONTACT_TO)
+[[send_email]]
+name = "CONTACT_EMAIL"
+
+[[durable_objects.bindings]]
+name = "STATS"
+class_name = "Stats"
+
+[[durable_objects.bindings]]
+name = "GUESTBOOK"
+class_name = "Guestbook"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Stats"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["Guestbook"]
+
+[[kv_namespaces]]
+binding = "PAGES_KV"
+id = "cb16baada3d8421792cf0bffeda934c4"
+
+# Anti-abus : nombre d'actions par adresse IP et par minute
+[[ratelimits]]
+name = "CREATE_LIMITER"
+namespace_id = "1001"
+simple = { limit = 4, period = 60 }
+
+[[ratelimits]]
+name = "UPLOAD_LIMITER"
+namespace_id = "1002"
+simple = { limit = 40, period = 60 }

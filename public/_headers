@@ -1,0 +1,40 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(self), geolocation=(), interest-cohort=()
+  Content-Security-Policy: default-src 'self'; img-src 'self' data: blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-src 'self' https://www.youtube-nocookie.com https://open.spotify.com; media-src 'self' blob:; form-action 'self'; base-uri 'self'; frame-ancestors 'self'; object-src 'none'
+
+/p/*
+  X-Robots-Tag: noindex, nofollow
+  Referrer-Policy: no-referrer
+
+/voir*
+  X-Robots-Tag: noindex, nofollow
+
+/merci*
+  X-Robots-Tag: noindex
+  Referrer-Policy: no-referrer
+
+/admin*
+  X-Robots-Tag: noindex
+
+/creer*
+  Referrer-Policy: no-referrer
+
+/assets/*
+  Cache-Control: public, max-age=3600
+
+/assets/js/*
+  ! Cache-Control
+  Cache-Control: no-cache
+
+/assets/css/*
+  ! Cache-Control
+  Cache-Control: no-cache
+
+/assets/demo/*
+  ! Cache-Control
+  Cache-Control: no-cache
+
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex

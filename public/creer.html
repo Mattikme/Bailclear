@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Créer ma page — Une page pour toi</title>
+<meta name="description" content="Crée ta page cadeau personnalisée : lettre, photos, souvenirs, musique. Aperçu en direct et gratuit.">
+<link rel="canonical" href="https://unepagepourtoi.fr/creer">
+<meta property="og:title" content="Créer ma page — Une page pour toi">
+<meta property="og:description" content="Crée ta page cadeau personnalisée : lettre, photos, souvenirs, musique. Aperçu en direct et gratuit.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Une page pour toi">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://unepagepourtoi.fr/creer">
+<meta property="og:image" content="https://unepagepourtoi.fr/assets/og-surprise.png">
+<meta property="og:locale" content="fr_FR">
+<meta name="theme-color" content="#d63c72">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/css/site.css">
+<script type="module" src="/assets/js/launch-banner.js"></script>
+<script type="module" src="/assets/js/stats.js"></script>
+
+<script type="module" src="/assets/js/editor.js"></script>
+</head>
+<body>
+<header class="site-header"><div class="wrap">
+  <a class="logo" href="/"><img src="/favicon.svg" alt="" width="28" height="28">Une page pour toi</a>
+  <nav class="nav" aria-label="Navigation principale">
+    <a href="/#occasions">Occasions</a>
+    <a href="/#prix">Prix</a>
+    <a href="/idees">Idées</a>
+    <a href="/#faq">FAQ</a>
+    <a class="btn small" href="/creer">Créer ma page</a>
+  </nav>
+</div></header>
+<main class="editor">
+<div>
+  <div class="notice" id="edit-banner" hidden>Tu modifies une page existante. <a id="view-link" href="#" target="_blank" rel="noopener" hidden>Voir la page en ligne</a></div>
+  <div class="notice" id="my-pages" hidden><strong>Tes pages créées sur cet appareil :</strong><ul style="margin:6px 0 0"></ul></div>
+  <div id="notice" class="notice" hidden role="alert"></div>
+  <form id="editor-form">
+    <fieldset>
+      <legend>L’occasion</legend>
+      <div class="chips" id="occasion-chips"></div>
+      <div class="field"><span class="label">Couleurs</span><div class="swatches" id="theme-swatches"></div></div>
+      <div class="field"><label for="f-lang">🌍 Langue de la page <span class="opt-badge">option</span></label><select id="f-lang"></select><p class="help">Pour offrir la page à quelqu’un qui ne parle pas français : les boutons et titres de la page s’affichent dans cette langue. Tes textes restent tels que tu les écris.</p></div>
+    </fieldset>
+    <fieldset>
+      <legend>Pour qui ?</legend>
+      <div class="row2">
+        <div class="field"><label for="f-to">Son prénom *</label><input id="f-to" type="text" data-field="to" maxlength="40" placeholder="Léa" required></div>
+        <div class="field"><label for="f-from">De la part de</label><input id="f-from" type="text" data-field="from" maxlength="40" placeholder="Hugo"></div>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>L’ouverture</legend>
+      <div class="field"><label for="f-intro">Message sur l’enveloppe</label><input id="f-intro" type="text" data-field="intro" maxlength="100"></div>
+      <div class="field"><label for="f-title">Titre de la page *</label><input id="f-title" type="text" data-field="title" maxlength="70" required></div>
+    </fieldset>
+    <fieldset>
+      <legend>Une date qui compte</legend>
+      <div class="row2">
+        <div class="field"><label for="f-date">Date</label><input id="f-date" type="date" data-field="date"></div>
+        <div class="field"><label for="f-dateLabel">Libellé</label><input id="f-dateLabel" type="text" data-field="dateLabel" maxlength="30" placeholder="Ensemble depuis"></div>
+      </div>
+      <p class="help">Facultatif. La page affiche le nombre de jours écoulés depuis cette date.</p>
+    </fieldset>
+    <fieldset>
+      <legend>Ta lettre</legend>
+      <div class="field">
+        <label for="f-letter" class="label">Écris avec ton cœur : 200 mots maximum, les retours à la ligne sont conservés</label>
+        <textarea id="f-letter" class="letter-input" data-field="letter" maxlength="1200"></textarea>
+        <div class="help">Besoin d’un coup de pouce ? Clique sur une idée :</div>
+        <div class="ideas" id="letter-ideas"></div>
+      </div>
+    </fieldset>
+    <fieldset id="voice-fieldset">
+      <legend>🎙️ Message vocal <span class="opt-badge premium" data-premium>premium</span></legend>
+      <p class="help">Enregistre quelques mots avec ta voix (2 minutes maximum). C’est souvent ce qui touche le plus.</p>
+      <div class="voice-rec">
+        <button type="button" class="btn" id="voice-rec">● Enregistrer</button>
+        <label class="btn ghost" for="voice-file">Importer un fichier audio</label>
+        <input id="voice-file" class="sr-only" type="file" accept="audio/*">
+        <span class="voice-timer" id="voice-timer" hidden>0:00</span>
+      </div>
+      <div class="voice-preview" id="voice-preview" hidden>
+        <audio id="voice-audio" controls preload="metadata"></audio>
+        <button type="button" class="btn ghost small" id="voice-del">Supprimer le message</button>
+      </div>
+      <p class="help" id="voice-status" role="status"></p>
+    </fieldset>
+    <fieldset>
+      <legend>Photos <span id="photo-count" style="font-size:15px;color:var(--muted)"></span></legend>
+      <label class="dropzone" id="dropzone">
+        <input id="photo-input" type="file" accept="image/*" multiple>
+        📷 <strong>Ajouter des photos</strong><br><span style="font-size:13px">Clique ou glisse tes photos ici (10 maximum)</span>
+      </label>
+      <p class="help" id="photo-status" role="status"></p>
+      <div class="photo-list" id="photo-list"></div>
+      <p class="help">N’ajoute que des photos que tu as le droit de partager, avec l’accord des personnes visibles. Pour un enfant, demande l’accord de ses parents et évite nom complet, école ou adresse.</p>
+    </fieldset>
+    <fieldset>
+      <legend id="timeline-legend">Frise de souvenirs</legend>
+      <p class="help">Facultatif. Des dates et des moments clés.</p>
+      <div id="timeline-list"></div>
+      <button type="button" class="btn ghost small add-btn" id="add-timeline">+ Ajouter un souvenir</button>
+    </fieldset>
+    <fieldset>
+      <legend id="reasons-legend">Liste</legend>
+      <p class="help">Facultatif. Chaque élément devient une carte à retourner.</p>
+      <div id="reasons-list"></div>
+      <button type="button" class="btn ghost small add-btn" id="add-reason">+ Ajouter</button>
+      <div class="ideas" id="reason-ideas"></div>
+    </fieldset>
+    <fieldset>
+      <legend>La chanson</legend>
+      <div class="field"><label for="f-music">Lien YouTube ou Spotify</label><input id="f-music" type="url" data-field="music" maxlength="300" placeholder="https://www.youtube.com/watch?v=…" inputmode="url"><p class="help" id="music-status" role="status"></p><div class="field"><span class="label" id="ms-label">Commencer à</span><div class="time-row" role="group" aria-labelledby="ms-label"><input id="f-musicMin" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" placeholder="0" aria-label="Minutes"><span>min</span><input id="f-musicSec" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" placeholder="00" aria-label="Secondes"><span>sec</span></div><p class="help" id="start-help">Par exemple <strong>1 min 05</strong> pour démarrer au refrain. Astuce : sur YouTube, « Partager › Commencer à » puis colle le lien ici, le moment est repris tout seul.</p></div><p class="help">Conseil : préfère YouTube, qui joue le morceau en entier. Avec Spotify, la personne n’entend qu’un extrait de 30 secondes si elle n’est pas connectée à son compte Spotify.</p></div>
+    </fieldset>
+    <fieldset id="group-fieldset">
+      <legend>👥 Carte de groupe <span class="opt-badge premium" data-premium>premium</span></legend>
+      <label class="check"><input type="checkbox" id="f-group"><span>Inviter d’autres personnes (famille, amis, collègues) à écrire chacune un mot sur la page</span></label>
+      <p class="help">Après la publication, tu reçois un <strong>lien d’invitation</strong> à partager (groupe WhatsApp, e-mail…). Chacun écrit son mot sans voir la page, et tu peux retirer un message. 50 messages maximum.</p>
+      <div id="group-admin" hidden>
+        <div class="share-box"><input id="group-link" type="text" readonly aria-label="Lien d’invitation"><button class="btn small" id="group-copy" type="button">Copier</button></div>
+        <p class="help"><a id="group-wa" href="#" target="_blank" rel="noopener">Partager sur WhatsApp</a></p>
+        <p class="label" id="group-count"></p>
+        <ul class="group-mod" id="group-list"></ul>
+      </div>
+    </fieldset>
+    <fieldset id="quiz-fieldset">
+      <legend>🎮 Mini-jeu : le quiz <span class="opt-badge">option</span></legend>
+      <p class="help">Jusqu’à 5 questions sur vous deux. Coche la bonne réponse : la personne joue et découvre son score.</p>
+      <div id="quiz-list"></div>
+      <button type="button" class="btn ghost small add-btn" id="add-quiz">+ Ajouter une question</button>
+    </fieldset>
+    <fieldset>
+      <legend>Le mot de la fin</legend>
+      <div class="field"><label for="f-finalMessage">Message final</label><textarea id="f-finalMessage" data-field="finalMessage" maxlength="250" rows="3"></textarea></div>
+    </fieldset>
+    <fieldset id="openat-fieldset">
+      <legend>⏰ Ouverture programmée <span class="opt-badge premium" data-premium>premium</span></legend>
+      <p class="help">Envoie le lien quand tu veux : la page reste fermée avec un compte à rebours jusqu’au jour et à l’heure choisis (minuit le jour de son anniversaire, le 24 au soir…).</p>
+      <div class="row2">
+        <div class="field"><label for="f-openAt">S’ouvre le</label><input id="f-openAt" type="datetime-local"></div>
+        <div class="field" style="align-self:end"><button type="button" class="btn ghost small" id="openat-clear" hidden>Retirer la date</button></div>
+      </div>
+      <p class="help" id="openat-status" role="status"></p>
+    </fieldset>
+    <fieldset>
+      <legend>Question secrète <span style="font-size:15px;color:var(--muted)">(facultatif)</span></legend>
+      <p class="help">La page ne s’ouvre qu’avec la bonne réponse (majuscules et accents ignorés). C’est un jeu, pas une protection forte.</p>
+      <div class="row2">
+        <div class="field"><label for="f-question">Question</label><input id="f-question" type="text" maxlength="100" placeholder="Où s’est-on rencontrés ?"></div>
+        <div class="field"><label for="f-answer">Réponse</label><input id="f-answer" type="text" maxlength="60" autocomplete="off" placeholder="au café de la place"></div>
+      </div>
+    </fieldset>
+    <p style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn ghost small" id="reset-btn" hidden>Recommencer à zéro</button><button type="button" class="btn ghost small" id="delete-btn" hidden>Supprimer ma page</button></p>
+  </form>
+</div>
+<aside class="editor-preview" id="preview-pane" aria-label="Aperçu">
+  <div class="phone"><iframe id="preview-frame" title="Aperçu de la page"></iframe></div>
+  <p>Aperçu en direct</p>
+  <button type="button" class="btn close-preview" id="close-preview">Fermer l’aperçu</button>
+</aside>
+</main>
+<div class="publish-bar"><div class="inner">
+  <span class="status"><span id="save-status" role="status"></span><span class="price-line" id="price-line"></span></span>
+  <div class="actions">
+    <button type="button" class="btn ghost preview-toggle" id="preview-toggle">Aperçu</button>
+    <button type="button" class="btn ghost" id="pay-btn" hidden>Payer et publier</button>
+    <button type="button" class="btn" id="publish-btn">Publier — 4,90 €</button>
+  </div>
+</div></div>
+<dialog id="publish-dialog">
+<div id="pub-check">
+  <h2>Tout est bon ? 👀</h2>
+  <p>Relis bien ta page <strong>dans l’aperçu</strong> avant de publier : prénoms, fautes, photos, musique… Une fois le lien envoyé, la personne découvre la page telle qu’elle est.</p>
+  <ul class="pub-recap" id="pub-recap"></ul>
+  <p class="pub-warn" id="pub-warn" hidden></p>
+  <p class="help" style="margin:10px 0 0">Tu pourras encore corriger ta page après, avec ton lien de modification. Mais si la personne l’a déjà ouverte, elle aura vu la première version : mieux vaut tout vérifier maintenant.</p>
+  <div class="dialog-actions">
+    <button type="button" class="btn ghost" id="pub-edit">Modifier encore</button>
+    <button type="button" class="btn ghost" id="pub-preview">Voir l’aperçu</button>
+    <button type="button" class="btn" id="pub-ok">Oui, tout est bon →</button>
+  </div>
+</div>
+<div id="pub-final" hidden>
+  <h2>Publier ta page</h2>
+  <p id="free-info" hidden>🎉 <strong>Offre de lancement</strong> : jusqu’au <span></span>, ta page est publiée <strong>gratuitement</strong>, sans paiement. Elle est hébergée 2 ans et modifiable quand tu veux. Toutes les options, même premium, sont offertes.</p>
+  <p class="pay-only" id="pay-info">Ta page sera en ligne <strong>immédiatement après le paiement</strong> de <strong>4,90 €</strong> (TVA non applicable, art. 293 B du CGI), hébergée 2 ans et modifiable gratuitement.</p>
+  <label class="check"><input type="checkbox" id="c-terms"><span>J’ai lu et j’accepte les <a href="/cgv" target="_blank">conditions générales</a> et les <a href="/regles-de-contenu" target="_blank">règles de contenu</a>, et je confirme avoir le droit de publier ces photos et textes.</span></label>
+  <label class="check"><input type="checkbox" id="c-waiver"><span>Je demande la mise en ligne immédiate de ma page et je reconnais <strong>perdre mon droit de rétractation</strong> dès qu’elle est fournie (art. L221-28 13° du Code de la consommation).</span></label>
+  <p class="pay-only" style="font-size:14px;margin:0">🔒 Paiement sécurisé par Stripe : carte bancaire, Apple Pay, Google Pay. Ta page reste modifiable gratuitement après le paiement, et tu es <strong>satisfait(e) ou remboursé(e) pendant 14 jours</strong>.</p>
+  <p class="progress" id="publish-progress" role="status"></p>
+  <div class="dialog-actions">
+    <button type="button" class="btn ghost" id="publish-cancel">Revenir à ma page</button>
+    <button type="button" class="btn" id="publish-confirm">Payer 4,90 €</button>
+  </div>
+</div>
+</dialog>
+<footer class="site-footer"><div class="wrap">
+  <nav class="footer-links" aria-label="Occasions et idées">
+    <a href="/saint-valentin">Saint-Valentin</a>
+    <a href="/anniversaire-de-couple">Anniversaire de couple</a>
+    <a href="/anniversaire">Anniversaire</a>
+    <a href="/fete-des-meres">Fête des mères</a>
+    <a href="/fete-des-peres">Fête des pères</a>
+    <a href="/fete-des-grands-meres">Fête des grands-mères</a>
+    <a href="/noel">Noël</a>
+    <a href="/demande">Demande</a>
+    <a href="/remerciements">Merci</a>
+    <a href="/idees">Idées et modèles de textes</a>
+  </nav>
+  <span>© 2026 Une page pour toi — fait en France avec ♥</span>
+  <nav aria-label="Liens légaux">
+    <a href="/contact">Contact</a>
+    <a href="/mentions-legales">Mentions légales</a>
+    <a href="/cgv">CGV</a>
+    <a href="/confidentialite">Confidentialité</a>
+    <a href="/regles-de-contenu">Règles de contenu &amp; signalement</a>
+  </nav>
+</div></footer>
+</body>
+</html>

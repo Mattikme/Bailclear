@@ -1,42 +1,59 @@
-# BailClear — application statique Cloudflare Pages
+# Une page pour toi
 
-## Fonctionnalités présentes
-- Calculateur de révision du loyer IRL avec sélection historique des indices INSEE.
-- Contrôles de vigilance sur clause, délai, DPE, reconduction, régime locatif et type de charges.
-- Courrier de notification et avis d'échéance distinct d'une quittance.
-- Calculateur indicatif de prorata calendaire.
-- Espace bailleur local : plusieurs biens, historique, import/export JSON et rappels visibles à l'ouverture.
-- Impression / enregistrement PDF via le navigateur.
+En ligne : https://unepagepourtoi.fr
 
-## Limites réelles
-- Dossiers conservés dans le navigateur : pas de compte, synchronisation serveur, sauvegarde distante ou notification quand le site est fermé.
-- Le dernier rafraîchissement INSEE réussi le 15 novembre 2026 a enregistré 96 observations par territoire, du T4 2002 au T3 2026. Le workflow quotidien poursuit l'actualisation ; un jeu de données âgé de plus de 14 jours bloque le calcul.
-- Le diagnostic est une aide à la vigilance, pas une validation juridique. Le site ne lit pas le bail, n'authentifie pas le DPE et ne vérifie pas les plafonds locaux.
-- Le prorata est une estimation arithmétique ; préavis, remise des clés et contrat peuvent modifier les sommes dues.
-- Paiements, ventes, codes d'activation, comptes, e-mails et stockage privé ne sont pas implémentés.
+Site de **pages cadeaux personnalisées** : lettre, photos, frise de souvenirs, cartes à retourner, compteur de jours, musique (YouTube ou Spotify) et question secrète. La page est offerte par lien ou par QR code (une carte A6 est fournie à imprimer). Prix : **9,90 €**, en paiement unique.
 
-## Bloquants avant toute vente
-1. Faire examiner par un avocat le risque de consultation juridique réglementée lié au diagnostic et au courrier personnalisé.
-2. Renseigner l'identité réelle, forme/statut, adresse, immatriculation, régime TVA et contact du vendeur.
-3. Confirmer les mentions légales et l'entité d'hébergement.
-4. Finaliser la politique RGPD après inventaire des traitements, journaux, traceurs, durées, sous-traitants et transferts.
-5. Mettre en place les informations précontractuelles, prix TTC, caractéristiques, confirmation durable, médiation et rétractation.
-6. Pour une fourniture numérique immédiate, recueillir et conserver les consentements/confirmations requis lorsque l'exception au droit de rétractation s'applique.
-7. Mettre en place une vérification de paiement côté serveur ; aucun déblocage par URL ou code côté navigateur.
-8. Tester le site en navigateur et vérifier la mise en production Cloudflare Pages.
+- **Démarrer (micro-entreprise, Stripe, mise en ligne)** : [`docs/DEMARRAGE.md`](docs/DEMARRAGE.md)
+- **Stratégie, concurrence, plan sur 90 jours, critères d'arrêt** : [`docs/STRATEGIE.md`](docs/STRATEGIE.md)
 
-## Automatisation des données et du droit
-- Les indices sont téléchargés chaque jour depuis l'API SDMX BDM de l'INSEE pour la métropole, la Corse et les territoires de l'article 73.
-- Le moteur sélectionne le dernier IRL publié à la date de signature lorsque le bail ne précise pas le trimestre, puis la dernière observation disponible de ce même trimestre à la date de révision.
-- Les observations provisoires, incohérentes ou trop anciennes sont rejetées ; les cas proches des dates de publication sont suspendus pour contrôle.
-- Le ruleset juridique est versionné et testé. La veille crée des alertes sur les textes officiels, mais aucune interprétation ou modification du droit n'est déployée automatiquement.
+## Fonctionnement
 
-## Déploiement
-Projet statique Cloudflare Pages : preset de framework None, commande de build vide, répertoire de sortie à la racine du dépôt.
+1. L'acheteur crée sa page sur `/creer`. L'aperçu se met à jour en direct et le brouillon reste sur son appareil (IndexedDB).
+2. Au clic sur « Publier », il accepte les CGV et renonce à son droit de rétractation (art. L221-28 13°). Le brouillon est envoyé avec les photos, déjà compressées dans le navigateur et débarrassées de leurs données EXIF/GPS. Le paiement passe ensuite par Stripe Checkout.
+3. La page `/merci` vérifie le paiement **côté serveur** auprès de Stripe ; le webhook sert de filet de sécurité. La page devient publique sur `/p/<id>` pour 2 ans.
+4. Un lien secret `/creer?edit=<id>#t=<jeton>` permet de modifier ou supprimer la page. Seule l'empreinte SHA-256 du jeton est stockée.
+5. Chaque page a un bouton « Signaler », traité dans la console `/admin`.
 
-## Références
-- INSEE, API BDM SDMX : https://www.insee.fr/fr/information/2862759
-- Service-Public, révision du loyer : https://www.service-public.gouv.fr/particuliers/vosdroits/F1311
-- Service-Public, validité DPE : https://www.service-public.gouv.fr/particuliers/vosdroits/F16096
-- Loi du 6 juillet 1989, article 17-1 : https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043977085
-- Loi du 31 décembre 1971, article 54 : https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000006903350
+## Architecture
+
+```
+public/            site statique (généré par scripts/build.mjs + JS vanilla, aucune dépendance externe)
+  assets/js/       editor.js, viewer.js, render.js, merci.js, occasions.js (données partagées)
+functions/api/     Cloudflare Pages Functions : pages, photos, checkout, confirm, stripe-webhook, report, admin
+lib/               config (prix, durées), validation, stockage KV, Stripe, crypto
+site.config.json   identité légale (à compléter) → injectée dans les mentions légales et les CGV
+tests/             tests unitaires (node --test)
+```
+
+**Stockage** : Cloudflare KV, avec une expiration automatique qui applique les durées RGPD :
+- brouillons non payés : 48 h ;
+- pages payées : 2 ans ;
+- traces de retrait : 30 jours ;
+- signalements : 1 an.
+
+**Sécurité** :
+- CSP stricte (aucun script inline) ;
+- rendu uniquement via `textContent` ;
+- signature des images vérifiée (JPEG, PNG ou WebP) ;
+- identifiants de 12 caractères aléatoires ;
+- jetons de 256 bits ;
+- signature du webhook vérifiée (HMAC, tolérance de 5 min) ;
+- pages privées en `noindex`, et `Disallow` dans robots.txt.
+
+## Commandes
+
+```bash
+npm install
+npm run build     # régénère les pages HTML (après modification de site.config.json, occasions.js ou config.js)
+npm run dev       # serveur local http://localhost:8788 (paiement simulé si DEV_FAKE_PAYMENT=1 dans .dev.vars)
+npm test          # tests unitaires
+npm run deploy:worker  # déploiement en Worker Cloudflare (méthode actuelle, voir docs/DEMARRAGE.md)
+npm run deploy    # alternative : Cloudflare Pages
+```
+
+## Personnaliser
+
+- **Prix** : `lib/config.js` (`PRICE_CENTS` et `PRICE_LABEL`), puis `npm run build`. Les tests vérifient la cohérence.
+- **Occasions, textes, idées, FAQ, thèmes** : `public/assets/js/occasions.js`, puis `npm run build`.
+- **Page de démonstration** : `public/assets/demo/` (servie sur `/p/demo`).

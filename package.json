@@ -1,9 +1,17 @@
 {
-  "name": "bailclear",
+  "name": "unepagepourtoi",
   "private": true,
-  "version": "0.2.0",
+  "type": "module",
   "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/build.mjs && wrangler pages dev --port 8788",
     "test": "node --test tests/*.test.mjs",
-    "check": "node scripts/check-static-site.mjs && node --check scripts/irl-data-parser.mjs && node --check scripts/update-irl-data.mjs"
+    "deploy": "node scripts/build.mjs && wrangler pages deploy --branch main",
+    "deploy:worker": "node scripts/build.mjs && node scripts/build-worker.mjs && wrangler deploy -c wrangler.worker.toml",
+    "dev:worker": "node scripts/build.mjs && node scripts/build-worker.mjs && wrangler dev -c wrangler.worker.toml --port 8789"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0",
+    "qrcode-generator": "^1.4.4"
   }
 }
