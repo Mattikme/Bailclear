@@ -1,4 +1,4 @@
-import { MAX_BODY_BYTES } from '../../../lib/config.js';
+import { MAX_BODY_BYTES, PREMIUM_CENTS, PREMIUM_LABEL, PRICE_CENTS, premiumUsed } from '../../../lib/config.js';
 import { ID_RE } from '../../../lib/crypto.js';
 import { bearer, error, handle, json, readJson } from '../../../lib/http.js';
 import { checkToken, deletePage, deletePhotosFrom, getPage, isLocked, logAction, publicView, savePage } from '../../../lib/store.js';
@@ -37,6 +37,11 @@ export const onRequestPut = handle(async ({ request, env, params }) => {
   } catch (e) {
     if (e instanceof ValidationError) return error(e.message, 422);
     throw e;
+  }
+  // Page payée au prix de base : les options premium ne s'ajoutent pas gratuitement après coup.
+  const extra = premiumUsed(content);
+  if (page.status === 'paid' && !page.free && (page.priceCents || PRICE_CENTS) < PREMIUM_CENTS && extra.length) {
+    return error(`Option premium (${extra.join(', ')}) : elle n’est pas incluse dans ta page actuelle. Écris-nous via la page Contact pour passer ta page en premium (${PREMIUM_LABEL}).`, 402);
   }
   // Relecture juste avant l'écriture : on ne modifie que le contenu (jamais le statut ni l'expiration).
   const fresh = await getPage(env, page.id);

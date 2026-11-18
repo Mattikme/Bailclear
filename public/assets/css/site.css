@@ -254,3 +254,5 @@ dialog.wallpaper .wp-stage { position: relative; aspect-ratio: 1179 / 2556; widt
 .wp-clock small { font: 500 11px system-ui, sans-serif; order: -1; margin-bottom: 4px; }
 .wp-styles { justify-content: center; margin-top: 8px; }
 .wp-opt { font-weight: 400; align-items: center; }
+.opt-badge.premium { background: linear-gradient(90deg, #f6d27a, #e9a83c); color: #4a3008; }
+.price-line { display: block; font-size: 12px; color: var(--muted); }

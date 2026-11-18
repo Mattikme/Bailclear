@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { OCCASIONS } from '../public/assets/js/occasions.js';
-import { PRICE_LABEL, PUBLISHED_DAYS, TERMS_VERSION, SITE_NAME } from '../lib/config.js';
+import { PRICE_LABEL, PREMIUM_LABEL, PUBLISHED_DAYS, TERMS_VERSION, SITE_NAME } from '../lib/config.js';
 import { FREE_UNTIL_LABEL } from '../public/assets/js/launch.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -79,7 +79,7 @@ const generalFaq = [
   ['Quelles photos puis-je ajouter ?', 'Jusqu’à 10 photos (JPEG, PNG, ou photos d’iPhone depuis un iPhone). Elles sont allégées dans ton navigateur et leurs données de localisation sont supprimées avant l’envoi.'],
   ['Et la musique ?', 'Colle un lien YouTube ou Spotify : la chanson se lance quand la personne appuie sur « Écouter ». YouTube joue le morceau en entier ; Spotify ne joue qu’un extrait de 30 secondes si la personne n’a pas de compte Spotify connecté.'],
   ['Je peux voir le résultat avant de payer ?', 'Oui, l’aperçu se met à jour en direct pendant que tu écris. Tu ne paies que lorsque tu es satisfait(e).'],
-  ['Comment se passe le paiement ?', `Par carte bancaire, Apple Pay ou Google Pay via Stripe, une plateforme de paiement sécurisée. ${PRICE_LABEL}, une seule fois, sans abonnement.`],
+  ['Comment se passe le paiement ?', `Par carte bancaire, Apple Pay ou Google Pay via Stripe, une plateforme de paiement sécurisée. ${PRICE_LABEL} la page, ou ${PREMIUM_LABEL} avec une option premium (message vocal, carte de groupe, ouverture programmée), une seule fois, sans abonnement.`],
 ];
 
 function faqHtml(items) {
@@ -267,7 +267,7 @@ pages['creer.html'] = layout({
       </div>
     </fieldset>
     <fieldset id="voice-fieldset">
-      <legend>🎙️ Message vocal <span class="opt-badge">option</span></legend>
+      <legend>🎙️ Message vocal <span class="opt-badge premium" data-premium>premium</span></legend>
       <p class="help">Enregistre quelques mots avec ta voix (2 minutes maximum). C’est souvent ce qui touche le plus.</p>
       <div class="voice-rec">
         <button type="button" class="btn" id="voice-rec">● Enregistrer</button>
@@ -309,7 +309,7 @@ pages['creer.html'] = layout({
       <div class="field"><label for="f-music">Lien YouTube ou Spotify</label><input id="f-music" type="url" data-field="music" maxlength="300" placeholder="https://www.youtube.com/watch?v=…" inputmode="url"><p class="help" id="music-status" role="status"></p><div class="field"><span class="label" id="ms-label">Commencer à</span><div class="time-row" role="group" aria-labelledby="ms-label"><input id="f-musicMin" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" placeholder="0" aria-label="Minutes"><span>min</span><input id="f-musicSec" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" placeholder="00" aria-label="Secondes"><span>sec</span></div><p class="help" id="start-help">Par exemple <strong>1 min 05</strong> pour démarrer au refrain. Astuce : sur YouTube, « Partager › Commencer à » puis colle le lien ici, le moment est repris tout seul.</p></div><p class="help">Conseil : préfère YouTube, qui joue le morceau en entier. Avec Spotify, la personne n’entend qu’un extrait de 30 secondes si elle n’est pas connectée à son compte Spotify.</p></div>
     </fieldset>
     <fieldset id="group-fieldset">
-      <legend>👥 Carte de groupe <span class="opt-badge">option</span></legend>
+      <legend>👥 Carte de groupe <span class="opt-badge premium" data-premium>premium</span></legend>
       <label class="check"><input type="checkbox" id="f-group"><span>Inviter d’autres personnes (famille, amis, collègues) à écrire chacune un mot sur la page</span></label>
       <p class="help">Après la publication, tu reçois un <strong>lien d’invitation</strong> à partager (groupe WhatsApp, e-mail…). Chacun écrit son mot sans voir la page, et tu peux retirer un message. 50 messages maximum.</p>
       <div id="group-admin" hidden>
@@ -330,7 +330,7 @@ pages['creer.html'] = layout({
       <div class="field"><label for="f-finalMessage">Message final</label><textarea id="f-finalMessage" data-field="finalMessage" maxlength="250" rows="3"></textarea></div>
     </fieldset>
     <fieldset id="openat-fieldset">
-      <legend>⏰ Ouverture programmée <span class="opt-badge">option</span></legend>
+      <legend>⏰ Ouverture programmée <span class="opt-badge premium" data-premium>premium</span></legend>
       <p class="help">Envoie le lien quand tu veux : la page reste fermée avec un compte à rebours jusqu’au jour et à l’heure choisis (minuit le jour de son anniversaire, le 24 au soir…).</p>
       <div class="row2">
         <div class="field"><label for="f-openAt">S’ouvre le</label><input id="f-openAt" type="datetime-local"></div>
@@ -356,7 +356,7 @@ pages['creer.html'] = layout({
 </aside>
 </main>
 <div class="publish-bar"><div class="inner">
-  <span class="status" id="save-status" role="status"></span>
+  <span class="status"><span id="save-status" role="status"></span><span class="price-line" id="price-line"></span></span>
   <div class="actions">
     <button type="button" class="btn ghost preview-toggle" id="preview-toggle">Aperçu</button>
     <button type="button" class="btn ghost" id="pay-btn" hidden>Payer et publier</button>
@@ -365,7 +365,7 @@ pages['creer.html'] = layout({
 </div></div>
 <dialog id="publish-dialog">
   <h2>Publier ta page</h2>
-  <p id="free-info" hidden>🎉 <strong>Offre de lancement</strong> : jusqu’au <span></span>, ta page est publiée <strong>gratuitement</strong>, sans paiement. Elle est hébergée ${YEARS} ans et modifiable quand tu veux.</p>
+  <p id="free-info" hidden>🎉 <strong>Offre de lancement</strong> : jusqu’au <span></span>, ta page est publiée <strong>gratuitement</strong>, sans paiement. Elle est hébergée ${YEARS} ans et modifiable quand tu veux. Toutes les options, même premium, sont offertes.</p>
   <p class="pay-only" id="pay-info">Ta page sera en ligne <strong>immédiatement après le paiement</strong> de <strong>${PRICE_LABEL}</strong> (TVA non applicable, art. 293 B du CGI), hébergée ${YEARS} ans et modifiable gratuitement.</p>
   <label class="check"><input type="checkbox" id="c-terms"><span>J’ai lu et j’accepte les <a href="/cgv" target="_blank">conditions générales</a> et les <a href="/regles-de-contenu" target="_blank">règles de contenu</a>, et je confirme avoir le droit de publier ces photos et textes.</span></label>
   <label class="check"><input type="checkbox" id="c-waiver"><span>Je demande la mise en ligne immédiate de ma page et je reconnais <strong>perdre mon droit de rétractation</strong> dès qu’elle est fournie (art. L221-28 13° du Code de la consommation).</span></label>
@@ -502,7 +502,7 @@ ${launchNote}
 <p>Un aperçu gratuit et complet est disponible avant toute commande. La Page s’affiche dans tout navigateur récent (téléphone ou ordinateur) avec une connexion internet. La lecture de la musique dépend de la disponibilité du morceau sur YouTube ou Spotify.</p>
 <p>Pour commander, tu dois être majeur(e) ou avoir l’accord d’un parent.</p>
 <h2>3. Prix</h2>
-<p>Le prix est de ${PRICE_LABEL} TTC par Page, payable une seule fois. TVA non applicable, art. 293 B du CGI. Des codes de réduction peuvent être proposés ponctuellement.</p>
+<p>Le prix est de ${PRICE_LABEL} TTC par Page, ou de ${PREMIUM_LABEL} TTC pour une Page utilisant au moins une option premium (message vocal, carte de groupe, ouverture programmée). Le prix applicable est affiché avant le paiement et payable une seule fois. Une option premium ne peut pas être ajoutée après coup à une Page payée au prix de base sans régler la différence. TVA non applicable, art. 293 B du CGI. Des codes de réduction peuvent être proposés ponctuellement.</p>
 <h2>4. Commande et paiement</h2>
 <p>La commande est passée en cliquant sur « Payer » après avoir accepté les présentes conditions. Le paiement est réalisé par carte bancaire, Apple Pay ou Google Pay via le prestataire Stripe. Nous n’avons jamais accès à tes données bancaires. La Page est mise en ligne dès la confirmation du paiement. Une facture confirmant la commande, la version des présentes conditions et ta renonciation au droit de rétractation t’est envoyée par e-mail.</p>
 <h2>5. Droit de rétractation</h2>

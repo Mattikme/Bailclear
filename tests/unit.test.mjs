@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { validateContent, ValidationError, imageType, musicEmbed } from '../lib/validate.js';
 import { verifyWebhook, buildCheckoutParams } from '../lib/stripe.js';
 import { hmacSha256Hex, randomId, ID_RE, safeEqual } from '../lib/crypto.js';
-import { PRICE_CENTS, PRICE_LABEL, MAX_PHOTOS } from '../lib/config.js';
+import { PRICE_CENTS, PRICE_LABEL, PREMIUM_LABEL, MAX_PHOTOS, priceFor } from '../lib/config.js';
 import { normalizeAnswer, daysSince } from '../public/assets/js/render.js';
 
 const base = { occasion: 'saint-valentin', theme: 'rose', to: 'Léa', title: 'Coucou' };
@@ -100,7 +100,7 @@ test('le prix affiché dans les pages correspond au prix facturé', () => {
   for (const f of ['index.html', 'creer.html', 'cgv.html', 'saint-valentin.html']) {
     const html = readFileSync(new URL(f, dir), 'utf8');
     assert.ok(html.includes(PRICE_LABEL), `${f} doit afficher ${PRICE_LABEL}`);
-    const others = [...html.matchAll(/(\d+,\d{2}) €/g)].map((m) => m[1] + ' €').filter((x) => x !== PRICE_LABEL);
+    const others = [...html.matchAll(/(\d+,\d{2}) €/g)].map((m) => m[1] + ' €').filter((x) => x !== PRICE_LABEL && x !== PREMIUM_LABEL);
     assert.deepEqual(others, [], `${f} contient un autre prix`);
   }
   assert.ok(readdirSync(dir).includes('_headers'));
@@ -208,4 +208,13 @@ test('langues : toutes les traductions sont complètes, langue inconnue → fran
   assert.equal(t('en', 'for', { to: 'Léa' }), 'For Léa');
   assert.equal(validateContent({ ...base, lang: 'de' }).lang, 'de');
   assert.equal(validateContent({ ...base, lang: 'xx' }).lang, 'fr');
+});
+
+test('prix : 4,90 € de base, 9,90 € dès qu’une option premium est utilisée', () => {
+  const plain = validateContent({ ...base, quiz: [{ q: 'Q', answers: ['a', 'b'], correct: 0 }], lang: 'en' });
+  assert.equal(priceFor(plain).cents, 490);
+  assert.equal(priceFor(validateContent({ ...base, voice: { duration: 12 } })).cents, 990);
+  assert.equal(priceFor(validateContent({ ...base, group: true })).cents, 990);
+  const p = priceFor(validateContent({ ...base, openAt: new Date(Date.now() + 3600e3).toISOString(), group: true }));
+  assert.deepEqual([p.cents, p.premium], [990, ['carte de groupe', 'ouverture programmée']]);
 });

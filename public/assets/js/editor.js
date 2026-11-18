@@ -5,6 +5,7 @@ import { isFreeLaunch, FREE_UNTIL_LABEL } from './launch.js';
 import { LIMITS } from './limits.js';
 import { inviteLink, inviteText } from './invite.js';
 import { LANGS, t } from './i18n.js';
+import { priceFor, BASE_LABEL, PREMIUM_LABEL } from './pricing.js';
 
 const FREE = isFreeLaunch();
 
@@ -57,8 +58,25 @@ function pushPreview() {
 
 /* ---------- Sauvegarde locale ---------- */
 let saveTimer;
+// Prix affiché selon les options utilisées (le serveur recalcule toujours le prix lui-même).
+function updatePrice() {
+  const p = priceFor(state);
+  const line = $('price-line');
+  if (FREE) {
+    line.textContent = p.premium.length ? `Options premium offertes pendant le lancement (ensuite ${PREMIUM_LABEL})` : '';
+    return;
+  }
+  line.textContent = p.premium.length ? `${p.label} avec ${p.premium.join(', ')}` : `${p.label}`;
+  if (serverStatus !== 'paid') {
+    if (!isEdit) $('publish-btn').textContent = `Publier — ${p.label}`;
+    $('publish-confirm').textContent = `Payer ${p.label}`;
+    const amount = $('pay-info').querySelector('strong:nth-of-type(2)'); if (amount) amount.textContent = p.label;
+  }
+}
+
 function changed() {
   dirty = true;
+  updatePrice();
   pushPreview();
   if (isEdit) { setStatus('Modifications non enregistrées'); return; }
   clearTimeout(saveTimer);
@@ -597,6 +615,11 @@ function setupPublish() {
     $('free-info').hidden = false;
     $('free-info').querySelector('span').textContent = FREE_UNTIL_LABEL;
   }
+  document.querySelectorAll('[data-premium]').forEach((b) => {
+    b.textContent = FREE ? 'premium · offert' : `premium · ${PREMIUM_LABEL}`;
+    b.title = `Avec cette option, la page passe de ${BASE_LABEL} à ${PREMIUM_LABEL}${FREE ? ' (offert pendant le lancement)' : ''}.`;
+  });
+  updatePrice();
   const sync = () => { confirmBtn.disabled = !(terms.checked && (FREE || waiver.checked)); };
   terms.onchange = sync; waiver.onchange = sync; sync();
   $('publish-cancel').onclick = () => dlg.close();
