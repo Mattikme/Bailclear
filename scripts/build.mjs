@@ -235,6 +235,7 @@ pages['creer.html'] = layout({
       <legend>L’occasion</legend>
       <div class="chips" id="occasion-chips"></div>
       <div class="field"><span class="label">Couleurs</span><div class="swatches" id="theme-swatches"></div></div>
+      <div class="field"><label for="f-lang">🌍 Langue de la page <span class="opt-badge">option</span></label><select id="f-lang"></select><p class="help">Pour offrir la page à quelqu’un qui ne parle pas français : les boutons et titres de la page s’affichent dans cette langue. Tes textes restent tels que tu les écris.</p></div>
     </fieldset>
     <fieldset>
       <legend>Pour qui ?</legend>

@@ -1,5 +1,6 @@
 import { renderPage, burst, sha256Hex, normalizeAnswer, applyTheme, mountMusic } from './render.js';
 import { getOccasion } from './occasions.js';
+import { t, langOf, locale } from './i18n.js';
 
 const $ = (id) => document.getElementById(id);
 const main = $('page');
@@ -21,10 +22,24 @@ function showState(title, text) {
   main.append(box);
 }
 
+// Libellés fixes de voir.html dans la langue de la page.
+function applyLabels(L) {
+  document.documentElement.lang = L;
+  if (L === 'fr') return;
+  $('open-btn').textContent = t(L, 'open');
+  const sb = document.querySelector('#secret-form button[type="submit"]'); if (sb) sb.textContent = t(L, 'openShort');
+  const units = document.querySelectorAll('.cd-grid span');
+  ['days', 'hours', 'min', 'sec'].forEach((k, i) => { if (units[i]) units[i].textContent = t(L, k); });
+  const made = document.querySelector('#footer .made'); if (made) made.textContent = t(L, 'made');
+  $('report-btn').textContent = t(L, 'report');
+}
+
 function envelope(content, onOpen) {
   const env = $('envelope');
   const occ = getOccasion(content.occasion);
-  $('env-title').textContent = content.from ? `${content.from} t’a préparé quelque chose ${occ.emoji}` : `Une surprise pour ${content.to} ${occ.emoji}`;
+  const L = langOf(content);
+  applyLabels(L);
+  $('env-title').textContent = content.from ? t(L, 'envFrom', { from: content.from, emoji: occ.emoji }) : t(L, 'envTo', { to: content.to, emoji: occ.emoji });
   $('env-intro').textContent = content.intro || '';
   env.hidden = false;
   const open = () => {
@@ -45,7 +60,7 @@ function envelope(content, onOpen) {
       e.preventDefault();
       const h = await sha256Hex(normalizeAnswer($('secret-answer').value));
       if (h === content.secret.answerHash) open();
-      else $('secret-error').textContent = 'Ce n’est pas ça… essaie encore 😉';
+      else $('secret-error').textContent = t(L, 'secretWrong');
     });
   } else {
     $('open-btn').addEventListener('click', open);
@@ -55,15 +70,17 @@ function envelope(content, onOpen) {
 // Page à ouverture programmée : enveloppe fermée + compte à rebours, puis rechargement à l'heure dite.
 function countdown(content, openAt) {
   const occ = getOccasion(content.occasion);
-  $('env-title').textContent = content.from ? `${content.from} t’a préparé quelque chose ${occ.emoji}` : `Une surprise pour ${content.to} ${occ.emoji}`;
+  const L = langOf(content);
+  applyLabels(L);
+  $('env-title').textContent = content.from ? t(L, 'envFrom', { from: content.from, emoji: occ.emoji }) : t(L, 'envTo', { to: content.to, emoji: occ.emoji });
   $('env-intro').textContent = content.intro || '';
   $('open-btn').hidden = true;
   $('envelope').hidden = false;
   $('envelope').classList.add('locked');
   main.replaceChildren();
   const target = Date.parse(openAt);
-  const when = new Date(target).toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
-  $('cd-label').textContent = `Patience… elle s’ouvrira le ${when}`;
+  const when = new Date(target).toLocaleString(locale(L), { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+  $('cd-label').textContent = t(L, 'countdown', { when });
   $('countdown').hidden = false;
   const tick = () => {
     const left = Math.max(0, target - Date.now());
@@ -117,23 +134,24 @@ async function loadPublished(id) {
 }
 
 function setupMontage(content, photoUrl) {
+  const L = langOf(content);
   const block = document.createElement('section');
   block.className = 'block share-block';
   const btn = document.createElement('button');
   btn.type = 'button'; btn.className = 'btn';
-  btn.textContent = '🎬 Créer la vidéo souvenir';
+  btn.textContent = t(L, 'video');
   const p = document.createElement('p');
   p.className = 'hint';
-  p.textContent = 'Un petit film de cette page, gratuit, à télécharger ou à partager sur TikTok, Instagram, Snapchat…';
+  p.textContent = t(L, 'videoHint');
   block.append(btn, p);
   if (content.photos && content.photos.length) {
     const wp = document.createElement('button');
     wp.type = 'button'; wp.className = 'btn secondary';
-    wp.textContent = '📱 Créer un fond d’écran';
+    wp.textContent = t(L, 'wp');
     wp.addEventListener('click', async () => { const { openWallpaper } = await import('./wallpaper-ui.js'); openWallpaper(content, photoUrl); });
     const p2 = document.createElement('p');
     p2.className = 'hint';
-    p2.textContent = 'Vos photos en fond d’écran de téléphone, l’heure reste lisible.';
+    p2.textContent = t(L, 'wpHint');
     block.append(wp, p2);
   }
   main.append(block);

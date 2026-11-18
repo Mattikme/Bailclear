@@ -4,6 +4,7 @@ import { idbGet, idbSet, idbDel, listPages, rememberPage } from './storage.js';
 import { isFreeLaunch, FREE_UNTIL_LABEL } from './launch.js';
 import { LIMITS } from './limits.js';
 import { inviteLink, inviteText } from './invite.js';
+import { LANGS, t } from './i18n.js';
 
 const FREE = isFreeLaunch();
 
@@ -32,7 +33,7 @@ function blankState(occId) {
   return {
     occasion: occ.id, theme: occ.theme, to: '', from: '',
     title: occ.defaults.title, intro: occ.defaults.intro, date: '', dateLabel: occ.defaults.dateLabel,
-    letter: '', photos: [], timeline: [], reasons: [], music: '', musicStart: 0, voice: null, openAt: '', quiz: [], group: false, finalMessage: occ.defaults.finalMessage,
+    letter: '', photos: [], timeline: [], reasons: [], music: '', musicStart: 0, voice: null, openAt: '', quiz: [], group: false, lang: 'fr', finalMessage: occ.defaults.finalMessage,
     secret: { question: '', answer: '', answerHash: '' },
   };
 }
@@ -270,6 +271,25 @@ function renderQuiz() {
     return row;
   }));
   $('add-quiz').disabled = state.quiz.length >= LIMITS.quiz;
+}
+
+/* ---------- Langue ---------- */
+function setupLang() {
+  const sel = $('f-lang');
+  sel.replaceChildren(...Object.entries(LANGS).map(([id, label]) => { const o = document.createElement('option'); o.value = id; o.textContent = label; return o; }));
+  sel.value = state.lang || 'fr';
+  sel.onchange = () => {
+    state.lang = sel.value;
+    if (state.lang !== 'fr') {
+      // Les textes proposés par défaut sont en français : on les retire s'ils n'ont pas été modifiés.
+      const d = getOccasion(state.occasion).defaults;
+      if (state.title === d.title) state.title = t(state.lang, 'titleDefault');
+      for (const k of ['intro', 'dateLabel', 'finalMessage']) if (state[k] === d[k]) state[k] = '';
+      form.querySelectorAll('[data-field]').forEach((input) => { input.value = state[input.dataset.field] || ''; });
+      notice(`Langue : ${LANGS[state.lang]}. Les boutons et titres de la page seront traduits ; pense à écrire ton titre, ta lettre et tes messages dans cette langue.`);
+    }
+    changed();
+  };
 }
 
 /* ---------- Carte de groupe ---------- */
@@ -745,7 +765,7 @@ function setupMisc() {
 
 async function init() {
   if (isEdit) await loadEdit(); else await loadDraft();
-  renderOccasions(); bindFields(); renderPhotos(); renderTimeline(); renderReasons(); renderQuiz(); setupOpenAt(); setupGroup();
+  renderOccasions(); bindFields(); renderPhotos(); renderTimeline(); renderReasons(); renderQuiz(); setupOpenAt(); setupGroup(); setupLang();
   if (pendingOccasion) switchOccasion(pendingOccasion);
   setupDropzone(); setupVoice(); setupPublish(); setupMisc(); renderMyPages();
   iframe.src = '/voir?preview=1';

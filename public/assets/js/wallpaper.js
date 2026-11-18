@@ -1,6 +1,7 @@
 // Fond d'écran de téléphone fabriqué sur l'appareil à partir des photos de la page.
 // Le haut (heure, widgets) et le bas (lampe, appareil photo) de l'écran verrouillé restent dégagés.
 import { THEMES, getOccasion } from './occasions.js';
+import { langOf, locale } from './i18n.js';
 
 export const W = 1179;
 export const H = 2556;
@@ -179,7 +180,7 @@ export function wallpaperText(content) {
   const symbol = getOccasion(content.occasion).id === 'noel' ? '❄' : '♥';
   if (content.date) {
     const d = new Date(`${content.date}T12:00:00`);
-    return `${content.to} · ${d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })} ${symbol}`;
+    return `${content.to} · ${d.toLocaleDateString(locale(langOf(content)), { day: 'numeric', month: 'long', year: 'numeric' })} ${symbol}`;
   }
   return content.from ? `${content.to} & ${content.from} ${symbol}` : `${content.to} ${symbol}`;
 }

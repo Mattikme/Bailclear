@@ -193,3 +193,19 @@ test('ouverture programmée : date valide gardée, absurde ignorée, page verrou
   assert.equal(isLocked({ content: { openAt: soon } }, Date.now() + 2 * 86400000), false);
   assert.equal(isLocked({ content: { openAt: '' } }), false);
 });
+
+test('langues : toutes les traductions sont complètes, langue inconnue → français', async () => {
+  const { LANG_IDS, t, sectionTitles } = await import('../public/assets/js/i18n.js');
+  const { OCCASIONS } = await import('../public/assets/js/occasions.js');
+  const src = readFileSync(new URL('../public/assets/js/i18n.js', import.meta.url), 'utf8');
+  const block = (l) => { const i = src.indexOf(`  ${l}: {`); return src.slice(i, src.indexOf('\n  },', i)); };
+  const keys = [...block('fr').matchAll(/(\w+): '/g)].map((m) => m[1]);
+  assert.ok(keys.length > 30);
+  for (const lang of LANG_IDS) {
+    for (const k of keys) assert.match(block(lang), new RegExp(`\\b${k}: '`), `${lang}.${k}`);
+    for (const o of OCCASIONS) { const s = sectionTitles(lang, o); assert.ok(s.timeline && s.reasons, `${lang} ${o.id}`); }
+  }
+  assert.equal(t('en', 'for', { to: 'Léa' }), 'For Léa');
+  assert.equal(validateContent({ ...base, lang: 'de' }).lang, 'de');
+  assert.equal(validateContent({ ...base, lang: 'xx' }).lang, 'fr');
+});

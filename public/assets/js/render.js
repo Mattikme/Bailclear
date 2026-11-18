@@ -1,6 +1,8 @@
 // Rendu d'une page cadeau. Uniquement des API DOM (textContent) : aucun HTML utilisateur n'est interprété.
 import { THEMES, getOccasion } from './occasions.js';
 
+import { t, langOf, locale, sectionTitles } from './i18n.js';
+
 const YT = /^https:\/\/(?:www\.|m\.)?(?:youtube\.com\/watch\?(?:[^#]*&)?v=|youtu\.be\/|youtube\.com\/shorts\/)([A-Za-z0-9_-]{11})/;
 const SPOTIFY = /^https:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album|playlist)\/([A-Za-z0-9]{22})/;
 
@@ -83,11 +85,12 @@ export function daysSince(dateStr, now = new Date()) {
 function counter(content) {
   const days = daysSince(content.date);
   if (days == null || days < 0) return null;
-  const label = content.dateLabel || 'Depuis';
-  const dateFr = new Date(content.date + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  const L = langOf(content);
+  const label = content.dateLabel || t(L, 'sinceLabel');
+  const date = new Date(content.date + 'T00:00:00').toLocaleDateString(locale(L), { day: 'numeric', month: 'long', year: 'numeric' });
   return el('div', { class: 'counter reveal pop' },
-    el('div', { class: 'counter-label', text: `${label} le ${dateFr}` }),
-    el('div', { class: 'counter-value' }, el('strong', { class: 'count-up', 'data-target': String(days), text: days.toLocaleString('fr-FR') }), ' jours'),
+    el('div', { class: 'counter-label', text: t(L, 'since', { label, date }).trim() }),
+    el('div', { class: 'counter-value' }, el('strong', { class: 'count-up', 'data-target': String(days), text: days.toLocaleString(locale(L)) }), ` ${t(L, 'daysWord')}`),
   );
 }
 
@@ -132,7 +135,7 @@ function lightbox(content, photoUrl, start) {
 function timeline(content, occ) {
   if (!content.timeline.length) return null;
   return el('section', { class: 'block' },
-    el('h2', { text: occ.timelineTitle }),
+    el('h2', { text: sectionTitles(langOf(content), occ).timeline }),
     el('ol', { class: 'timeline' }, content.timeline.map((t, i) =>
       el('li', { class: 'reveal slide-in', style: `--i:${i}` }, t.when ? el('span', { class: 'when', text: t.when }) : null, el('p', { text: t.text })))));
 }
@@ -156,7 +159,8 @@ function reasons(content, occ) {
   if (!content.reasons.length) return null;
   const symbol = occ.id === 'noel' ? '❄' : occ.id === 'anniversaire' ? '✦' : '♥';
   const total = content.reasons.length;
-  const hint = el('p', { class: 'hint', text: 'Touche les cartes pour les découvrir' });
+  const L = langOf(content);
+  const hint = el('p', { class: 'hint', text: t(L, 'cardsHint') });
   const grid = el('div', { class: 'reasons reveal' });
   const flip = (card) => {
     const opening = !card.classList.contains('flipped');
@@ -166,7 +170,7 @@ function reasons(content, occ) {
     grid.classList.add('touched');
     cardBurst(card, symbol);
     const done = grid.querySelectorAll('.reason.flipped').length;
-    hint.textContent = done === total ? 'Toutes les cartes sont découvertes ' + symbol : `${done} / ${total} découvertes`;
+    hint.textContent = done === total ? `${t(L, 'cardsAll')} ${symbol}` : t(L, 'cardsDone', { n: done, total });
     if (done === total) setTimeout(() => burst(document.body, symbol, 36), 450);
   };
   content.reasons.forEach((r, i) => {
@@ -176,7 +180,7 @@ function reasons(content, occ) {
     card.style.setProperty('--i', i);
     grid.append(card);
   });
-  return el('section', { class: 'block' }, el('h2', { text: occ.reasonsTitle }), hint, grid);
+  return el('section', { class: 'block' }, el('h2', { text: sectionTitles(L, occ).reasons }), hint, grid);
 }
 
 const YT_ORIGIN = 'https://www.youtube-nocookie.com';
@@ -261,10 +265,11 @@ export function mountMusic(content) {
 // Message vocal : lecteur maison (la musique se met en pause pendant l'écoute).
 function voice(content, voiceUrl) {
   if (!content.voice || !voiceUrl) return null;
+  const L = langOf(content);
   const fmt = (x) => { const v = Math.max(0, Math.round(x || 0)); return `${Math.floor(v / 60)}:${String(v % 60).padStart(2, '0')}`; };
   const audio = el('audio', { src: voiceUrl, preload: 'metadata' });
   const icon = el('span', { class: 'voice-icon', 'aria-hidden': 'true', text: '▶' });
-  const btn = el('button', { class: 'voice-btn', type: 'button', 'aria-label': 'Écouter le message vocal' }, icon);
+  const btn = el('button', { class: 'voice-btn', type: 'button', 'aria-label': t(L, 'listen') }, icon);
   const fill = el('i');
   const bar = el('div', { class: 'voice-progress' }, fill);
   const time = el('span', { class: 'voice-time', text: fmt(content.voice.duration) });
@@ -278,8 +283,8 @@ function voice(content, voiceUrl) {
   btn.addEventListener('click', () => {
     if (audio.paused) { if (currentMusic) currentMusic.pause(); audio.play().catch(() => {}); } else audio.pause();
   });
-  audio.addEventListener('play', () => { card.classList.add('playing'); icon.textContent = '❚❚'; btn.setAttribute('aria-label', 'Mettre en pause'); });
-  audio.addEventListener('pause', () => { card.classList.remove('playing'); icon.textContent = '▶'; btn.setAttribute('aria-label', 'Écouter le message vocal'); });
+  audio.addEventListener('play', () => { card.classList.add('playing'); icon.textContent = '❚❚'; btn.setAttribute('aria-label', t(L, 'pause')); });
+  audio.addEventListener('pause', () => { card.classList.remove('playing'); icon.textContent = '▶'; btn.setAttribute('aria-label', t(L, 'listen')); });
   audio.addEventListener('ended', () => { fill.style.width = '0%'; time.textContent = fmt(content.voice.duration); if (currentMusic) currentMusic.resume(); });
   audio.addEventListener('timeupdate', () => {
     const d = audio.duration && Number.isFinite(audio.duration) ? audio.duration : content.voice.duration;
@@ -287,7 +292,7 @@ function voice(content, voiceUrl) {
     time.textContent = fmt(d - audio.currentTime);
   });
   return el('section', { class: 'block voice reveal' },
-    el('h2', { text: `🎙️ ${content.from ? `${content.from} a un message pour toi` : 'Un message pour toi'}` }),
+    el('h2', { text: `🎙️ ${content.from ? t(L, 'voiceFrom', { from: content.from }) : t(L, 'voice')}` }),
     card, audio);
 }
 
@@ -302,8 +307,8 @@ function groupBook(content, messages, preview) {
   }
   if (!list.length) return null;
   return el('section', { class: 'block group reveal' },
-    el('h2', { text: '💬 Ils ont aussi un mot pour toi' }),
-    el('p', { class: 'hint', text: sample ? 'Aperçu avec des exemples' : `${list.length} message${list.length > 1 ? 's' : ''}` }),
+    el('h2', { text: `💬 ${t(langOf(content), 'group')}` }),
+    el('p', { class: 'hint', text: sample ? 'Aperçu avec des exemples' : t(langOf(content), list.length > 1 ? 'msgN' : 'msg1', { n: list.length }) }),
     el('div', { class: 'group-grid' }, list.map((m, i) => {
       const card = el('figure', { class: 'group-card', style: `--r:${((i * 37) % 7) - 3}deg;--i:${i}` },
         el('blockquote', {}, paragraphs(m.text)), el('figcaption', { text: `— ${m.name}` }));
@@ -315,48 +320,51 @@ function groupBook(content, messages, preview) {
 function quiz(content) {
   const qs = Array.isArray(content.quiz) ? content.quiz.filter((q) => q && q.q && q.answers && q.answers.filter(Boolean).length >= 2) : [];
   if (!qs.length) return null;
+  const L = langOf(content);
   const box = el('div', { class: 'quiz-card' });
   let i = 0; let score = 0;
   const show = () => {
     if (i >= qs.length) {
-      const msg = score === qs.length ? 'Sans faute ! Tu me connais par cœur 💯' : score >= qs.length / 2 ? 'Pas mal du tout 😉' : 'On a encore des souvenirs à se faire 😄';
+      const msg = t(L, score === qs.length ? 'perfect' : score >= qs.length / 2 ? 'good' : 'meh');
       box.replaceChildren(
         el('p', { class: 'quiz-score', text: `${score} / ${qs.length}` }),
         el('p', { class: 'quiz-msg', text: msg }),
-        el('button', { class: 'btn small', type: 'button', text: 'Rejouer', onclick: () => { i = 0; score = 0; show(); } }));
+        el('button', { class: 'btn small', type: 'button', text: t(L, 'replay'), onclick: () => { i = 0; score = 0; show(); } }));
       if (score === qs.length) burst(document.body, '★', 30);
       return;
     }
     const q = qs[i];
     const answers = q.answers.filter(Boolean);
-    const next = el('button', { class: 'btn small quiz-next', type: 'button', text: i + 1 < qs.length ? 'Question suivante →' : 'Voir mon score', hidden: true, onclick: () => { i++; show(); } });
+    const next = el('button', { class: 'btn small quiz-next', type: 'button', text: t(L, i + 1 < qs.length ? 'next' : 'score'), hidden: true, onclick: () => { i++; show(); } });
     const fb = el('p', { class: 'quiz-fb', role: 'status' });
     const btns = answers.map((a, k) => el('button', { class: 'quiz-answer', type: 'button', text: a, onclick: () => {
       btns.forEach((b, j) => { b.disabled = true; if (j === q.correct) b.classList.add('right'); });
-      if (k === q.correct) { score++; fb.textContent = 'Bonne réponse !'; cardBurst(btns[k], '★', 8); } else { btns[k].classList.add('wrong'); fb.textContent = `Raté… c’était « ${answers[q.correct]} »`; }
+      if (k === q.correct) { score++; fb.textContent = t(L, 'right'); cardBurst(btns[k], '★', 8); } else { btns[k].classList.add('wrong'); fb.textContent = t(L, 'wrong', { a: answers[q.correct] }); }
       next.hidden = false;
       next.focus();
     } }));
     box.replaceChildren(
-      el('p', { class: 'quiz-step', text: `Question ${i + 1} / ${qs.length}` }),
+      el('p', { class: 'quiz-step', text: t(L, 'quizStep', { i: i + 1, n: qs.length }) }),
       el('p', { class: 'quiz-q', text: q.q }),
       el('div', { class: 'quiz-answers' }, btns), fb, next);
   };
   show();
-  return el('section', { class: 'block quiz reveal' }, el('h2', { text: '🎮 Le quiz' }), el('p', { class: 'hint', text: 'Est-ce que tu me connais vraiment ?' }), box);
+  return el('section', { class: 'block quiz reveal' }, el('h2', { text: `🎮 ${t(L, 'quiz')}` }), el('p', { class: 'hint', text: t(L, 'quizHint') }), box);
 }
 
 // Construit la page complète dans `root`.
 export function renderPage(root, content, { photoUrl, preview = false, voiceUrl = null, messages = null } = {}) {
   const occ = getOccasion(content.occasion);
+  const L = langOf(content);
+  document.documentElement.lang = L;
   applyTheme(content.theme);
   document.title = content.title || 'Une page pour toi';
   const sections = [
     preview ? el('div', { class: 'preview-banner', text: 'Aperçu — page non publiée' }) : null,
     el('header', { class: 'hero' },
-      el('p', { class: 'eyebrow', text: `${occ.emoji} Pour ${content.to || '…'}` }),
+      el('p', { class: 'eyebrow', text: `${occ.emoji} ${t(L, 'for', { to: content.to || '…' })}` }),
       el('h1', { 'aria-label': content.title || '' }, words(content.title || '', 0.25)),
-      content.from ? el('p', { class: 'from', text: `de la part de ${content.from}` }) : null,
+      content.from ? el('p', { class: 'from', text: t(L, 'by', { from: content.from }) }) : null,
       counter(content)),
     content.letter ? el('section', { class: 'block letter reveal unfold' }, paragraphs(content.letter), content.from ? el('p', { class: 'signature', text: `— ${content.from}` }) : null) : null,
     voice(content, voiceUrl),
@@ -392,7 +400,7 @@ function countUp(node) {
   const t0 = performance.now();
   const step = (now) => {
     const p = Math.min(1, (now - t0) / 1600);
-    n.textContent = Math.round(target * (1 - Math.pow(1 - p, 4))).toLocaleString('fr-FR');
+    n.textContent = Math.round(target * (1 - Math.pow(1 - p, 4))).toLocaleString(locale(document.documentElement.lang));
     if (p < 1) requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
