@@ -38,6 +38,7 @@ const SECURITY = {
   'permissions-policy': 'camera=(), microphone=(self), geolocation=(), interest-cohort=()',
   'content-security-policy': "default-src 'self'; img-src 'self' data: blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' blob:; frame-src 'self' https://www.youtube-nocookie.com https://open.spotify.com; media-src 'self' blob:; form-action 'self'; base-uri 'self'; frame-ancestors 'self'; object-src 'none'",
 };
+const CANONICAL_HOST = 'unepagepourtoi.fr';
 const NOINDEX = /^\/(p\/|voir|merci|admin|ecrire)/;
 const NO_REFERRER = /^\/(p\/|merci|creer|ecrire)/;
 
@@ -98,6 +99,15 @@ export default {
     const url = new URL(request.url);
     if (url.pathname.startsWith('/api/')) return api(request, env, ctx, url);
     if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Méthode non autorisée.', { status: 405 });
-    return serve(request, url);
+    // Une seule adresse par page pour Google : https, sans « www », sans barre finale.
+    if (url.hostname === CANONICAL_HOST || url.hostname === `www.${CANONICAL_HOST}`) {
+      let to = null;
+      if (url.protocol === 'http:' || url.hostname !== CANONICAL_HOST) to = new URL(url.pathname + url.search, `https://${CANONICAL_HOST}`);
+      if (url.pathname.length > 1 && url.pathname.endsWith('/')) to = new URL(url.pathname.replace(/\/+$/, '') + url.search, `https://${CANONICAL_HOST}`);
+      if (to) return Response.redirect(to.toString(), 301);
+    }
+    const res = serve(request, url);
+    if (url.hostname === CANONICAL_HOST) res.headers.set('strict-transport-security', 'max-age=31536000');
+    return res;
   },
 };

@@ -72,3 +72,19 @@ Le détail est dans `docs/STRATEGIE.md`. L'essentiel :
 4. **Micro-influenceurs** couple et lifestyle (10 000 à 50 000 abonnés) : page offerte et code promo Stripe.
 5. **Groupes Facebook « idées cadeaux », mariage, maîtresses d'école** : répondre utilement, sans spammer.
 6. **Le bouche-à-oreille intégré** : chaque page offerte et chaque vidéo souvenir affichent « crée la tienne ».
+
+
+## Référencement (SEO) : ce qui est en place
+
+- **Une seule adresse par page** : `http://`, `www.` et la barre finale redirigent (301) vers `https://unepagepourtoi.fr/...`.
+- **Balises** : titre, description et adresse canonique sur chaque page ; aperçus de partage (Open Graph, Twitter).
+- **Données structurées** : FAQ, produit avec prix, organisation, fil d’Ariane, articles. À vérifier sur https://search.google.com/test/rich-results.
+- **Sitemap** : avec dates de mise à jour.
+- **Guides** sous `/idees/...` : contenus qui répondent aux recherches courantes (« lettre d’amour », « texte fête des mères »…).
+- **Test automatique** : `npm test` vérifie titres, descriptions, h1 unique, canonique et JSON-LD.
+
+**À faire chaque année :**
+- mettre à jour les dates des fêtes (constante `WHEN` dans `scripts/build.mjs`) ;
+- mettre à jour les années dans les titres des guides (`scripts/guides.mjs`).
+
+**Pour ajouter un guide :** ajoute une entrée dans `scripts/guides.mjs`, puis `npm run deploy:worker`. Il apparaît tout seul dans `/idees`, le sitemap et les pages occasions.

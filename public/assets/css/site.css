@@ -259,3 +259,19 @@ dialog.wallpaper .wp-stage { position: relative; aspect-ratio: 1179 / 2556; widt
 /* Vérification avant publication */
 .pub-recap { list-style: none; padding: 12px 14px; margin: 12px 0 0; background: var(--soft, #fff0f4); border-radius: 14px; display: grid; gap: 4px; font-size: 15px; overflow-wrap: anywhere; }
 .pub-warn { margin: 10px 0 0; font-weight: 600; color: #a5481a; }
+/* Guides et référencement */
+.crumbs { font-size: 14px; color: var(--muted); margin-bottom: 16px; }
+.crumbs a { color: inherit; }
+.article .meta { font-size: 14px; color: var(--muted); margin-top: -8px; }
+.article .lead { font-size: 19px; }
+.quotes { list-style: none; padding: 0; display: grid; gap: 10px; }
+.quotes li { background: var(--surface); border-left: 4px solid var(--accent); border-radius: 10px; padding: 12px 16px; font-style: italic; }
+.cta-box { margin: 40px 0; padding: 24px; border-radius: 20px; background: var(--soft); text-align: center; }
+.cta-box .cta-title { font-family: var(--serif); font-size: 22px; font-weight: 700; margin-top: 0; }
+.guide-list { display: grid; gap: 14px; margin-top: 24px; }
+.guide-card { display: grid; gap: 6px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); text-decoration: none; }
+.guide-card:hover { border-color: var(--accent); }
+.guide-card span:last-child { color: var(--muted); font-size: 15px; }
+.guide-tag { font-size: 13px; font-weight: 600; color: var(--accent); }
+.when-note { background: var(--soft); border-radius: 12px; padding: 12px 16px; font-weight: 600; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 6px 16px; width: 100%; margin-bottom: 14px; font-size: 14px; }

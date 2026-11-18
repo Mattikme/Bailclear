@@ -1,11 +1,12 @@
 // Génère les pages HTML statiques de public/ à partir de site.config.json et des occasions.
 // Usage : npm run build
-import { readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { OCCASIONS } from '../public/assets/js/occasions.js';
 import { PRICE_LABEL, PREMIUM_LABEL, PUBLISHED_DAYS, TERMS_VERSION, SITE_NAME } from '../lib/config.js';
 import { FREE_UNTIL_LABEL } from '../public/assets/js/launch.js';
+import { GUIDES } from './guides.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const pub = join(root, 'public');
@@ -22,7 +23,7 @@ const fill = (value, label) => {
 };
 const email = cfg.contactEmail ? `<a href="mailto:${esc(cfg.contactEmail)}">${esc(cfg.contactEmail)}</a>` : fill('', 'e-mail de contact');
 
-function layout({ title, description, path, body, scripts = '', noindex = false, jsonld = null }) {
+function layout({ title, description, path, body, scripts = '', noindex = false, jsonld = null, ogType = 'website' }) {
   return `<!doctype html>
 <html lang="fr">
 <head>
@@ -33,16 +34,21 @@ function layout({ title, description, path, body, scripts = '', noindex = false,
 ${noindex ? '<meta name="robots" content="noindex">' : `<link rel="canonical" href="${SITE}${path}">`}
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
-<meta property="og:type" content="website">
+<meta property="og:type" content="${ogType}">
+<meta property="og:site_name" content="${SITE_NAME}">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:url" content="${SITE}${path}">
 <meta property="og:image" content="${SITE}/assets/og-surprise.png">
 <meta property="og:locale" content="fr_FR">
 <meta name="theme-color" content="#d63c72">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/css/site.css">
 <script type="module" src="/assets/js/launch-banner.js"></script>
 <script type="module" src="/assets/js/stats.js"></script>
-${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld)}</script>` : ''}
+${(Array.isArray(jsonld) ? jsonld : jsonld ? [jsonld] : []).map((j) => `<script type="application/ld+json">${JSON.stringify(j).replace(/</g, '\\u003c')}</script>`).join('\n')}
 ${scripts}
 </head>
 <body>
@@ -51,12 +57,17 @@ ${scripts}
   <nav class="nav" aria-label="Navigation principale">
     <a href="/#occasions">Occasions</a>
     <a href="/#prix">Prix</a>
+    <a href="/idees">Idées</a>
     <a href="/#faq">FAQ</a>
     <a class="btn small" href="/creer">Créer ma page</a>
   </nav>
 </div></header>
 ${body}
 <footer class="site-footer"><div class="wrap">
+  <nav class="footer-links" aria-label="Occasions et idées">
+    ${OCCASIONS.map((o) => `<a href="/${o.id}">${esc(o.label.replace(/ \(.*\)$/, ''))}</a>`).join('\n    ')}
+    <a href="/idees">Idées et modèles de textes</a>
+  </nav>
   <span>© ${new Date().getFullYear()} ${SITE_NAME} — fait en France avec ♥</span>
   <nav aria-label="Liens légaux">
     <a href="/contact">Contact</a>
@@ -132,13 +143,90 @@ const features = `<ul class="features">
   <li>Parfait sur téléphone</li>
 </ul>`;
 
+const ORG_LD = { '@context': 'https://schema.org', '@type': 'Organization', '@id': `${SITE}/#org`, name: SITE_NAME, url: `${SITE}/`, logo: `${SITE}/apple-touch-icon.png`, email: cfg.contactEmail || undefined };
+const SITE_LD = { '@context': 'https://schema.org', '@type': 'WebSite', '@id': `${SITE}/#site`, name: SITE_NAME, url: `${SITE}/`, inLanguage: 'fr-FR', publisher: { '@id': `${SITE}/#org` } };
+function productLd(name, description, path) {
+  return {
+    '@context': 'https://schema.org', '@type': 'Product', name, description, image: `${SITE}/assets/og-surprise.png`, url: `${SITE}${path}`,
+    brand: { '@type': 'Brand', name: SITE_NAME },
+    offers: { '@type': 'AggregateOffer', priceCurrency: 'EUR', lowPrice: PRICE_LABEL.replace(/[^\d,]/g, '').replace(',', '.'), highPrice: PREMIUM_LABEL.replace(/[^\d,]/g, '').replace(',', '.'), offerCount: 2, availability: 'https://schema.org/InStock' },
+  };
+}
+function crumbsLd(items) {
+  return { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: items.map(([name, path], i) => ({ '@type': 'ListItem', position: i + 1, name, item: `${SITE}${path}` })) };
+}
+function crumbsHtml(items) {
+  return `<nav class="crumbs" aria-label="Fil d’Ariane">${items.map(([name, path], i) => (i < items.length - 1 ? `<a href="${path}">${esc(name)}</a> › ` : `<span aria-current="page">${esc(name)}</span>`)).join('')}</nav>`;
+}
+const frDate = (iso) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+// Dates des prochaines fêtes (à mettre à jour chaque année).
+const WHEN = {
+  'saint-valentin': 'La Saint-Valentin 2027 tombe le dimanche 14 février.',
+  'fete-des-meres': 'En France, la fête des mères 2027 a lieu le dimanche 30 mai.',
+  'fete-des-peres': 'En France, la fête des pères 2027 a lieu le dimanche 20 juin.',
+  'fete-des-grands-meres': 'La fête des grands-mères 2027 a lieu le dimanche 7 mars.',
+  noel: 'Noël 2026 tombe un vendredi : ta page peut s’ouvrir à minuit pile, le 25 décembre.',
+};
+
+function guideSection(sec) {
+  return `<h2>${esc(sec.h2)}</h2>
+${(sec.p || []).map((x) => `<p>${esc(x)}</p>`).join('\n')}
+${sec.list ? `<ul>${sec.list.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+${sec.quotes ? `<ul class="quotes">${sec.quotes.map((x) => `<li>« ${esc(x)} »</li>`).join('')}</ul>` : ''}`;
+}
+
 const pages = {};
+
+for (const g of GUIDES) {
+  const occ = OCCASIONS.find((o) => o.id === g.occasion);
+  const path = `/idees/${g.slug}`;
+  const crumbs = [['Accueil', '/'], ['Idées', '/idees'], [g.h1, path]];
+  const related = GUIDES.filter((x) => x.slug !== g.slug).sort((a, b) => (b.occasion === g.occasion) - (a.occasion === g.occasion)).slice(0, 3);
+  pages[`idees/${g.slug}.html`] = layout({
+    title: `${g.title} — ${SITE_NAME}`, description: g.description, path, ogType: 'article',
+    jsonld: [
+      { '@context': 'https://schema.org', '@type': 'Article', headline: g.title, description: g.description, inLanguage: 'fr-FR', datePublished: g.date, dateModified: g.date, mainEntityOfPage: `${SITE}${path}`, image: `${SITE}/assets/og-surprise.png`, author: { '@type': 'Organization', name: SITE_NAME, url: `${SITE}/` }, publisher: { '@id': `${SITE}/#org` } },
+      crumbsLd(crumbs), ORG_LD,
+    ],
+    body: `<main class="wrap narrow prose article">
+${crumbsHtml(crumbs)}
+<article>
+<h1>${esc(g.h1)}</h1>
+<p class="meta">Mis à jour le ${frDate(g.date)} · ${occ.emoji} ${esc(occ.label)}</p>
+<p class="lead">${esc(g.intro)}</p>
+${g.sections.map(guideSection).join('\n')}
+</article>
+<aside class="cta-box">
+  <p class="cta-title">${occ.emoji} Mets tes mots dans une page qui s’ouvre comme une enveloppe</p>
+  <p>Lettre, photos, souvenirs, votre chanson et même un message vocal : une page secrète à offrir par lien ou QR code, prête en 10 minutes.</p>
+  <p><a class="btn" href="/creer?occasion=${occ.id}">${esc(occ.cta || 'Créer ma page')}</a> <a class="btn ghost" href="/p/demo" target="_blank" rel="noopener">Voir un exemple</a></p>
+</aside>
+<h2>À lire aussi</h2>
+<ul>${related.map((x) => `<li><a href="/idees/${x.slug}">${esc(x.title)}</a></li>`).join('')}</ul>
+<p>Pour aller plus loin : <a href="/${occ.id}">notre page ${esc(occ.label)}</a>.</p>
+</main>`,
+  });
+}
+
+pages['idees.html'] = layout({
+  title: `Idées de textes, messages et cadeaux — ${SITE_NAME}`,
+  description: 'Lettres d’amour, textes pour la fête des mères, messages d’anniversaire, idées cadeaux de dernière minute : nos guides et modèles gratuits pour trouver les bons mots.',
+  path: '/idees',
+  jsonld: [crumbsLd([['Accueil', '/'], ['Idées', '/idees']]), ORG_LD],
+  body: `<main class="wrap narrow prose">
+${crumbsHtml([['Accueil', '/'], ['Idées', '/idees']])}
+<h1>Idées de textes et de cadeaux</h1>
+<p class="lead">Trouver les bons mots n’est pas toujours facile. Nos guides gratuits te donnent des méthodes simples et des exemples à adapter, pour une lettre, une carte ou une page cadeau.</p>
+<div class="guide-list">${GUIDES.map((g) => { const o = OCCASIONS.find((x) => x.id === g.occasion); return `<a class="guide-card" href="/idees/${g.slug}"><span class="guide-tag">${o.emoji} ${esc(o.label)}</span><strong>${esc(g.title)}</strong><span>${esc(g.description)}</span></a>`; }).join('\n')}</div>
+</main>`,
+});
 
 pages['index.html'] = layout({
   title: `${SITE_NAME} — page cadeau personnalisée avec photos, lettre et musique`,
   description: `Crée une page web unique pour la personne que tu aimes : lettre, photos, souvenirs et chanson, à offrir par lien ou QR code. Saint-Valentin, anniversaire, fête des mères… ${PRICE_LABEL}.`,
   path: '/',
-  jsonld: faqLd(generalFaq),
+  jsonld: [faqLd(generalFaq), ORG_LD, SITE_LD, productLd(`Page cadeau personnalisée — ${SITE_NAME}`, 'Page web personnalisée à offrir : lettre, photos, souvenirs, musique, message vocal. Par lien ou QR code.', '/')],
   scripts: '<script type="module" src="/assets/js/season.js"></script><script type="module" src="/assets/js/video.js"></script>',
   body: `<main>
 <div class="wrap"><p class="season" id="season" hidden></p></div>
@@ -184,7 +272,7 @@ for (const o of OCCASIONS) {
     title: o.seoTitle,
     description: o.lead.slice(0, 155),
     path: `/${o.id}`,
-    jsonld: faqLd(faq),
+    jsonld: [faqLd(faq), crumbsLd([['Accueil', '/'], [o.label, `/${o.id}`]]), productLd(o.seoTitle, o.lead, `/${o.id}`), ORG_LD],
     scripts: '<script type="module" src="/assets/js/video.js"></script>',
     body: `<main>
 <section class="wrap hero">
@@ -199,12 +287,14 @@ for (const o of OCCASIONS) {
   <div class="phone"><iframe src="/p/demo" title="Exemple de page" loading="lazy"></iframe></div>
 </section>
 <section class="section"><div class="wrap narrow">
+  ${WHEN[o.id] ? `<p class="when-note">📅 ${esc(WHEN[o.id])}</p>` : ''}
   <h2>Nos conseils pour une page réussie</h2>
   <ul>${o.tips.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
   <h2 style="margin-top:40px">Des idées pour commencer ta lettre</h2>
   <ul>${o.letterIdeas.map((t) => `<li><em>« ${esc(t)} »</em></li>`).join('')}</ul>
   <h2 style="margin-top:40px">Des idées pour « ${esc(o.reasonsTitle)} »</h2>
   <ul>${o.reasonIdeas.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
+  ${GUIDES.some((g) => g.occasion === o.id) ? `<h2 style="margin-top:40px">Nos guides</h2><ul>${GUIDES.filter((g) => g.occasion === o.id).map((g) => `<li><a href="/idees/${g.slug}">${esc(g.title)}</a></li>`).join('')}</ul>` : ''}
 </div></section>
 <section class="section"><div class="wrap">
   <h2>Comment ça marche</h2>
@@ -487,7 +577,7 @@ const e = cfg.editor;
 const pro = Boolean(e.siret && String(e.siret).trim());
 const launchNote = pro ? '' : `<div class="callout"><p><strong>Phase de lancement :</strong> jusqu’au ${FREE_UNTIL_LABEL} 2026 inclus, la création de pages est gratuite et aucune vente n’a lieu. Pendant cette période, les présentes conditions valent conditions d’utilisation ; les articles 3 à 5 (prix, paiement, rétractation) et la médiation ne s’appliqueront qu’aux commandes payantes, après l’immatriculation de l’éditeur.</p></div>`;
 pages['mentions-legales.html'] = layout({
-  title: `Mentions légales — ${SITE_NAME}`, description: 'Mentions légales du site.', path: '/mentions-legales',
+  title: `Mentions légales — ${SITE_NAME}`, description: 'Mentions légales d’Une page pour toi : éditeur du site, hébergeur, contact et signalement des contenus.', path: '/mentions-legales',
   body: `<main class="wrap narrow prose">
 <h1>Mentions légales</h1>
 <h2>Éditeur du site</h2>
@@ -504,7 +594,7 @@ ${pro ? `<p>${fill(e.name, 'prénom et nom')}<br>${esc(e.status)}<br>SIRET : ${f
 
 const m = cfg.mediator;
 pages['cgv.html'] = layout({
-  title: `Conditions générales de vente — ${SITE_NAME}`, description: 'Conditions générales de vente.', path: '/cgv',
+  title: `Conditions générales de vente — ${SITE_NAME}`, description: 'Conditions générales de vente d’Une page pour toi : prix, options premium, mise en ligne, modification, remboursement.', path: '/cgv',
   body: `<main class="wrap narrow prose">
 <h1>Conditions générales de vente</h1>
 <p>Version du ${TERMS_VERSION}.</p>
@@ -538,7 +628,7 @@ ${launchNote}
 });
 
 pages['confidentialite.html'] = layout({
-  title: `Confidentialité — ${SITE_NAME}`, description: 'Politique de confidentialité.', path: '/confidentialite',
+  title: `Confidentialité — ${SITE_NAME}`, description: 'Politique de confidentialité d’Une page pour toi : données collectées, durées de conservation, photos, droits RGPD.', path: '/confidentialite',
   body: `<main class="wrap narrow prose">
 <h1>Politique de confidentialité</h1>
 <p>Responsable du traitement : ${fill(e.name, 'prénom et nom')}, ${email}.</p>
@@ -572,7 +662,7 @@ pages['confidentialite.html'] = layout({
 });
 
 pages['regles-de-contenu.html'] = layout({
-  title: `Règles de contenu et signalement — ${SITE_NAME}`, description: 'Ce qui est interdit et comment signaler un contenu.', path: '/regles-de-contenu',
+  title: `Règles de contenu et signalement — ${SITE_NAME}`, description: 'Règles de contenu d’Une page pour toi : ce qui est interdit sur les pages offertes et comment signaler un contenu.', path: '/regles-de-contenu',
   body: `<main class="wrap narrow prose">
 <h1>Règles de contenu et signalement</h1>
 <p>${SITE_NAME} sert à offrir des pages bienveillantes. Sont interdits notamment :</p>
@@ -645,12 +735,17 @@ pages['404.html'] = layout({
   body: `<main class="wrap narrow prose" style="text-align:center"><h1>Oups, cette page n’existe pas</h1><p><a class="btn" href="/">Retour à l’accueil</a></p></main>`,
 });
 
+mkdirSync(join(pub, 'idees'), { recursive: true });
 for (const [file, html] of Object.entries(pages)) writeFileSync(join(pub, file), html);
 
-const indexable = ['/', ...OCCASIONS.map((o) => `/${o.id}`), '/contact', '/mentions-legales', '/cgv', '/confidentialite', '/regles-de-contenu'];
+const today = new Date().toISOString().slice(0, 10);
+const indexable = [
+  ['/', today], ...OCCASIONS.map((o) => [`/${o.id}`, today]), ['/idees', today], ...GUIDES.map((g) => [`/idees/${g.slug}`, g.date]),
+  ['/contact'], ['/mentions-legales'], ['/cgv'], ['/confidentialite'], ['/regles-de-contenu'],
+];
 writeFileSync(join(pub, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${indexable.map((p) => `  <url><loc>${SITE}${p}</loc></url>`).join('\n')}
+${indexable.map(([p, d]) => `  <url><loc>${SITE}${p}</loc>${d ? `<lastmod>${d}</lastmod>` : ''}</url>`).join('\n')}
 </urlset>
 `);
 writeFileSync(join(pub, 'robots.txt'), `User-agent: *
@@ -659,6 +754,7 @@ Disallow: /api/
 Disallow: /admin
 Disallow: /merci
 Disallow: /voir
+Disallow: /ecrire
 Sitemap: ${SITE}/sitemap.xml
 `);
 

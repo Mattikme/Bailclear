@@ -218,3 +218,23 @@ test('prix : 4,90 € de base, 9,90 € dès qu’une option premium est utilis�
   const p = priceFor(validateContent({ ...base, openAt: new Date(Date.now() + 3600e3).toISOString(), group: true }));
   assert.deepEqual([p.cents, p.premium], [990, ['carte de groupe', 'ouverture programmée']]);
 });
+
+test('référencement : titre et description uniques, un seul h1, canonique, JSON-LD valide', () => {
+  const dir = new URL('../public/', import.meta.url);
+  const sitemap = readFileSync(new URL('sitemap.xml', dir), 'utf8');
+  const paths = [...sitemap.matchAll(/<loc>https:\/\/[^/]+(\/[^<]*)<\/loc>/g)].map((m) => m[1]);
+  const titles = new Set(); const descs = new Set();
+  for (const path of paths) {
+    const file = path === '/' ? 'index.html' : `${path.slice(1)}.html`;
+    const html = readFileSync(new URL(file, dir), 'utf8');
+    const title = /<title>([^<]+)<\/title>/.exec(html)[1];
+    const desc = /<meta name="description" content="([^"]+)"/.exec(html)[1];
+    assert.ok(!titles.has(title), `titre en double : ${title}`); titles.add(title);
+    assert.ok(!descs.has(desc), `description en double : ${path}`); descs.add(desc);
+    assert.ok(desc.length >= 50 && desc.length <= 200, `description de ${path} : ${desc.length} caractères`);
+    assert.equal((html.match(/<h1[\s>]/g) || []).length, 1, `${path} doit avoir un seul h1`);
+    assert.ok(html.includes(`<link rel="canonical" href="https://unepagepourtoi.fr${path}">`), `canonique ${path}`);
+    for (const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) JSON.parse(m[1]);
+  }
+  assert.ok(paths.includes('/idees/lettre-d-amour'));
+});
