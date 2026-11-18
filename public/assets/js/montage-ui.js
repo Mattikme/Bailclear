@@ -12,6 +12,10 @@ const HTML = `
     <button class="btn" type="button" id="montage-share" hidden>Partager</button>
     <a class="btn" id="montage-download" href="#">Télécharger</a>
   </div>
+  <div class="montage-last" id="montage-last-box">
+    <label for="montage-last">✍️ Un dernier mot pour finir la vidéo <span>(facultatif)</span></label>
+    <input id="montage-last" type="text" maxlength="120" placeholder="Je t’aime, aujourd’hui et pour toujours">
+  </div>
   <label class="montage-opt" id="montage-opt"><input type="checkbox" id="montage-music" checked> 🎵 Avec une musique douce (composée automatiquement, libre de droits)</label>
   <p class="montage-note">Tu peux aussi la remplacer par ta chanson dans TikTok, Instagram ou Snapchat. Fabriquée sur ton téléphone, rien n’est envoyé.</p>
   <div class="row"><button class="btn" type="button" id="montage-start">Créer la vidéo</button><button class="btn secondary" type="button" id="montage-close">Fermer</button></div>`;
@@ -43,6 +47,7 @@ function reset() {
   q('montage-progress').value = 0;
   q('montage-start').hidden = false;
   q('montage-opt').hidden = false;
+  q('montage-last-box').hidden = false;
   q('montage-status').textContent = 'Un petit film avec tes photos, ta lettre et vos souvenirs. Gratuit, à télécharger ou partager.';
 }
 
@@ -51,6 +56,7 @@ async function start() {
   busy = true;
   q('montage-start').hidden = true;
   q('montage-opt').hidden = true;
+  q('montage-last-box').hidden = true;
   q('montage-close').disabled = true;
   q('montage-status').textContent = 'Création du montage… garde cet écran ouvert.';
   let lock = null;
@@ -60,6 +66,7 @@ async function start() {
     const { blob, ext, withMusic } = await renderMontage(current.content, current.photoUrl, q('montage-canvas'), {
       music: q('montage-music').checked,
       pace: 'pose',
+      lastWord: q('montage-last').value,
       onProgress: (x) => { q('montage-progress').value = x; },
     });
     if (url) URL.revokeObjectURL(url);
@@ -82,6 +89,7 @@ async function start() {
   } catch (err) {
     q('montage-status').textContent = err.message || 'La création de la vidéo a échoué.';
     q('montage-start').hidden = false;
+    q('montage-last-box').hidden = false;
   } finally {
     busy = false;
     q('montage-close').disabled = false;

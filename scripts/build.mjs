@@ -169,10 +169,32 @@ const WHEN = {
   noel: 'Noël 2026 tombe un vendredi : ta page peut s’ouvrir à minuit pile, le 25 décembre.',
 };
 
+// Liens marchands : recherche sur le site du marchand (pas de prix ni de photo copiés, conformément aux règles d'Amazon).
+const AFF = cfg.affiliate || {};
+function shopLinks(query) {
+  const q = encodeURIComponent(query);
+  const links = [{ name: 'Amazon', url: `https://www.amazon.fr/s?k=${q}${AFF.amazonTag ? `&tag=${encodeURIComponent(AFF.amazonTag)}` : ''}`, aff: Boolean(AFF.amazonTag) }];
+  const awin = (mid, target) => (AFF.awinPublisherId && mid ? `https://www.awin1.com/cread.php?awinmid=${mid}&awinaffid=${AFF.awinPublisherId}&ued=${encodeURIComponent(target)}` : target);
+  links.push({ name: 'Cdiscount', url: awin(AFF.awinCdiscountId, `https://www.cdiscount.com/search/10/${q.replace(/%20/g, "+")}.html`), aff: Boolean(AFF.awinPublisherId && AFF.awinCdiscountId) });
+  links.push({ name: 'Fnac', url: awin(AFF.awinFnacId, `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${q}`), aff: Boolean(AFF.awinPublisherId && AFF.awinFnacId) });
+  return links;
+}
+const affActive = Boolean(AFF.amazonTag || AFF.awinPublisherId);
+const AFF_NOTE = `Ces liens mènent vers des boutiques en ligne.${affActive ? ' Ce sont des liens affiliés : si tu achètes après avoir cliqué, nous touchons une petite commission, sans aucun surcoût pour toi.' : ''}${AFF.amazonTag ? ' En tant que Partenaire Amazon, nous réalisons un bénéfice sur les achats remplissant les conditions requises.' : ''} Les prix et disponibilités sont à vérifier sur le site du marchand.`;
+function giftGrid(items) {
+  return `<p class="aff-note">ℹ️ ${esc(AFF_NOTE)}</p>
+<div class="gift-grid">${items.map((g) => `<div class="gift-card">
+  <div class="gift-pic" aria-hidden="true">${g.emoji}</div>
+  <div class="gift-body"><span class="gift-budget">${esc(g.budget)}</span><h3>${esc(g.name)}</h3><p>${esc(g.why)}</p>
+  <div class="gift-links">${shopLinks(g.query).map((l) => `<a href="${esc(l.url)}" target="_blank" rel="${l.aff ? 'sponsored ' : ''}nofollow noopener">Voir sur ${l.name}</a>`).join('')}</div></div>
+</div>`).join('')}</div>`;
+}
+
 function guideSection(sec) {
   return `<h2>${esc(sec.h2)}</h2>
 ${(sec.p || []).map((x) => `<p>${esc(x)}</p>`).join('\n')}
 ${sec.list ? `<ul>${sec.list.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+${sec.gifts ? giftGrid(sec.gifts) : ''}
 ${sec.quotes ? `<ul class="quotes">${sec.quotes.map((x) => `<li>« ${esc(x)} »</li>`).join('')}</ul>` : ''}`;
 }
 
@@ -589,6 +611,8 @@ ${pro ? `<p>${fill(e.name, 'prénom et nom')}<br>${esc(e.status)}<br>SIRET : ${f
 <p>Les pages personnalisées sont créées par les utilisateurs, qui sont responsables de leur contenu. ${SITE_NAME} agit comme hébergeur de ces contenus. Pour signaler un contenu : bouton « Signaler un contenu » présent sur chaque page, ou ${email}. Voir les <a href="/regles-de-contenu">règles de contenu</a>.</p>
 <h2>Propriété intellectuelle</h2>
 <p>Le site, son design et ses textes sont protégés. Les contenus des pages restent la propriété de leurs auteurs.</p>
+<h2>Liens vers des boutiques</h2>
+<p>Certains guides du site proposent des idées de cadeaux avec des liens vers des boutiques en ligne (Amazon, Cdiscount, Fnac). ${affActive ? 'Ces liens peuvent être des liens affiliés : l’éditeur perçoit alors une commission sur les achats effectués après un clic, sans surcoût pour l’acheteur.' : 'À ce jour, ces liens ne rapportent rien à l’éditeur.'}${AFF.amazonTag ? ' En tant que Partenaire Amazon, l’éditeur réalise un bénéfice sur les achats remplissant les conditions requises.' : ''} Ces liens sont signalés comme tels et n’influencent pas le contenu des pages offertes.</p>
 </main>`,
 });
 

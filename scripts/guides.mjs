@@ -82,6 +82,14 @@ export const GUIDES = [
     h1: 'Idées cadeau originales pour la Saint-Valentin, même à petit budget',
     intro: 'La Saint-Valentin 2027 tombe un dimanche 14 février. Pas besoin de dépenser beaucoup : les cadeaux qui marquent sont ceux qui montrent que tu as pensé à l’autre. Voici des idées classées par budget.',
     sections: [
+      { h2: 'Notre sélection de cadeaux', gifts: [
+      { emoji: '📸', name: 'Un appareil photo instantané', why: 'Pour remplir votre prochain album de vraies photos, tout de suite.', query: 'appareil photo instantané', budget: 'Moyen budget' },
+      { emoji: '💍', name: 'Un bijou gravé', why: 'Vos initiales ou la date de votre rencontre, à porter tous les jours.', query: 'bracelet gravé personnalisé couple', budget: 'Moyen budget' },
+      { emoji: '🕯️', name: 'Un coffret bougies parfumées', why: 'Pour une soirée cocooning à deux, ambiance garantie.', query: 'coffret bougies parfumées', budget: 'Petit budget' },
+      { emoji: '🧩', name: 'Un puzzle avec votre photo', why: 'Une soirée à reconstituer votre plus beau souvenir.', query: 'puzzle photo personnalisé', budget: 'Petit budget' },
+      { emoji: '💆', name: 'Un coffret massage en duo', why: 'Un moment de détente à partager.', query: 'coffret cadeau massage duo', budget: 'Gros budget' },
+      { emoji: '📖', name: 'Un carnet « Notre histoire » à remplir', why: 'Pour écrire vos souvenirs au fil des années.', query: 'carnet couple à remplir', budget: 'Petit budget' },
+      ] },
       { h2: 'Moins de 10 €', list: [
         'Une lettre d’amour manuscrite (voir notre guide pour l’écrire).',
         'Un bocal de « raisons pour lesquelles je t’aime ».',
@@ -123,6 +131,34 @@ export const GUIDES = [
       ] },
       { h2: 'Comment lui offrir', p: [
         'Écris ton message sur une carte, ou réunis-le avec des photos de famille, une frise de souvenirs et sa chanson préférée sur une page à ouvrir comme une enveloppe. Toute la famille peut même y ajouter un mot grâce à la carte de groupe.',
+      ] },
+    ],
+  },
+  {
+    slug: 'idees-cadeau-fete-des-meres',
+    occasion: 'fete-des-meres',
+    date: '2026-11-18',
+    title: 'Idées cadeau fête des mères originales (2027) : 15 idées pour maman',
+    description: 'Idées de cadeaux originaux pour la fête des mères du 30 mai 2027 : personnalisés, bien-être, souvenirs de famille, à tous les budgets.',
+    h1: 'Idées cadeau originales pour la fête des mères',
+    intro: 'La fête des mères 2027 a lieu le dimanche 30 mai. Le cadeau qui fait le plus plaisir à une maman, c’est souvent celui qui lui rappelle combien elle compte : un souvenir, un mot, un moment partagé. Voici nos idées, du fait-maison au plus gâté.',
+    sections: [
+      { h2: 'Le cadeau qui la fera pleurer (de joie)', p: [
+        'Réunis un mot de chaque enfant et petit-enfant, des photos de famille, une frise de vos souvenirs et sa chanson préférée sur une page qui s’ouvre comme une enveloppe. Avec la carte de groupe, chacun écrit son message depuis son téléphone, même à distance.',
+      ] },
+      { h2: 'Notre sélection de cadeaux', gifts: [
+      { emoji: '🌸', name: 'Un coffret de soins', why: 'Un moment rien que pour elle, à la maison.', query: 'coffret soin femme', budget: 'Moyen budget' },
+      { emoji: '📷', name: 'Un livre photo de famille', why: 'Vos plus belles photos, de l’enfance à aujourd’hui.', query: 'livre photo personnalisé', budget: 'Moyen budget' },
+      { emoji: '🪴', name: 'Une jolie plante d’intérieur', why: 'Un cadeau qui dure et lui fera penser à vous.', query: 'plante intérieur cadeau', budget: 'Petit budget' },
+      { emoji: '☕', name: 'Un mug personnalisé', why: 'Avec un prénom, une photo ou un petit mot.', query: 'mug personnalisé maman', budget: 'Petit budget' },
+      { emoji: '💐', name: 'Un bouquet de fleurs séchées', why: 'Le charme des fleurs, sans faner.', query: 'bouquet fleurs séchées', budget: 'Petit budget' },
+      { emoji: '👜', name: 'Un joli sac ou une pochette', why: 'Un accessoire qu’elle ne s’offrirait pas.', query: 'pochette femme cuir', budget: 'Gros budget' },
+      ] },
+      { h2: 'Les cadeaux faits maison', list: [
+        'Un livre de recettes de famille, écrit à la main.', 'Un bocal de « Merci maman, pour… » avec un petit papier par souvenir.', 'Un petit-déjeuner au lit préparé par toute la famille.', 'Une journée où c’est elle qui choisit tout le programme.',
+      ] },
+      { h2: 'Ajoute toujours quelques mots', p: [
+        'Quel que soit le cadeau, accompagne-le d’un message : c’est ce qu’elle relira. Besoin d’idées ? Voir nos 25 textes pour la fête des mères.',
       ] },
     ],
   },
@@ -184,6 +220,14 @@ export const GUIDES = [
     h1: 'Cadeau de Noël de dernière minute : 15 idées qui ont l’air préparées',
     intro: 'Le 24 décembre approche et il te manque un cadeau ? Pas de panique : voici des idées rapides qui montrent que tu as pensé à la personne, et non que tu as couru à la dernière boutique ouverte.',
     sections: [
+      { h2: 'Des cadeaux livrés vite', p: ['Pour les commandes de dernière minute, vérifie la date de livraison indiquée avant d’acheter, ou choisis le retrait en magasin.'], gifts: [
+      { emoji: '🎧', name: 'Des écouteurs sans fil', why: 'Le cadeau utile qui plaît presque toujours.', query: 'écouteurs sans fil', budget: 'Moyen budget' },
+      { emoji: '📚', name: 'Un beau livre', why: 'Choisis-le pour elle ou lui, avec une dédicace sur la première page.', query: 'beau livre cadeau', budget: 'Petit budget' },
+      { emoji: '🧣', name: 'Une écharpe douce', why: 'Un classique de l’hiver qui fait toujours plaisir.', query: 'écharpe femme laine douce', budget: 'Petit budget' },
+      { emoji: '🎲', name: 'Un jeu de société à deux', why: 'Pour les soirées d’hiver, sans écran.', query: 'jeu de société pour 2 joueurs', budget: 'Petit budget' },
+      { emoji: '🫖', name: 'Un coffret de thés de Noël', why: 'Une pause gourmande, à offrir aussi aux collègues.', query: 'coffret thé noël', budget: 'Petit budget' },
+      { emoji: '🖼️', name: 'Un cadre photo numérique', why: 'Toutes vos photos de l’année, qui défilent dans le salon.', query: 'cadre photo numérique wifi', budget: 'Gros budget' },
+      ] },
       { h2: 'À faire soi-même en moins d’une heure', list: [
         'Une lettre de fin d’année : ce que cette année avec elle ou lui t’a apporté.', 'Des bons à échanger : un petit-déjeuner au lit, une soirée sans téléphone, une journée où tu choisis tout.', 'Un pot de biscuits maison avec une étiquette personnalisée.', 'Une playlist de l’année avec un mot pour chaque chanson.', 'Un cadre avec une photo imprimée en boutique photo minute.',
       ] },

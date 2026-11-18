@@ -213,7 +213,7 @@ const TRANSITIONS = {
 const CYCLE = ['zoom', 'whip', 'iris', 'flash', 'pushUp', 'wipe', 'fade'];
 
 /* ---------- Scènes ---------- */
-function buildScenes(content, images, theme, occ) {
+function buildScenes(content, images, theme, occ, lastWord = '') {
   const { accent, ink, soft } = theme;
   const symbol = occ.id === 'noel' ? '❄' : occ.id === 'anniversaire' ? '✦' : '♥';
   const imgs = images.filter(Boolean);
@@ -528,8 +528,29 @@ function buildScenes(content, images, theme, occ) {
     }, 'flash');
   }
 
-  // 8. Signature (fait connaître le site)
-  add(POSE ? 4 : 4 * BEAT, (ctx, t) => {
+  // 8. Le dernier mot (facultatif) : la vidéo se termine sur lui, la signature du site reste discrète en bas.
+  if (lastWord) {
+    add(Math.max(6, readTime(lastWord) + 3.5), (ctx, t) => {
+      const f = fit(ctx, lastWord, W - 160, 5, 76, 44, { font: SERIF, weight: 700 });
+      const lh = Math.round(f.size * 1.2);
+      const blockH = f.lines.length * lh;
+      const y0 = H / 2 - 120 - blockH / 2;
+      kinetic(ctx, f.lines, W / 2, y0, lh, t, { size: f.size, font: SERIF, weight: 700, color: ink, stagger: 0.14, dur: 0.8, delay: 0.2 });
+      if (content.from) kinetic(ctx, [`— ${content.from}`], W / 2, y0 + blockH + 50, 50, t, { size: 40, font: SERIF, weight: 500, color: accent, delay: 0.9 });
+      const a = easeBack(seg(t, 1.3, 2.1));
+      const beat = 1 + 0.1 * Math.pow(Math.max(0, Math.sin((t / BEAT) * Math.PI)), 6);
+      ctx.save(); ctx.globalAlpha *= clamp(a); ctx.translate(W / 2, y0 + blockH + 190); ctx.scale(beat * a, beat * a);
+      txt(ctx, symbol, 0, 0, { size: 110, color: accent }); ctx.restore();
+      const b = clamp(seg(t, 2.2, 3.0));
+      ctx.save(); ctx.globalAlpha *= b * 0.75;
+      txt(ctx, `Une page pour toi · ${location.host.replace(/^www\./, '')}`, W / 2, SAFE_BOTTOM - 10, { size: 26, weight: 600, color: ink });
+      ctx.restore();
+    }, 'fade');
+    return scenes;
+  }
+
+  // 8 bis. Signature (fait connaître le site)
+  add(POSE ? 4.5 : 4 * BEAT, (ctx, t) => {
     const a = easeBack(seg(t, 0, 0.6));
     ctx.save(); ctx.translate(W / 2, 520); ctx.scale(a, a); ctx.rotate((1 - a) * 0.4);
     rr(ctx, -64, -64, 128, 128, 32); ctx.fillStyle = accent; ctx.fill();
@@ -548,8 +569,8 @@ function scheduleMusic(ac, dest, total) {
   const master = ac.createGain();
   master.gain.setValueAtTime(0.0001, ac.currentTime);
   master.gain.exponentialRampToValueAtTime(1.0, ac.currentTime + 1.2);
-  master.gain.setValueAtTime(1.0, ac.currentTime + total - 1.8);
-  master.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + total);
+  master.gain.setValueAtTime(1.0, ac.currentTime + total - 3.2);
+  master.gain.linearRampToValueAtTime(0.0001, ac.currentTime + total);
   const comp = ac.createDynamicsCompressor();
   master.connect(comp);
   comp.connect(dest);
@@ -561,7 +582,16 @@ function scheduleMusic(ac, dest, total) {
   const hz = (m) => 440 * Math.pow(2, (m - 69) / 12);
   const chords = [[60, 64, 67], [55, 59, 62], [57, 60, 64], [53, 57, 60]]; // C G Am F
   const t0 = ac.currentTime + 0.05;
-  const bars = Math.ceil(total / (BEAT * 4)) + 1;
+  // La progression s'arrête avant la fin et se résout sur un accord de do tenu, qui s'éteint avec l'image.
+  const endAt = Math.max(BEAT * 4, total - 4.2);
+  const bars = Math.max(1, Math.floor(endAt / (BEAT * 4)));
+  const last = t0 + bars * BEAT * 4;
+  [48, 60, 64, 67, 72].forEach((n, i) => {
+    const o = ac.createOscillator(); o.type = i === 0 ? 'sine' : 'triangle'; o.frequency.value = hz(n);
+    const g = ac.createGain(); g.gain.setValueAtTime(0.0001, last); g.gain.linearRampToValueAtTime(i === 0 ? 0.14 : 0.05, last + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, Math.max(last + 1, t0 + total));
+    o.connect(g); g.connect(master); if (i) g.connect(delay); o.start(last); o.stop(t0 + total + 0.2);
+  });
   for (let b = 0; b < bars; b++) {
     const chord = chords[b % 4];
     const start = t0 + b * BEAT * 4;
@@ -591,7 +621,7 @@ function scheduleMusic(ac, dest, total) {
 }
 
 /* ---------- Rendu ---------- */
-export async function renderMontage(content, photoUrl, canvas, { onProgress, music = true, pace = 'pose' } = {}) {
+export async function renderMontage(content, photoUrl, canvas, { onProgress, music = true, pace = 'pose', lastWord = '' } = {}) {
   POSE = pace !== 'dynamique';
   TR = POSE ? 0.75 : BEAT * 0.75;
   KIN.stagger = POSE ? 0.11 : 0.06;
@@ -602,7 +632,7 @@ export async function renderMontage(content, photoUrl, canvas, { onProgress, mus
   const occ = getOccasion(content.occasion);
   const symbol = occ.id === 'noel' ? '❄' : occ.id === 'anniversaire' ? '✦' : '♥';
   const images = await Promise.all(content.photos.slice(0, 6).map((_, i) => loadImage(photoUrl(i))));
-  const scenes = buildScenes(content, images, theme, occ);
+  const scenes = buildScenes(content, images, theme, occ, String(lastWord || '').trim().slice(0, 120));
   // Les scènes se chevauchent pendant les transitions
   let acc = 0;
   scenes.forEach((s, i) => { s.start = acc; acc += s.d - (i < scenes.length - 1 ? TR : 0); });
@@ -651,7 +681,7 @@ export async function renderMontage(content, photoUrl, canvas, { onProgress, mus
       (TRANSITIONS[b.transition] || TRANSITIONS.fade)(ctx, layer(a), layer(b), p);
     } else if (active.length === 1) {
       const s = active[0];
-      const fadeOut = s === scenes[scenes.length - 1] ? clamp((s.start + s.d - time) / 0.6) : 1;
+      const fadeOut = s === scenes[scenes.length - 1] ? clamp((s.start + s.d - time) / 1.8) : 1; // fondu lent : pas de fin brutale
       ctx.save(); ctx.globalAlpha = fadeOut; s.draw(ctx, time - s.start); ctx.restore();
     }
     finish();

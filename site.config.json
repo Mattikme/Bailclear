@@ -12,5 +12,12 @@
     "name": "",
     "url": "",
     "address": ""
+  },
+  "affiliate": {
+    "_aide": "Identifiants d'affiliation (publics, ils apparaissent dans les liens). Laisse vide tant que tu n'es pas inscrit : les liens marchent quand même, sans commission. Puis npm run deploy:worker.",
+    "amazonTag": "",
+    "awinPublisherId": "",
+    "awinCdiscountId": "6948",
+    "awinFnacId": ""
   }
 }
